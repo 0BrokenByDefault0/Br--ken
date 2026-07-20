@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="BR--KEN — a mobile-first groovebox / DAW that runs entirely in your browser.">
+<title>BR--KEN</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a0c'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' fill='%23c8ff2e' text-anchor='middle'%3E--%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- Audio unlock / splash -->
+<div id="boot" class="boot">
+  <div class="boot-inner">
+    <div class="boot-logo">BR<span class="boot-dash">——</span>KEN</div>
+    <div class="boot-sub">pocket studio &mdash; v1.0</div>
+    <button id="boot-start" class="boot-btn">TAP TO START</button>
+    <div class="boot-hint">headphones recommended</div>
+  </div>
+</div>
+
+<div id="app" class="app" hidden>
+
+  <!-- Top transport bar -->
+  <header class="topbar">
+    <div class="brand" id="brand">BR<span class="brand-dash">--</span>KEN</div>
+
+    <div class="transport">
+      <button id="t-play" class="tbtn tbtn-play" aria-label="Play">
+        <svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
+      </button>
+      <button id="t-stop" class="tbtn" aria-label="Stop">
+        <svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12"/></svg>
+      </button>
+      <button id="t-rec" class="tbtn tbtn-rec" aria-label="Record">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+      </button>
+      <button id="t-metro" class="tbtn tbtn-metro" aria-label="Metronome">
+        <svg viewBox="0 0 24 24"><path d="M12 3 5 20h14L12 3zm0 5.2 3.4 8.3h-6.8L12 8.2z"/></svg>
+      </button>
+    </div>
+
+    <div class="bpm-box" id="bpm-box" title="drag up/down or tap edges">
+      <span class="bpm-minus">−</span>
+      <span class="bpm-val" id="bpm-val">120</span>
+      <span class="bpm-plus">+</span>
+      <span class="bpm-label">BPM</span>
+    </div>
+
+    <button id="menu-btn" class="tbtn" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+    </button>
+  </header>
+
+  <!-- Position / status strip -->
+  <div class="statusbar">
+    <span id="pos-display" class="pos">1.1</span>
+    <span id="status-msg" class="status-msg"></span>
+    <span class="spacer"></span>
+    <button id="undo-btn" class="mini-btn" aria-label="Undo">↺ undo</button>
+    <button id="redo-btn" class="mini-btn" aria-label="Redo">↻</button>
+  </div>
+
+  <!-- Main view container -->
+  <main id="view" class="view"></main>
+
+  <!-- Bottom navigation -->
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="session"><span class="tab-ico">▦</span>SESSION</button>
+    <button class="tab" data-view="editor"><span class="tab-ico">✎</span>EDIT</button>
+    <button class="tab" data-view="keys"><span class="tab-ico">♪</span>PLAY</button>
+    <button class="tab" data-view="mixer"><span class="tab-ico">≡</span>MIX</button>
+    <button class="tab" data-view="fx"><span class="tab-ico">◉</span>FX</button>
+  </nav>
+
+  <!-- Menu sheet -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-backdrop" data-close></div>
+    <div class="sheet-panel">
+      <div class="sheet-title">PROJECT</div>
+      <input id="proj-name" class="sheet-input" maxlength="32" spellcheck="false">
+      <div class="sheet-row">
+        <button class="sheet-btn" id="m-save">SAVE</button>
+        <button class="sheet-btn" id="m-new">NEW</button>
+        <button class="sheet-btn" id="m-demo">DEMO</button>
+      </div>
+      <div class="sheet-row">
+        <button class="sheet-btn wide accent" id="m-export">⤓ EXPORT WAV</button>
+      </div>
+      <div class="sheet-row">
+        <label class="sheet-label">SWING</label>
+        <input type="range" id="m-swing" min="0" max="100" value="0" class="sheet-range">
+        <span id="m-swing-val" class="sheet-val">0%</span>
+      </div>
+      <div class="sheet-foot">br--ken saves automatically to this device</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" hidden></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
