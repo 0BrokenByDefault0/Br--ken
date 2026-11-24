@@ -10,6 +10,13 @@ public enum Voicer {
         return notes.sorted()
     }
 
+    /// Voice-leads a progression. The first chord uses `closeVoicing`. For each later chord, every inversion
+    /// (shifted by whole octaves so its lowest note is in 48...62) is a candidate, and the lowest-cost one wins;
+    /// ties go to the lower inversion, then the lower octave.
+    ///
+    /// Cost rule: when both voicings have the same note count, the sum of |differences| between the sorted
+    /// voicings. When the counts differ, the sum over each new note of its distance to the nearest previous note,
+    /// plus the sum over each previous note of its distance to the nearest new note.
     public static func voiceLead(_ chords: [Chord]) -> [[Int]] {
         guard let first = chords.first else { return [] }
         var result = [closeVoicing(first)]
@@ -22,7 +29,7 @@ public enum Voicer {
                 for octave in -10...10 {
                     let candidate = close.map { $0 + 12 * octave }
                     guard (48...62).contains(candidate[0]) else { continue }
-                    let cost = zip(candidate, previous).reduce(0) { $0 + abs($1.0 - $1.1) }
+                    let cost = movementCost(from: previous, to: candidate)
                     if cost < bestCost {
                         bestCost = cost
                         best = candidate
@@ -32,5 +39,16 @@ public enum Voicer {
             result.append(best)
         }
         return result
+    }
+
+    private static func movementCost(from previous: [Int], to candidate: [Int]) -> Int {
+        if previous.count == candidate.count {
+            return zip(candidate, previous).reduce(0) { $0 + abs($1.0 - $1.1) }
+        }
+        func nearest(_ n: Int, in notes: [Int]) -> Int {
+            notes.map { abs($0 - n) }.min() ?? 0
+        }
+        return candidate.reduce(0) { $0 + nearest($1, in: previous) }
+            + previous.reduce(0) { $0 + nearest($1, in: candidate) }
     }
 }

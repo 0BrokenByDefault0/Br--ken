@@ -14,6 +14,17 @@ public struct PitchClass: Hashable, Codable, Sendable {
         rawValue = ((v % 12) + 12) % 12
     }
 
+    /// Decodes a bare integer and wraps it modulo 12, so persisted data can never hold an out-of-range value.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        self.init(try container.decode(Int.self))
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+
     static let sharpNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
     static let flatNames = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
 
