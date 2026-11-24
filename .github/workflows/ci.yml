@@ -18,6 +18,7 @@ jobs:
   app:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ipa]') || startsWith(github.ref, 'refs/tags/v')
     runs-on: macos-15
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -35,7 +36,10 @@ jobs:
         run: |
           UDID="$(scripts/pick-simulator.sh)"
           echo "Using simulator $UDID"
-          xcodebuild test -project Broken.xcodeproj -scheme Broken -destination "id=$UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcodebuild test -project Broken.xcodeproj -scheme Broken -destination "id=$UDID" \
+            -parallel-testing-enabled NO -default-test-execution-time-allowance 120
       - run: scripts/build-ipa.sh
       - uses: actions/upload-artifact@v4
         with:
