@@ -34,13 +34,34 @@ jobs:
       - run: xcodegen generate
       - name: Test
         run: |
+          set -euo pipefail
           UDID="$(scripts/pick-simulator.sh)"
           echo "Using simulator $UDID"
-          xcrun simctl boot "$UDID" || true
+          # Tolerate only "already booted"; any other boot failure fails the step.
+          if ! xcrun simctl boot "$UDID" 2> boot.err; then
+            cat boot.err
+            grep -q "current state: Booted" boot.err
+          fi
           xcrun simctl bootstatus "$UDID" -b
           xcodebuild test -project Broken.xcodeproj -scheme Broken -destination "id=$UDID" \
-            -parallel-testing-enabled NO -default-test-execution-time-allowance 120
+            -parallel-testing-enabled NO -default-test-execution-time-allowance 120 \
+            2>&1 | tee test.log
+          # Fail if no Swift Testing run reported at least one passing test.
+          grep -E 'Test run with [1-9][0-9]* tests? .*passed' test.log
       - run: scripts/build-ipa.sh
+      - name: Verify IPA contents
+        run: |
+          set -euo pipefail
+          ls -l Broken.ipa
+          echo "IPA size: $(stat -f%z Broken.ipa) bytes"
+          unzip -l Broken.ipa | tee ipa.lst
+          grep -q 'Payload/Broken.app/Content/journey.json' ipa.lst
+          PLIST=build/Build/Products/Release-iphoneos/Broken.app/Info.plist
+          plutil -p "$PLIST" | tee plist.txt
+          grep -q '"UIFileSharingEnabled" => true' plist.txt
+          grep -q '"LSSupportsOpeningDocumentsInPlace" => true' plist.txt
+          grep -q '"MinimumOSVersion" => "18.0"' plist.txt
+          echo "IPA verification passed"
       - uses: actions/upload-artifact@v4
         with:
           name: Broken.ipa
