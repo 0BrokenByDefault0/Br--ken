@@ -58,6 +58,9 @@ The instrumentals are **built to carry vocals**: songs will have someone rapping
   as a separate module; don't design it out.
 - **No mixing/mastering course.** Sound choice and basic balance only, where they serve composition
   (e.g. "the 808 and kick fight; here's why"). *(Builder's call how far to go; keep it shallow.)*
+- **No importing your own audio** (from Koala, Files, etc.) for now. That would mean tempo/key
+  detection, chopping, and time-stretching, which is a large audio job. Koala stays the place for
+  real sampling. The owner may ask for it later, so don't design it out.
 - No App Store release, accounts, backend, social features, or Android.
 
 ### Anti-goals (it fails even if it technically works when…)
@@ -135,6 +138,7 @@ path plus **alternate starting routes**, each converging on the same later stage
 - **Chords/loop first:** a chord loop or melodic loop as the seed.
 - **Drums first:** a groove, then a melody that sits in it. (Closest to how the owner works today.)
 - **Sample first:** start from a sample or loop and build around it, mirroring Koala workflows.
+  Uses **loops bundled with the app** (see Non-goals: no audio import).
 
 The route changes the order of the early stages and the framing of their lessons, not the depth.
 *(How routes are presented, e.g. a fork on the map vs. a choice at the start of a new track, is
@@ -217,12 +221,22 @@ deconstructable example beats (mute/solo each element to hear what it contribute
 - **Working knowledge:** boom bap, lo-fi, drill (UK/NY/Chicago), West Coast/G-funk, Memphis/phonk,
   Jersey club, and others as relevant.
 
-> **Open with owner:** confirm "UG" means underground SoundCloud-style subgenres (plugg, pluggnb,
-> rage, jerk, etc.) and not something else.
+*("UG" confirmed by owner: underground SoundCloud-style subgenres.)*
 
-### 5.7 Progress
-Stored locally on the device: lessons completed, current map position, saved tracks, and drill
-history. No account, no sync. Progress shows as position on the map and a playable track, not
+### 5.7 Learn mode and Build mode *(decided by owner)*
+The journey is a **course you go through once** (Learn mode). After that, the same map stages
+become a **guided Build mode** for every new song: start a new track and the stages walk you through
+it in order, without the lessons. Each step gives quick reminders, the right tool, and a
+"go deeper" link back to the full lesson. Stages finished in Learn mode unlock their Build-mode
+version, but nothing is locked: the owner can use Build mode at any time.
+
+Consequences for the data model: **lesson progress belongs to the user**, while **each track has its
+own build progress** (which stages it has gone through). The first track the owner builds in Learn
+mode is just a track like any other.
+
+### 5.8 Progress
+Stored locally on the device: lessons completed, current map position, saved tracks with their
+per-track stage progress, and drill history. No account, no sync. Progress shows as position on the map and a playable track, not
 as points or badges. *(Light streaks for practice drills are the builder's call; never let
 gamification replace actual results.)*
 
@@ -235,7 +249,7 @@ The owner should get a usable app early. Each phase ends with an IPA they can si
    Journey Map shell; *Your Track*; audio export to Koala; and the first stages of content end to end
    (getting started → melody → harmony → drums) on the main route.
 2. **Complete journey.** Remaining stages (808, layers, arrangement timeline, building for vocals);
-   alternate starting routes; the practice area.
+   alternate starting routes; Build mode; the practice area.
 3. **Style guides.** Trap, cloud rap, and underground in depth with example beats; then the
    working-knowledge guides.
 
@@ -255,11 +269,10 @@ Each phase gets its own implementation plan.
   cross-checked against references and real tracks. The owner flags anything that "doesn't sound
   right" in use.
 
-### Open with owner
-1. After the journey is done once, how are later songs made? (Proposal: stages become a guided
-   build mode without the lessons.)
-2. Import your own audio into the app? (Proposal: not initially; bundled loops only.)
-3. Confirm "UG" = underground SoundCloud styles.
+### Settled with owner after review
+1. Later songs are made in the guided Build mode (5.7).
+2. No audio import initially; bundled loops only (Non-goals).
+3. "UG" = underground SoundCloud styles (plugg, pluggnb, rage, jerk, etc.).
 
 ## 8. Left to the builder
 
