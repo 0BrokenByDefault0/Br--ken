@@ -1,0 +1,61 @@
+name: Broken
+options:
+  deploymentTarget:
+    iOS: "18.0"
+packages:
+  BrokenKit:
+    path: Packages/BrokenKit
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+targets:
+  Broken:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: App/Sources
+      - path: App/Resources
+      - path: Content
+        type: folder
+    dependencies:
+      - package: BrokenKit
+        product: MusicCore
+      - package: BrokenKit
+        product: SoundEngine
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.broken
+        PRODUCT_NAME: Broken
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Br--ken
+        INFOPLIST_KEY_UIFileSharingEnabled: YES
+        INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+  BrokenTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: App/Tests
+    dependencies:
+      - target: Broken
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.local.broken.tests
+schemes:
+  Broken:
+    build:
+      targets:
+        Broken: all
+        BrokenTests: [test]
+    test:
+      targets:
+        - BrokenTests
