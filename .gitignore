@@ -4,3 +4,4 @@ Payload/
 *.ipa
 .build/
 DerivedData/
+App/Info.plist

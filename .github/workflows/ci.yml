@@ -58,8 +58,8 @@ jobs:
           grep -q 'Payload/Broken.app/Content/journey.json' ipa.lst
           PLIST=build/Build/Products/Release-iphoneos/Broken.app/Info.plist
           plutil -p "$PLIST" | tee plist.txt
-          test "$(plutil -extract UIFileSharingEnabled raw "$PLIST")" = "true"
-          test "$(plutil -extract LSSupportsOpeningDocumentsInPlace raw "$PLIST")" = "true"
+          case "$(plutil -extract UIFileSharingEnabled raw "$PLIST")" in true|1) ;; *) echo "UIFileSharingEnabled not true"; exit 1;; esac
+          case "$(plutil -extract LSSupportsOpeningDocumentsInPlace raw "$PLIST")" in true|1) ;; *) echo "LSSupportsOpeningDocumentsInPlace not true"; exit 1;; esac
           test "$(plutil -extract MinimumOSVersion raw "$PLIST")" = "18.0"
           echo "IPA verification passed"
       - uses: actions/upload-artifact@v4
