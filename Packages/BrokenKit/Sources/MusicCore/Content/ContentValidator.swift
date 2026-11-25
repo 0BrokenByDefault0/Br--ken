@@ -105,7 +105,8 @@ public enum ContentValidator {
     private static func isDrumCheck(_ check: TaskCheck) -> Bool {
         switch check {
         case .drumHitOnBeats, .laneHitCount, .hatRollPresent, .syncopatedKicks: true
-        default: false
+        case .tempoInRange, .inKey, .noteCount, .barRhythmRepeats, .endsOnDegree, .chordCount, .chordsInKey,
+             .chordDegrees, .chordsFitMelody, .extendedChordCount, .barsDiffer: false
         }
     }
 }

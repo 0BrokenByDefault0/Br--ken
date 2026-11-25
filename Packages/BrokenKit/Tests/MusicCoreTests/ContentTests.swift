@@ -109,36 +109,42 @@ private func errors(listed: [String] = ["L1"], files: [String: String]) throws -
 }
 
 @Test func validatorFlagsEachRule() throws {
-    func expectError(_ e: [String], mentioning id: String = "L1", _ rule: String) {
-        #expect(e.contains { $0.contains(id) }, "rule '\(rule)' produced no error naming \(id): \(e)")
+    func expectError(_ e: [String], id: String = "L1", fragment: String, decodeCase: Bool = false, _ rule: String) {
+        #expect(e.contains { $0.contains(id) && $0.contains(fragment) }, "rule '\(rule)' produced no error with '\(fragment)': \(e)")
+        if !decodeCase {
+            #expect(!e.contains { $0.contains("failed to decode") }, "rule '\(rule)' fixture failed to decode: \(e)")
+        }
     }
-    // missing lesson file
-    expectError(try errors(listed: ["L1"], files: [:]), "missing file")
-    // stage mismatch
-    expectError(try errors(files: ["L1.json": lessonJSON(stage: "other", steps: #"{"type":"koala","body":"b"}"#)]), "stage mismatch")
-    // bad melody notation
+    expectError(try errors(listed: ["L1"], files: [:]), fragment: "no lesson file", "missing file")
+    expectError(try errors(files: ["L1.json": lessonJSON(stage: "other", steps: #"{"type":"koala","body":"b"}"#)]),
+                fragment: "but it is listed by stage", "stage mismatch")
     let badMelody = #"{"tempo":90,"key":"A minor","bars":1,"parts":[{"role":"melody","instrument":"bell","melody":"nonsense"}]}"#
-    expectError(try errors(files: ["L1.json": lessonJSON(steps: taskStep(uses: #"["melody"]"#, starter: badMelody))]), "bad notation")
-    // bad key
+    expectError(try errors(files: ["L1.json": lessonJSON(steps: taskStep(uses: #"["melody"]"#, starter: badMelody))]),
+                fragment: "clip does not parse", "bad notation")
     let badKey = #"{"tempo":90,"key":"H sharp","bars":1,"parts":[{"role":"melody","instrument":"bell","melody":"A4:4"}]}"#
     let listen = #"{"type":"listen","title":"t","caption":"c","examples":[{"label":"l","explanation":"e","clip":\#(badKey)}]}"#
-    expectError(try errors(files: ["L1.json": lessonJSON(steps: listen)]), "bad key")
-    // check role not target/uses
+    expectError(try errors(files: ["L1.json": lessonJSON(steps: listen)]), fragment: "clip does not parse", "bad key")
     let roleStep = taskStep(uses: #"["melody"]"#, starter: goodClip, checks: #"[{"kind":"chordsInKey","role":"chords"}]"#)
-    expectError(try errors(files: ["L1.json": lessonJSON(steps: roleStep)]), "check role")
-    // uses role missing from starter
+    expectError(try errors(files: ["L1.json": lessonJSON(steps: roleStep)]),
+                fragment: "neither targetRole nor in uses", "check role")
     let usesStep = taskStep(uses: #"["chords"]"#, starter: goodClip)
-    expectError(try errors(files: ["L1.json": lessonJSON(steps: usesStep)]), "starter lacks role")
-    // uses with no starter
-    expectError(try errors(files: ["L1.json": lessonJSON(steps: taskStep(uses: #"["melody"]"#))]), "uses without starter")
-    // drum check on non-drum tool
+    expectError(try errors(files: ["L1.json": lessonJSON(steps: usesStep)]),
+                fragment: "starter lacks that role", "starter lacks role")
+    expectError(try errors(files: ["L1.json": lessonJSON(steps: taskStep(uses: #"["melody"]"#))]),
+                fragment: "has no starter", "uses without starter")
     let drumStep = taskStep(tool: "melodyEditor", checks: #"[{"kind":"hatRollPresent"}]"#)
-    expectError(try errors(files: ["L1.json": lessonJSON(steps: drumStep)]), "drum check")
-    // duplicate ids
+    expectError(try errors(files: ["L1.json": lessonJSON(steps: drumStep)]),
+                fragment: "not drumGrid", "drum check")
     let koala = lessonJSON(steps: #"{"type":"koala","body":"b"}"#)
-    expectError(try errors(files: ["a.json": koala, "b.json": koala]), "duplicate ids")
-    // undecodable file
-    expectError(try errors(listed: [], files: ["broken.json": "{ not json"]), mentioning: "broken.json", "undecodable")
+    expectError(try errors(files: ["a.json": koala, "b.json": koala]), id: "b.json",
+                fragment: "duplicate lesson id 'L1'", "duplicate ids")
+    expectError(try errors(listed: [], files: ["broken.json": "{ not json"]), id: "broken.json",
+                fragment: "failed to decode", decodeCase: true, "undecodable")
+}
+
+@Test func validatorAcceptsDrumCheckInDrumGridTask() throws {
+    let step = taskStep(tool: "drumGrid", target: "drums", checks: #"[{"kind":"hatRollPresent"},{"kind":"laneHitCount","lane":"kick","min":1}]"#)
+    #expect(try errors(files: ["L1.json": lessonJSON(steps: step)]) == [])
 }
 
 @Test func libraryLoadsAndOrdersLessons() throws {
@@ -159,5 +165,19 @@ private func errors(listed: [String] = ["L1"], files: [String: String]) throws -
 @Test func repoContentIsValid() throws {
     #expect(ContentValidator.validate(directory: repoContent) == [])
     let lib = try ContentLibrary(directory: repoContent)
-    #expect(lib.journey.stages.map(\.order) == Array(1...8))
+    let expected: [(String, String, String)] = [
+        ("first-sounds", "First sounds", "tempo, key, picking a vibe"),
+        ("the-idea", "The idea", "melody or loop as your seed"),
+        ("harmony", "Harmony", "chords that fit your melody"),
+        ("drums-groove", "Drums & groove", "patterns that lock with it"),
+        ("eight08-bass", "808 & bass", "following the chords, sliding"),
+        ("layers", "Layers", "counter-melodies, texture"),
+        ("arrangement", "Arrangement", "loop → intro/verse/hook/bridge"),
+        ("room-for-vocals", "Leave room for vocals", "space for the rapper or singer"),
+    ]
+    let stages = lib.journey.stages
+    #expect(stages.map(\.id) == expected.map(\.0))
+    #expect(stages.map(\.title) == expected.map(\.1))
+    #expect(stages.map(\.tagline) == expected.map(\.2))
+    #expect(stages.map(\.order) == Array(1...8))
 }
