@@ -1,0 +1,226 @@
+{
+  "id": "harmony.chords-from-melody",
+  "stage": "harmony",
+  "title": "Chords from your melody",
+  "summary": "How the strong, long notes of a melody pick the chord, how chord tones, color tones and clashes sound, and how to use the Chord Finder to choose a chord for every bar.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Chord tone, color tone, clash",
+      "body": "Your melody already hints at its chords. Under any chord, each melody note is one of three things:\n\n- **Chord tone**: the note is in the chord. Solid and settled.\n- **Color tone**: not in the chord, but it doesn't rub. It adds flavor, like the 7ths and 9ths you'll meet next lesson.\n- **Clash**: the note is a **half step above** a chord note. The two grind against each other.\n\nIn key isn't enough on its own. A melody note and a chord can both be in your key and still clash.\n\nNext: one melody over three chords.",
+      "deeper": "Why a half step above? The melody note sits one half step over a chord note, often more than an octave higher. That interval (a minor 2nd, or a minor 9th when it's an octave up) is one of the harshest pairs there is, and the chord note keeps sounding under it.\n\nA half step **below** a chord note is usually fine. B over a C chord is the major 7th that gives Cmaj7 its dreamy sound, so it counts as a color tone.\n\nIn A minor the scale has only two half steps, B–C and E–F. So with chords from your key, only two of its notes can clash: **C** over a chord that contains B (like Em, G or Bdim), and **F** over a chord that contains E (like Am, C or Em). The borrowed V adds one more: A over its G#.\n\nThe Chord Finder uses this same rule to color its chips."
+    },
+    {
+      "type": "listen",
+      "title": "One melody, three chords",
+      "caption": "The same melody each time, with a long C on beat 1 of both bars. Only the chord under it changes, one chord for both bars.",
+      "examples": [
+        {
+          "label": "Chord tone: Am",
+          "explanation": "C is in Am (A, C, E), and so are the A and E. The long notes sit right on the chord; the short B and D are color tones passing by.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:32"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "C5:8 B4:4 A4:4 C5:8 E5:4 D5:4"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Color tone: Dm",
+          "explanation": "C isn't in Dm (D, F, A), but it's not a half step above any of its notes either. It's Dm's 7th, so it sounds soft and a bit jazzy, less settled than over Am, and it scores lower in the Chord Finder. Nothing grinds, though.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Dm:32"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "C5:8 B4:4 A4:4 C5:8 E5:4 D5:4"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Clash: Em",
+          "explanation": "Em is E, G, B, and C sits a half step above B. Every time the long C lands, it grinds against the B in the chord. Both are in key, and it still sounds wrong.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Em:32"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "C5:8 B4:4 A4:4 C5:8 E5:4 D5:4"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Long notes pick the chord",
+      "body": "Not every note counts the same. The ear judges a chord by the notes that are **long** or land **on the beat**, especially beat 1. A quick note between two chord tones passes by before it can rub.\n\nSo when you pick a chord for a bar, look at its longest, strongest notes and find a chord that contains them. Short notes can be color tones, even clashes, and it still works.\n\nThe **Chord Finder** does this for every bar of your melody. It scores each chord in your key and ranks the best five, with the top fit at 100.\n\nNext: the same clash, short and then long.",
+      "deeper": "How the Chord Finder scores a chord, bar by bar:\n\n- Each melody note counts for its length, and one and a half times as much if it starts on beat 1 or beat 3.\n- A chord tone adds its full weight. A color tone adds a quarter of it. A clash takes its weight away.\n- Each chord note your melody never plays costs a little, so between two otherwise equal fits, the one with fewer unused notes wins.\n\nThe best chord in the bar shows 100 and the rest are scaled to it. The candidates are the seven triads of your key, their 7th chords and, in a minor key, the borrowed V and V7.\n\nTies are common. Am and C share two notes (C and E), so a bar built on those notes often scores them the same. Then your ear decides."
+    },
+    {
+      "type": "listen",
+      "title": "Passing vs held",
+      "caption": "Same drums, same Am chord. Each bar starts with E and F, one long and one short, then a long note on beat 3. F is a half step above the E in Am, so it clashes either way. Only which one is long changes.",
+      "examples": [
+        {
+          "label": "F passes by",
+          "explanation": "E is held on beat 1, F flicks past as a short note, then a long C (an A in bar 2) lands on beat 3. The rub is over before you notice it. In the Chord Finder, Am would score 82 here.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:32"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 F5:2 C5:8 E5:6 F5:2 A4:8"
+              }
+            ]
+          }
+        },
+        {
+          "label": "F is held",
+          "explanation": "Now F is the long note on beat 1, and E is the quick one. F grinds against the chord's E for a beat and a half, every bar. Same notes, and Am drops to 20.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:32"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "F5:6 E5:2 C5:8 F5:6 E5:2 A4:8"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Find the chords",
+      "prompt": "Pick a chord for each bar of your melody:\n\n1. Choose **Bar 1**. Tap a few of the top fits to hear each one under your melody, and watch the chips change color.\n2. Tap **Use** on the one you like. The finder moves on to bar 2.\n3. Do the same for bar 2, then tap play to hear both bars.\n\nIf Your Track has no melody yet, a practice melody is used; it isn't saved. Your chords are. Any fit scoring **70 or more** passes the check.",
+      "tool": "chordFinder",
+      "targetRole": "chords",
+      "uses": [
+        "melody"
+      ],
+      "starter": {
+        "tempo": 140,
+        "key": "A minor",
+        "bars": 2,
+        "parts": [
+          {
+            "role": "melody",
+            "instrument": "bell",
+            "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "chordsFitMelody",
+          "chords": "chords",
+          "melody": "melody",
+          "minScoreRatio": 0.6
+        }
+      ],
+      "hints": [
+        "Look at the long chips first: they matter most. Under a good chord they're **chord tone** colored, and none of them shows as a **clash**.",
+        "Each bar needs its own chord. The strip at the top shows what's in each bar, and – means it's empty. Choose that bar, then tap **Use** on a fit.",
+        "If the check names a bar, it also names that bar's best chord. Find it at the top of the list for that bar and tap **Use**."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Save it. These chords go into Your Track under your melody. Next lesson you'll make them sound expensive.",
+      "roles": [
+        "chords"
+      ]
+    }
+  ]
+}

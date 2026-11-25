@@ -1,0 +1,188 @@
+{
+  "id": "harmony.stacked-notes",
+  "stage": "harmony",
+  "title": "Chords are stacked notes",
+  "summary": "How a chord is built by stacking every other note of your scale, why chords sound minor, major or diminished, and the seven chords that live in A minor.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Skip a note, stack a note",
+      "body": "A chord is three or more notes played together. Here's the easy way to build one from your scale: start on any note, **skip one, take the next**, then skip one and take the next again.\n\nIn A minor, start on A: skip B, take C, skip D, take E. **A, C, E** is **Am**, the home chord.\n\nA three-note stack like that is a **triad**. Its bottom note is the **root**, and it names the chord.\n\nDo it from each of the seven notes and you get seven chords, every one of them in key.\n\nNext: the same root, three different chord sounds.",
+      "deeper": "Skipping one scale note jumps a **third**. Thirds come in two sizes: **minor** (3 half steps, like A to C) and **major** (4 half steps, like C to E). Which size you get depends on where you are in the scale.\n\nA triad is two thirds stacked:\n\n- **Minor**: minor third, then major third (A C E: 3 + 4 half steps).\n- **Major**: major third, then minor third (C E G: 4 + 3).\n- **Diminished**: two minor thirds (B D F: 3 + 3). Its top note is a half step lower than in the other two, which is what makes it tense.\n\nThe seven triads of A minor:\n\n- **Am** (A C E), minor\n- **Bdim** (B D F), diminished\n- **C** (C E G), major\n- **Dm** (D F A), minor\n- **Em** (E G B), minor\n- **F** (F A C), major\n- **G** (G B D), major\n\nThe chord pads build exactly these from your track's key."
+    },
+    {
+      "type": "listen",
+      "title": "Minor, major, diminished",
+      "caption": "Same drums, same root note (A) in all three. Only the other two notes move. Listen to the mood of each chord.",
+      "examples": [
+        {
+          "label": "Minor: Am",
+          "explanation": "A, C, E. The middle note sits 3 half steps above the root. Dark and moody: the home chord of A minor.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:32"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Major: A",
+          "explanation": "A, C#, E. Only the middle note moves, up a half step, and the chord turns bright. C# isn't in A minor; it's here just to compare.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "A:32"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Diminished: Adim",
+          "explanation": "A, C, Eb. The middle note is C again, as in Am, and now the top note drops a half step. Tense and unstable, like it needs to go somewhere. Eb isn't in A minor either; it's here to compare.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Adim:32"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Three kinds of chord",
+      "body": "Every triad has one of three sounds:\n\n- **Minor**: dark, moody. In A minor: Am, Dm, Em.\n- **Major**: bright, open. In A minor: C, F, G.\n- **Diminished**: tense, unstable. In A minor: Bdim.\n\nYou don't choose which kind each chord is. Your key does, by which notes it gives you to stack.\n\nThe pads label each chord with a **Roman numeral** for the scale note it's built on: **lowercase** for minor, **uppercase** for major, **°** for diminished. In A minor, Am is **i** and Dm is **iv**.\n\nNext: all seven chords of A minor, walking up the scale.",
+      "deeper": "In A minor the numerals run: **i** (Am), **ii°** (Bdim), **III** (C), **iv** (Dm), **v** (Em), **VI** (F), **VII** (G).\n\nThe pattern of minor, diminished and major is the same in every minor key, so the numerals always line up with the same sounds. In C minor, **iv** is Fm and **VI** is Ab.\n\nWhy does minor sound darker? Its lower third is the smaller one, so the middle note sits a half step lower than in major. You heard it in the first example pair: Am and A differ by that one note.\n\nDiminished is the odd one out. Its outer notes are 6 half steps apart instead of 7, and that squeezed interval sounds like it wants to move. Use it briefly, on the way to another chord."
+    },
+    {
+      "type": "listen",
+      "title": "The seven chords of A minor",
+      "caption": "Same drums, one chord per bar, walking up the scale. A starts on home and climbs to iv; B carries on from v and comes back home.",
+      "examples": [
+        {
+          "label": "i, ii°, III, iv",
+          "explanation": "Am (minor), Bdim (diminished), C (major), Dm (minor). Hear how Bdim leans forward and C brightens things for a bar.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 Bdim:16 C:16 Dm:16"
+              }
+            ]
+          }
+        },
+        {
+          "label": "v, VI, VII, i",
+          "explanation": "Em (minor), F (major), G (major), then Am (minor), home. Two bright chords in a row lift it before the home chord settles it.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Em:16 F:16 G:16 Am:16"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "One, four, five",
+      "prompt": "Build a progression from the chords on the 1st, 4th and 5th notes of your key: **i**, **iv** and **v** in a minor key (**I**, **IV**, **V** in a major one). Each pad shows its numeral under the chord name; tap any pad to hear it.\n\n1. Switch the slot strip to **2 / bar**, so you have four slots.\n2. Tap slot **1a**, then tap **i**, **iv**, **v** and **i**. Each pad you tap fills the next slot.\n3. Press play and listen to it loop.",
+      "tool": "chordPads",
+      "targetRole": "chords",
+      "uses": [],
+      "checks": [
+        {
+          "kind": "chordDegrees",
+          "role": "chords",
+          "required": [
+            1,
+            4,
+            5
+          ]
+        }
+      ],
+      "hints": [
+        "Lowercase numerals are minor chords. **i** is your home chord, **iv** is built on the 4th note of your key, and **v** on the 5th.",
+        "Three chords won't fit in two slots. Switch the strip to **2 / bar**, then tap slot **1a**. It lights up, and each pad you tap fills the next slot.",
+        "In A minor that's Am, Dm, Em, then Am again. The **V ·borrowed** pad counts as the five too."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Practice rep, so nothing goes into Your Track. Next: which chords go together, and the progressions behind a lot of minor-key beats.",
+      "roles": []
+    }
+  ]
+}

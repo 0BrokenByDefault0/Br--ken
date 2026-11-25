@@ -1,0 +1,247 @@
+{
+  "id": "harmony.sound-expensive",
+  "stage": "harmony",
+  "title": "Make chords sound expensive",
+  "summary": "Add 7ths and 9ths, hear why m7, m9 and maj7 chords run through dark and dreamy beats, and keep voicings close and smooth in the middle of the keyboard.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Stack one more",
+      "body": "Keep stacking. Skip a note and take the next once more, and a triad becomes a **7th chord**. Am (A, C, E) becomes **Am7** (A, C, E, G). F becomes **Fmaj7** (F, A, C, E). Stack again for a **9th**: Am9 adds B.\n\nThe extra notes soften the chord. Minor gets smoother and less heavy; major gets a dreamy, bittersweet edge. That's the expensive sound: **m7**, **m9** and **maj7** chords are staples of dreamy, moody beats, from cloud rap to R&B-leaning trap.\n\nOn the pads, hold one and pick **7** or **9**, or flip on **7ths** for all of them.\n\nNext: one progression as triads, 7ths and 9ths.",
+      "deeper": "The 7th chords of A minor:\n\n- **Am7** i7 (A C E G)\n- **Bm7b5** iiø7 (B D F A)\n- **Cmaj7** IIImaj7 (C E G B)\n- **Dm7** iv7 (D F A C)\n- **Em7** v7 (E G B D)\n- **Fmaj7** VImaj7 (F A C E)\n- **G7** VII7 (G B D F)\n\nWhy softer? A 7th chord holds two triads at once. Fmaj7 is F major with A minor on top (A C E); Am7 is A minor with C major on top (C E G). Bright and dark at the same time.\n\nThe four kinds: **maj7** (major triad, 7th 11 half steps up) is dreamy. **m7** (minor triad, 7th 10 half steps up) is smooth. **7** (major triad, 7th 10 half steps up) is bluesy and restless. **m7b5** (diminished triad, 7th 10 half steps up) is dark and tense.\n\nThe pads' **9** turns m7 into m9 and maj7 into maj9. The ii, VII and V ·borrowed pads stay at their 7th. One catch: the 9 on the **v** pad adds a note from outside your key (F# in A minor), so it can sound off."
+    },
+    {
+      "type": "listen",
+      "title": "Triads, 7ths, 9ths",
+      "caption": "Same drums, same roots every time: i, iv, VI, v. Only the chord type changes.",
+      "examples": [
+        {
+          "label": "Triads",
+          "explanation": "Am, Dm, F, Em. Clear and solid, a little plain.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 Dm:16 F:16 Em:16"
+              }
+            ]
+          }
+        },
+        {
+          "label": "7ths",
+          "explanation": "Am7, Dm7, Fmaj7, Em7. One extra note each, and the whole thing goes softer and richer. Fmaj7 in bar 3 is the dreamy one.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am7:16 Dm7:16 Fmaj7:16 Em7:16"
+              }
+            ]
+          }
+        },
+        {
+          "label": "9ths",
+          "explanation": "Am9, Dm9, Fmaj9, then Em7 (the v's 9th would leave the key). Lush and blurry: the first three chords have five notes each, stacked close together.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am9:16 Dm9:16 Fmaj9:16 Em7:16"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Close and smooth",
+      "body": "How you stack the notes matters as much as which notes.\n\n**Close**: keep the notes within about an octave, in the middle of the keyboard around middle C. Lower gets muddy and fights the 808. Higher gets thin and crowds the melody and the vocal.\n\n**Smooth**: from one chord to the next, hold the notes they share and move the rest as little as you can. That's **voice-leading**. Am to F moves just one note: E steps up to F.\n\nTap a pad and you hear the chord in its basic stacked shape, so pads jump around. Chords in the slots are voice-led for you.\n\nNext: the same four chords, jumpy and smooth.",
+      "deeper": "The same chord can be stacked in different orders. C E G, E G C and G C E are all C major. Putting a different note on the bottom is called an **inversion**; the basic stack, root at the bottom, is **root position**.\n\nWhen notes hold or move by step, the ear follows each one as its own line, so the chords flow into each other. Listen to the top note: in the smooth Am–F–C–G it goes E, F, E, D, a small melody of its own.\n\nWhat the app does: the first chord plays in root position with its root between C3 and B3. Each chord after that takes whichever inversion moves the least from the one before, with its lowest note between C3 and D4. That keeps your chords close and in the middle, clear of the 808 below."
+    },
+    {
+      "type": "listen",
+      "title": "Jumpy vs voice-led",
+      "caption": "Same four chords, Am, F, C, G, same drums, same pad sound. A plays every chord in root position, the way a pad sounds when you tap it. B is how the slots play them. Listen to the top notes.",
+      "examples": [
+        {
+          "label": "Root position every time",
+          "explanation": "Am, F, C, G, each stacked from its root. Every note leaps at every change: the top line goes E, C, G, D, and each chord sounds like it starts over.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "melody": "A3:16 F3:16 C3:16 G3:16",
+                "sound": {
+                  "volume": 0.7,
+                  "drive": 0.0,
+                  "cutoff": 1.0,
+                  "reverb": 0.15,
+                  "delay": 0.0
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "melody": "C4:16 A3:16 E3:16 B3:16",
+                "sound": {
+                  "volume": 0.7,
+                  "drive": 0.0,
+                  "cutoff": 1.0,
+                  "reverb": 0.15,
+                  "delay": 0.0
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "melody": "E4:16 C4:16 G3:16 D4:16",
+                "sound": {
+                  "volume": 0.7,
+                  "drive": 0.0,
+                  "cutoff": 1.0,
+                  "reverb": 0.15,
+                  "delay": 0.0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "Voice-led",
+          "explanation": "The same chords. Shared notes hold and the rest step: the top line goes E, F, E, D. The chords flow into each other.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16 C:16 G:16"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Upgrade your chords",
+      "prompt": "Your chords are plain triads. Make them expensive:\n\n1. Hold a pad and pick **7** or **9**, or flip on **7ths** to change every pad.\n2. Tap a slot, then tap the upgraded pad. Keep the same chord, just richer: Am becomes Am7 or Am9.\n3. Upgrade **at least 2** slots, then press play and hear it with the melody.\n\nIf Your Track has no melody or chords yet, practice ones load in. Only the chords are saved.",
+      "tool": "chordPads",
+      "targetRole": "chords",
+      "uses": [
+        "melody",
+        "chords"
+      ],
+      "starter": {
+        "tempo": 140,
+        "key": "A minor",
+        "bars": 2,
+        "parts": [
+          {
+            "role": "melody",
+            "instrument": "bell",
+            "melody": "E5:6 G5:2 E5:4 C5:4 E5:6 C5:2 A4:8"
+          },
+          {
+            "role": "chords",
+            "instrument": "pad",
+            "chords": "Am:16 F:16"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "extendedChordCount",
+          "role": "chords",
+          "min": 2
+        },
+        {
+          "kind": "chordsFitMelody",
+          "chords": "chords",
+          "melody": "melody",
+          "minScoreRatio": 0.6
+        }
+      ],
+      "hints": [
+        "Hold a pad for half a second to open **Quality**, then pick **7** or **9**. The pad's name changes, like Am to Am7. Then tap a slot and that pad.",
+        "Tapping a pad on its own only plays it. Select a slot first; it lights up. The strip then shows the new name, like Am7 or Fmaj9.",
+        "Keep each chord's root and change only its type. If the melody check names a bar, place the chord it suggests as a 7th. Skip the 9 on the **v** pad: it adds a note from outside your key."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Save it. Your upgraded chords replace the old ones in Your Track, under your melody.",
+      "roles": [
+        "chords"
+      ]
+    },
+    {
+      "type": "koala",
+      "body": "Take your chords into Koala:\n\n1. Tap **Export loop to Koala**, pick **Chords** under What to export, tap **Export**, then share the file and import it into Koala (the sheet shows how).\n2. In Koala, load it onto a pad and chop it so each chord gets its own pad.\n3. Over a drum loop, play the chord pads in a new order, or hold one chord for two bars. Same chords, new progression, from your own sound."
+    }
+  ]
+}
