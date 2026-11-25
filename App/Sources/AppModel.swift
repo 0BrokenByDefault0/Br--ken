@@ -22,7 +22,13 @@ final class AppModel {
 
     private let trackStore: TrackStore
     private let progressStore: ProgressStore
-    private let audio: any AudioPlaying
+    /// The audio player: tool screens use it directly for live notes and the playhead.
+    let audio: any AudioPlaying
+    /// True while the loop is playing (the active track, or a Chord Finder audition).
+    private(set) var isPlaying = false
+    /// While on, a rim click on every beat is mixed into what is played (the saved track is unchanged).
+    var metronome = false { didSet { if let activeTrack, !auditioning { send(activeTrack) } } }
+    private var auditioning = false
 
     init(content: ContentLibrary, trackStore: TrackStore, progressStore: ProgressStore, audio: any AudioPlaying) {
         self.content = content
@@ -33,7 +39,7 @@ final class AppModel {
         tracks = report.tracks
         skippedFiles = report.skipped
         progress = progressStore.load()
-        if let activeTrack { audio.setTrack(activeTrack) }
+        if let activeTrack { send(activeTrack) }
     }
 
     /// The owner's track that lessons build on ("Your Track").
@@ -49,10 +55,18 @@ final class AppModel {
         return track
     }
 
+    /// Creates a track and makes it active.
+    @discardableResult
+    func startTrack(name: String, tempo: Double, key: Key) -> Track {
+        let track = newTrack(name: name, tempo: tempo, key: key)
+        setActive(track.id)
+        return track
+    }
+
     func setActive(_ id: UUID) {
         progress.activeTrackID = id
         saveProgress()
-        if let activeTrack { audio.setTrack(activeTrack) }
+        if let activeTrack { send(activeTrack) }
     }
 
     /// Applies `mutate` to the active track, saves it, then plays the result. No-op without an active track.
@@ -60,8 +74,84 @@ final class AppModel {
         guard var track = activeTrack else { return }
         mutate(&track)
         save(track)
-        audio.setTrack(track)
+        send(track)
     }
+
+    /// Edits the active track's part for `role`, creating an empty one (`instrument`, `empty`) on the
+    /// first edit. An existing part keeps its instrument. No-op without an active track.
+    func editActivePart(_ role: PartRole, instrument: InstrumentID, empty: PartContent, _ mutate: (inout Part) -> Void) {
+        updateActiveTrack { track in
+            var part = track.part(role) ?? Part(role: role, instrument: instrument, content: empty)
+            mutate(&part)
+            track.setPart(part)
+        }
+    }
+
+    /// Mutes or unmutes a part of the active track. No-op if the track has no such part.
+    func setMuted(role: PartRole, _ muted: Bool) {
+        guard activeTrack?.part(role) != nil else { return }
+        updateActiveTrack { track in
+            guard var part = track.part(role) else { return }
+            part.muted = muted
+            track.setPart(part)
+        }
+    }
+
+    func renameTrack(id: UUID, to name: String) {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, var track = tracks.first(where: { $0.id == id }) else { return }
+        track.name = trimmed
+        save(track)
+    }
+
+    /// Deletes the track's file. If it was the active track, there is no active track afterwards.
+    func deleteTrack(id: UUID) {
+        let wasActive = progress.activeTrackID == id
+        tracks.removeAll { $0.id == id }
+        do {
+            try trackStore.delete(id: id)
+        } catch {
+            lastError = "Couldn't delete the track: \(error.localizedDescription)"
+        }
+        if wasActive {
+            stop()
+            progress.activeTrackID = nil
+            saveProgress()
+        }
+    }
+
+    /// Plays the active track from the start (puts it back first if an audition replaced it).
+    func play() {
+        auditioning = false
+        if let activeTrack { send(activeTrack) }
+        audio.play()
+        isPlaying = true
+    }
+
+    /// Plays a temporary track (a Chord Finder audition). `stop()` restores the active track.
+    func audition(_ track: Track) {
+        auditioning = true
+        send(track)
+        audio.play()
+        isPlaying = true
+    }
+
+    func stop() {
+        audio.stop()
+        isPlaying = false
+        if auditioning {
+            auditioning = false
+            if let activeTrack { send(activeTrack) }
+        }
+    }
+
+    /// Saves lesson progress: the lesson the Lesson tab shows.
+    func openLesson(_ id: String) {
+        progress.currentLessonID = id
+        saveProgress()
+    }
+
+    var currentLesson: Lesson? { progress.currentLessonID.flatMap { content.lesson($0) } }
 
     /// The track a lesson step works on. It is a copy of the active track (the owner's tempo, key, and
     /// parts win), or a new "Practice" track at the starter's (or the default) tempo and key. Every role
@@ -96,12 +186,16 @@ final class AppModel {
         progress.activeTrackID = track.id
         progress.completedLessons.insert(lessonID)
         saveProgress()
-        audio.setTrack(track)
+        send(track)
     }
 
     func markLessonComplete(_ id: String) {
         progress.completedLessons.insert(id)
         saveProgress()
+    }
+
+    private func send(_ track: Track) {
+        audio.setTrack(metronome ? withMetronome(track) : track)
     }
 
     private static func emptyTrack(name: String) -> Track {

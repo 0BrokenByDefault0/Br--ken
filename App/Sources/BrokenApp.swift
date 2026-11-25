@@ -42,7 +42,7 @@ struct BrokenApp: App {
         WindowGroup {
             Group {
                 if let model {
-                    LabRootView(audio: player)  // temporary root until the real navigation (Task 17)
+                    RootView()
                         .environment(model)
                         .environment(audioHost)
                 } else {
@@ -57,20 +57,6 @@ struct BrokenApp: App {
 private enum AppLaunchError: Error, CustomStringConvertible {
     case contentMissing
     var description: String { "The lesson content folder is missing from the app." }
-}
-
-/// Stand-in until the real Journey screen exists: the stage titles.
-private struct JourneyPlaceholderView: View {
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        NavigationStack {
-            List(model.content.journey.stages) { stage in
-                Text(stage.title)
-            }
-            .navigationTitle("Br--ken")
-        }
-    }
 }
 
 private struct LaunchErrorView: View {

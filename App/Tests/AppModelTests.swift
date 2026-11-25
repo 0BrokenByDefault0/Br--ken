@@ -331,3 +331,21 @@ private let journeyStages: [(String, [String])] = [
     model.metronome = false
     #expect(audio.tracksSet.last?.part(.texture) == nil)
 }
+
+@MainActor
+@Test func startTrackCreatesAndActivates() throws {
+    let sandbox = try Sandbox()
+    let model = try sandbox.makeModel()
+    let t = model.startTrack(name: "My first beat", tempo: 150, key: try Key(parsing: "C minor"))
+    #expect(model.activeTrack?.id == t.id)
+    #expect(model.activeTrack?.tempo == 150)
+    #expect(ProgressStore(fileURL: sandbox.progressURL).load().activeTrackID == t.id)
+}
+
+@MainActor
+@Test func genreFitHints() {
+    #expect(TrackSetupView.genreFit(tempo: 140) == "Fits: trap, cloud")
+    #expect(TrackSetupView.genreFit(tempo: 165) == "Fits: trap")
+    #expect(TrackSetupView.genreFit(tempo: 70) == "Fits: cloud")
+    #expect(TrackSetupView.genreFit(tempo: 100) == "Between the usual trap and cloud tempos")
+}
