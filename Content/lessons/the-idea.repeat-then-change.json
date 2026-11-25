@@ -86,7 +86,7 @@
     {
       "type": "listen",
       "title": "An answer vs a new idea",
-      "caption": "Two-bar loops over the same drums and pad (Am, then F). Bar 1 is the same call in both. Looped, each one becomes ABAB.",
+      "caption": "Two-bar loops over the same drums and pad (Am, F, Am). Bar 1 is the same call in both. Looped, each one becomes ABAB.",
       "examples": [
         {
           "label": "Same rhythm, new ending",
@@ -108,7 +108,7 @@
               {
                 "role": "chords",
                 "instrument": "pad",
-                "chords": "Am:16 F:16"
+                "chords": "Am:16 F:8 Am:8"
               },
               {
                 "role": "melody",
@@ -138,7 +138,7 @@
               {
                 "role": "chords",
                 "instrument": "pad",
-                "chords": "Am:16 F:16"
+                "chords": "Am:16 F:8 Am:8"
               },
               {
                 "role": "melody",
@@ -186,7 +186,7 @@
         }
       ],
       "hints": [
-        "To change a note's pitch, tap it in the piano roll to remove it, then tap the cell above or below it at the same step. Hold and drag if you want its old length back.",
+        "To change a note's pitch, tap it in the piano roll to remove it, then tap another tinted (in-key) row at the same step. Hold and drag if you want its old length back.",
         "The check compares where notes **start** in each bar. Adding a note, removing one, or moving one to another step breaks the rhythm match. Changing a pitch or a length doesn't.",
         "Simplest pass: move only the last note of bar 2 to the home row, A in A minor. If Your Track already has a melody, you're editing that instead of the starter: give bar 2 the same rhythm as bar 1 with at least one note changed."
       ]

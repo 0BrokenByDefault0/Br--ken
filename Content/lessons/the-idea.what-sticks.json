@@ -13,7 +13,7 @@
     {
       "type": "listen",
       "title": "Random notes vs a motif",
-      "caption": "Same drums, same pad (Am, then F), same sound, and 12 notes in each. The only difference is whether anything repeats.",
+      "caption": "Same drums, same pad (Am, then F), same sound, and 12 notes in each. The main difference is whether anything repeats.",
       "examples": [
         {
           "label": "Random notes",
@@ -47,7 +47,7 @@
         },
         {
           "label": "One 3-note motif, four times",
-          "explanation": "C, E, A in a 3 + 3 + 2 rhythm, played four times. By the third time you can sing it. Same key, same number of notes; repetition is the whole difference.",
+          "explanation": "C, E, A in a 3 + 3 + 2 rhythm, played four times. By the third time you can sing it. Same key, same number of notes; repetition is the main difference.",
           "clip": {
             "tempo": 140,
             "key": "A minor",
@@ -80,8 +80,8 @@
     {
       "type": "idea",
       "title": "Rhythm first, and leave space",
-      "body": "Two habits make a motif hit harder.\n\n**Rhythm first.** Find a rhythm that bounces before you worry about which notes. Even on a single note, a good rhythm already grooves with the drums. Then pick pitches to fill the slots.\n\n**Leave space.** Rests are part of the melody. A gap lets the motif land, makes the next entry hit harder, and leaves room for a rapper.\n\nAnd keep the **range** tight: motifs that stay within about an octave and move mostly to neighbouring notes are easy to follow and easy to hum.",
-      "deeper": "**Why rhythm first?** The rhythm is what locks the melody to the drums. Fixing it first also shrinks the problem: once you have three slots, you only choose three notes, and you can try different notes in them without losing the groove.\n\n**Space.** These beats are built to carry vocals. Gaps in the melody are where a rapper's lines can sit without fighting it, and a melody that never stops leaves nowhere to breathe.\n\n**Range.** A **step** moves to the neighbouring note in the scale; anything bigger is a **leap**. Steps are easy to follow and to sing. A leap stands out, so save it for the note you want to stand out. An **octave** is 12 half steps, from one A to the next A."
+      "body": "Two habits make a motif hit harder.\n\n**Rhythm first.** Find a rhythm that bounces before you worry about which notes. Even on a single note, a good rhythm already grooves with the drums. Then pick pitches to fill the slots.\n\n**Leave space.** Rests are part of the melody. A gap lets the motif land, makes the next entry hit harder, and leaves room for a rapper.\n\nAnd keep the **range** tight, within about an octave. Two safe moves: **step** to a neighbouring scale note, or **jump between the home chord's notes** (1, 3 and 5). Save a big leap outside the chord for the note you want to stand out.",
+      "deeper": "**Why rhythm first?** The rhythm is what locks the melody to the drums. Fixing it first also shrinks the problem: once you have three slots, you only choose three notes, and you can try different notes in them without losing the groove.\n\n**Space.** These beats are built to carry vocals. Gaps in the melody are where a rapper's lines can sit without fighting it, and a melody that never stops leaves nowhere to breathe.\n\n**Range.** A **step** moves to the neighbouring note in the scale; anything bigger is a **leap**. Steps are easy to follow and to sing. Leaps between the home chord's notes (1, 3 and 5: A, C and E in A minor) sound natural too, because those notes already belong together; the C, E, A motif in this lesson moves only that way. A big leap to a note outside the chord stands out, so save it for the note you want to stand out. An **octave** is 12 half steps, from one A to the next A."
     },
     {
       "type": "listen",
@@ -183,7 +183,7 @@
     {
       "type": "task",
       "title": "Write a 1-bar motif",
-      "prompt": "Write one motif of **3 to 6 notes** in **bar 1**, and leave **bar 2 empty**. The empty bar is your space, and the next lesson is about what to put there.\n\nRhythm first: tap a rhythm on one row of the piano roll, press play, and change it until it bounces. Then move notes to other rows. Keep them close together.",
+      "prompt": "Write one motif of **3 to 6 notes** in **bar 1**, and leave **bar 2 empty**. The empty bar is your space, and the next lesson is about what to put there.\n\nRhythm first: tap a rhythm on one row of the piano roll, press play, and change it until it bounces. Then move notes to other tinted (in-key) rows. Keep them close together.",
       "tool": "melodyEditor",
       "targetRole": "melody",
       "uses": [],
@@ -200,8 +200,8 @@
         }
       ],
       "hints": [
-        "Start from the 3 + 3 + 2 rhythm: tap the 1st, 4th and 7th cells of bar 1 on the same row and play it. Then shift a note or two up or down a row.",
-        "Keep it close: try degrees 1, 3 and 5 (A, C and E in A minor). The keys marked **1** are home. Scale lock only guards the keyboard, so check that piano-roll notes sit on tinted rows.",
+        "Start from the 3 + 3 + 2 rhythm: tap the 1st, 4th and 7th cells of bar 1 on the same row and play it. Then move a note or two to another tinted (in-key) row.",
+        "Keep it close: step between neighbouring scale notes, or use the home chord's notes, degrees 1, 3 and 5 (A, C and E in A minor). The keys marked **1** are home. Scale lock only guards the keyboard, so check that piano-roll notes sit on tinted rows.",
         "The check counts every melody note in both bars, including a melody Your Track already has (edits in a practice lesson aren't saved). Too many? Delete notes in bar 2 first, then trim bar 1 until 3 to 6 are left."
       ]
     },

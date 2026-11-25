@@ -13,11 +13,11 @@
     {
       "type": "listen",
       "title": "Raw take vs the keeper",
-      "caption": "Both over the same drums and pad (Am, then F). A is two bars of noodling, quantized but not edited. B is what's left after the edit.",
+      "caption": "Both over the same drums and pad (F, then Am). A is two bars of noodling, quantized but not edited. B is what's left after the edit.",
       "examples": [
         {
           "label": "Raw take",
-          "explanation": "20 notes, all in key, wandering around A minor. There are good bits in here, like the C, E, D in bar 2, but they're buried, and nothing repeats.",
+          "explanation": "20 notes, all in key, wandering around A minor. There are good bits in here, like the C, E, D that turns up in both bars, but they're buried in a different rhythm each time.",
           "clip": {
             "tempo": 140,
             "key": "A minor",
@@ -35,7 +35,7 @@
               {
                 "role": "chords",
                 "instrument": "pad",
-                "chords": "Am:16 F:16"
+                "chords": "F:16 Am:16"
               },
               {
                 "role": "melody",
@@ -65,7 +65,7 @@
               {
                 "role": "chords",
                 "instrument": "pad",
-                "chords": "Am:16 F:16"
+                "chords": "F:16 Am:16"
               },
               {
                 "role": "melody",
@@ -128,7 +128,7 @@
     },
     {
       "type": "koala",
-      "body": "Flip your own melody in Koala:\n\n1. Tap **Export loop to Koala**, pick **Melody** under What to export, tap **Export**, then share the file and import it into Koala (the sheet shows how).\n2. In Koala, load it onto a pad and chop it into slices, one or two notes per pad.\n3. Over a drum loop, play the slices in a new order: make a 3-note motif, play it three times, and change the last hit on the fourth. That's AAAB, from your own sound."
+      "body": "Flip your own melody in Koala:\n\n1. Tap **Export loop to Koala**, pick **Melody** under What to export, tap **Export**, then share the file and import it into Koala (the sheet shows how).\n2. In Koala, load it onto a pad and chop it into slices, one or two notes per pad.\n3. Over any drum loop in Koala, play the slices in a new order: make a 3-note motif, play it three times, and change the last hit on the fourth. That's AAAB, from your own sound."
     }
   ]
 }
