@@ -169,7 +169,7 @@ private func firstMessage(_ check: TaskCheck, _ t: Track) -> CheckResult {
     // Bb major is not diatonic to A minor, so it is not among ChordFinder's candidates.
     let t = checkTrack(melody: "A4:16", chords: "Bb:16 Am:16")
     let strict = firstMessage(.chordsFitMelody(chords: .chords, melody: .melody, minScoreRatio: 0.6), t)
-    #expect(!strict.passed && strict.message.contains("Bar 1") && strict.message.contains("Bb"))
+    #expect(!strict.passed && strict.message.contains("Bar 1") && strict.message.contains("A#"))
     let lax = firstMessage(.chordsFitMelody(chords: .chords, melody: .melody, minScoreRatio: 0.1), t)
     #expect(lax.passed)
 }
