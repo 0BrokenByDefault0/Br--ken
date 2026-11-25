@@ -82,7 +82,7 @@ public struct DrumPattern: Hashable, Codable, Sendable {
             let t: Float = ticks.count > 1 ? Float(i) / Float(ticks.count - 1) : 0
             let (a, b) = descending ? (velocities.upperBound, velocities.lowerBound)
                                     : (velocities.lowerBound, velocities.upperBound)
-            let velocity = a + (b - a) * t
+            let velocity = i == ticks.count - 1 && ticks.count > 1 ? b : a + (b - a) * t
             hits.append(DrumHit(tick: tick, velocity: velocity))
         }
         hits.sort { $0.tick < $1.tick }

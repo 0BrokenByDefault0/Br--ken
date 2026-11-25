@@ -250,7 +250,7 @@ struct DrumGridView: View {
 
     private func playhead(_ l: Layout) -> some View {
         let cell = l.cell
-        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !isPlaying)) { _ in
+        return TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !isPlaying)) { _ in
             Canvas { context, size in
                 guard isPlaying else { return }
                 let tick = playheadTick() % max(1, model.loopTicks)
