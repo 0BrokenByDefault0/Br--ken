@@ -198,12 +198,22 @@ struct DrumGridView: View {
         }
         .frame(width: size.width, height: size.height)
         .contentShape(Rectangle())
-        .gesture(SpatialTapGesture().onEnded { tap in handleTap(at: tap.location, l) })
+        // Roll mode: a plain tap (clears a roll).
+        .gesture(SpatialTapGesture().onEnded { tap in handleTap(at: tap.location, l) },
+                 including: mode == .roll ? .all : .none)
+        // Draw mode: hold and tap are one exclusive gesture (hold has priority), so a hold that sets a
+        // velocity or clears a roll can never also fire the tap that toggles the hit.
         .gesture(
             LongPressGesture(minimumDuration: 0.35)
                 .sequenced(before: DragGesture(minimumDistance: 0))
+                .exclusively(before: SpatialTapGesture())
                 .onEnded { value in
-                    if mode == .draw, case .second(true, let drag?) = value { handleHold(at: drag.startLocation, l) }
+                    switch value {
+                    case .first(let hold):
+                        if case .second(true, let drag?) = hold { handleHold(at: drag.startLocation, l) }
+                    case .second(let tap):
+                        handleTap(at: tap.location, l)
+                    }
                 },
             including: mode == .draw ? .all : .none
         )

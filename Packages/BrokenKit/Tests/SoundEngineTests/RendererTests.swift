@@ -344,3 +344,12 @@ private func peak(_ s: Stereo) -> Float { max(peak(s.left), peak(s.right)) }
     #expect(s.parts[0].events.allSatisfy { $0.end == $0.start + 1 })
     #expect(pattern.lanes[.closedHat]!.map(\.tick) == [0, 24, 36, 48, 72, 84])  // stored ticks stay unswung
 }
+
+@Test func swungHitStaysInsideTheLoop() {
+    var pattern = DrumPattern(lanes: [.closedHat: [DrumHit(tick: 378, velocity: 1)]])
+    pattern.swing = 0.6
+    let drums = Part(role: .drums, instrument: .trapKit, content: .drums(pattern))
+    let s = PlaybackSnapshot(track: track(bars: 1, [drums]))
+    #expect(s.parts[0].events.map(\.start) == [383])
+    #expect(s.parts[0].events[0].end == 384)
+}

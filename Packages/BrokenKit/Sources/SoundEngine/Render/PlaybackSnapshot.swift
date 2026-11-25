@@ -26,7 +26,7 @@ public struct PartPlayback: Hashable, Sendable {
     /// Sorted by start (then pitch, then end).
     public let events: [ScheduledNote]
 
-    init(part: Part) {
+    init(part: Part, loopTicks: Int) {
         instrument = part.instrument
         sound = part.sound
         muted = part.muted
@@ -39,7 +39,8 @@ public struct PartPlayback: Hashable, Sendable {
         case .drums(let pattern):
             for (lane, hits) in pattern.lanes {
                 for hit in hits {
-                    let start = pattern.swungTick(hit.tick)
+                    // Swing can push a late hit past the loop end, where it would never play: keep it inside the loop.
+                    let start = min(pattern.swungTick(hit.tick), max(hit.tick, loopTicks - 1))
                     events.append(ScheduledNote(start: start, end: start + 1, pitch: lane.midiNote,
                                                 velocity: hit.velocity, glide: false))
                 }
@@ -67,7 +68,8 @@ public struct PlaybackSnapshot: Sendable {
 
     public init(track: Track) {
         tempo = track.tempo
-        loopTicks = max(1, track.bars) * Ticks.perBar
-        parts = track.parts.prefix(Self.maxParts).map(PartPlayback.init(part:))
+        let loop = max(1, track.bars) * Ticks.perBar
+        loopTicks = loop
+        parts = track.parts.prefix(Self.maxParts).map { PartPlayback(part: $0, loopTicks: loop) }
     }
 }
