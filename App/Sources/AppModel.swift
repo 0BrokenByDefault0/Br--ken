@@ -218,7 +218,10 @@ final class AppModel {
                                         bars: $0.bars, parts: []) }
             ?? Self.emptyTrack(name: "Practice")
         for role in uses where working.part(role) == nil {
-            if let part = starterTrack?.part(role) { working.setPart(part) }
+            // Starters are authored in their own key; move them into the working track's key.
+            if let starterTrack, let part = starterTrack.part(role) {
+                working.setPart(part.transposed(by: starterTrack.key.semitones(toMatch: working.key)))
+            }
         }
         return working
     }

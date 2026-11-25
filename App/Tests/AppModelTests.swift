@@ -123,6 +123,23 @@ private func notes(_ t: Track, _ role: PartRole) -> [NoteEvent] {
 }
 
 @MainActor
+@Test func workingTrackTransposesStarterIntoOwnersKey() throws {
+    let model = try Sandbox().makeModel()
+    let cMinor = try Key(parsing: "C minor")
+    let mine = model.newTrack(name: "Mine", tempo: 150, key: cMinor)
+    model.setActive(mine.id)
+    let aMinorStarter = Clip(tempo: 92, key: "A minor", bars: 2, parts: [
+        ClipPart(role: .melody, instrument: .bell, melody: "E4:4 G4:4 A4:4 r:4"),
+    ])
+    let working = model.workingTrack(for: chordFinderStep(uses: [.melody], starter: aMinorStarter),
+                                     lessonID: "harmony.find")
+    let pitches = notes(working, .melody).map(\.pitch)
+    #expect(pitches == [67, 70, 72], "A minor starter shifted up 3 semitones")
+    #expect(pitches.allSatisfy { cMinor.contains(PitchClass($0)) })
+    #expect(CheckRunner.run([.inKey(.melody)], on: working).allSatisfy(\.passed))
+}
+
+@MainActor
 @Test func keepCreatesTrackAndPersists() throws {
     let sandbox = try Sandbox()
     let audio = FakeAudio()
