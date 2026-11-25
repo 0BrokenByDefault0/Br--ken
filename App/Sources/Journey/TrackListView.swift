@@ -26,6 +26,7 @@ struct TrackListView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.night.ignoresSafeArea())
+        .safeAreaInset(edge: .top) { ErrorBanner().padding(.horizontal, 16) }
         .navigationTitle("Your tracks")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -33,22 +34,19 @@ struct TrackListView: View {
             }
         }
         .sheet(isPresented: $showNew) { NewTrackSheet() }
-        .alert("Rename track", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
+        .alert("Rename track", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } }),
+               presenting: renaming) { track in
             TextField("Name", text: $renameText)
             Button("Cancel", role: .cancel) {}
-            Button("Rename") {
-                if let renaming { model.renameTrack(id: renaming.id, to: renameText) }
-            }
+            Button("Rename") { model.renameTrack(id: track.id, to: renameText) }
         }
-        .confirmationDialog("Delete \(deleting?.name ?? "track")?",
+        .confirmationDialog("Delete track?",
                             isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }),
-                            titleVisibility: .visible) {
-            Button("Delete track", role: .destructive) {
-                if let deleting { model.deleteTrack(id: deleting.id) }
-            }
+                            titleVisibility: .visible, presenting: deleting) { track in
+            Button("Delete \(track.name)", role: .destructive) { model.deleteTrack(id: track.id) }
             Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This can't be undone.")
+        } message: { track in
+            Text("\(track.name) can't be recovered.")
         }
     }
 

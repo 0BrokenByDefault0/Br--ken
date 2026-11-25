@@ -109,7 +109,7 @@ struct NewTrackSheet: View {
 
     var body: some View {
         NavigationStack {
-            TrackSetupView { name, tempo, key in
+            TrackSetupView(name: model.defaultTrackName) { name, tempo, key in
                 model.startTrack(name: name, tempo: tempo, key: key)
                 dismiss()
             }
@@ -155,8 +155,9 @@ struct TrackTransport: View {
     var body: some View {
         TransportBar(isPlaying: model.isPlaying,
                      tempo: Binding(get: { model.activeTrack?.tempo ?? AppModel.defaultTempo },
-                                    set: { t in model.updateActiveTrack { $0.tempo = t } }),
+                                    set: { t in model.previewActiveTrack { $0.tempo = t } }),
                      metronome: Binding(get: { model.metronome }, set: { model.metronome = $0 }),
-                     onPlay: { model.play() }, onStop: { model.stop() })
+                     onPlay: { model.play() }, onStop: { model.stop() },
+                     onTempoCommit: { model.commitActiveTrack() })
     }
 }

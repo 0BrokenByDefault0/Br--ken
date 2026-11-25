@@ -310,7 +310,8 @@ private let journeyStages: [(String, [String])] = [
     model.setActive(t.id)
     let audition = Track(name: "Chord Finder", createdAt: Date(), tempo: 100, key: t.key, bars: 2, parts: [])
     model.audition(audition)
-    #expect(audio.tracksSet.last == audition)
+    #expect(audio.tracksSet.last?.name == "Chord Finder")
+    #expect(audio.tracksSet.last?.tempo == 140, "an audition plays at the active track's tempo, not a stale one")
     #expect(model.isPlaying && audio.isPlaying)
     model.stop()
     #expect(!model.isPlaying && !audio.isPlaying)
@@ -348,4 +349,79 @@ private let journeyStages: [(String, [String])] = [
     #expect(TrackSetupView.genreFit(tempo: 165) == "Fits: trap")
     #expect(TrackSetupView.genreFit(tempo: 70) == "Fits: cloud")
     #expect(TrackSetupView.genreFit(tempo: 100) == "Between the usual trap and cloud tempos")
+}
+
+@MainActor
+@Test func previewDoesNotWriteToDiskCommitDoes() throws {
+    let sandbox = try Sandbox()
+    let audio = FakeAudio()
+    let model = try sandbox.makeModel(audio: audio)
+    let t = model.startTrack(name: "A", tempo: 140, key: try Key(parsing: "A minor"))
+    model.previewActiveTrack { $0.tempo = 120 }
+    model.previewActiveTrack { $0.tempo = 100 }
+    #expect(model.activeTrack?.tempo == 100, "the change is live in memory")
+    #expect(audio.tracksSet.last?.tempo == 100, "and heard")
+    #expect(TrackStore(directory: sandbox.tracksDir).loadAll().tracks.first { $0.id == t.id }?.tempo == 140,
+            "but not saved yet")
+    model.commitActiveTrack()
+    #expect(TrackStore(directory: sandbox.tracksDir).loadAll().tracks.first { $0.id == t.id }?.tempo == 100)
+}
+
+@MainActor
+@Test func previewPartEditThenCommit() throws {
+    let sandbox = try Sandbox()
+    let model = try sandbox.makeModel()
+    model.startTrack(name: "A", tempo: 140, key: try Key(parsing: "A minor"))
+    model.editActivePart(.melody, instrument: .bell, empty: .notes(NoteSequence(notes: [])), persist: false) {
+        $0.sound.volume = 0.3
+    }
+    #expect(model.activeTrack?.part(.melody)?.sound.volume == 0.3)
+    #expect(TrackStore(directory: sandbox.tracksDir).loadAll().tracks.first?.part(.melody) == nil)
+    model.commitActiveTrack()
+    #expect(TrackStore(directory: sandbox.tracksDir).loadAll().tracks.first?.part(.melody)?.sound.volume == 0.3)
+}
+
+@MainActor
+@Test func failedDeleteKeepsTrackAndReportsError() throws {
+    let sandbox = try Sandbox()
+    let model = try sandbox.makeModel()
+    let t = model.startTrack(name: "A", tempo: 140, key: try Key(parsing: "A minor"))
+    let fm = FileManager.default
+    try fm.setAttributes([.posixPermissions: 0o555], ofItemAtPath: sandbox.tracksDir.path)
+    defer { try? fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: sandbox.tracksDir.path) }
+    model.deleteTrack(id: t.id)
+    #expect(model.tracks.contains { $0.id == t.id }, "still on disk, so still listed")
+    #expect(model.activeTrack?.id == t.id)
+    #expect(model.lastError != nil)
+    model.dismissError()
+    #expect(model.lastError == nil)
+}
+
+@MainActor
+@Test func playWithoutActiveTrackIsNoOpEvenAfterDelete() throws {
+    let audio = FakeAudio()
+    let model = try Sandbox().makeModel(audio: audio)
+    model.play()
+    #expect(!model.isPlaying && !audio.isPlaying)
+    let t = model.startTrack(name: "A", tempo: 140, key: try Key(parsing: "A minor"))
+    model.play()
+    #expect(model.isPlaying)
+    model.deleteTrack(id: t.id)
+    #expect(!model.isPlaying && !audio.isPlaying)
+    model.play()
+    #expect(!model.isPlaying && !audio.isPlaying, "a deleted track is never replayed")
+}
+
+@MainActor
+@Test func defaultTrackNamesAreUnique() throws {
+    let model = try Sandbox().makeModel()
+    #expect(model.defaultTrackName == "My first beat")
+    let first = model.newTrack(name: model.defaultTrackName, tempo: 140, key: try Key(parsing: "A minor"))
+    #expect(model.defaultTrackName == "Beat 2")
+    _ = model.newTrack(name: model.defaultTrackName, tempo: 140, key: try Key(parsing: "A minor"))
+    #expect(model.defaultTrackName == "Beat 3")
+    model.deleteTrack(id: first.id)
+    #expect(model.defaultTrackName == "Beat 3" || model.defaultTrackName == "Beat 4")
+    let names = Set(model.tracks.map(\.name))
+    #expect(!names.contains(model.defaultTrackName))
 }

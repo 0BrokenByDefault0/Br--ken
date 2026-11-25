@@ -15,6 +15,7 @@ struct JourneyMapView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                ErrorBanner()
                 YourTrackBar()
                 let stages = model.content.journey.stages.sorted { $0.order < $1.order }
                 VStack(alignment: .leading, spacing: 0) {

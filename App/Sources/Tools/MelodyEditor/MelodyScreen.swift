@@ -119,8 +119,9 @@ private struct MelodyEditorBody: View {
                     get: { app.activeTrack?.part(.melody)?.sound ?? SoundSettings() },
                     set: { value in
                         app.editActivePart(.melody, instrument: MelodyToolModel.defaultInstrument,
-                                           empty: .notes(NoteSequence(notes: []))) { $0.sound = value }
-                    }))
+                                           empty: .notes(NoteSequence(notes: [])), persist: false) { $0.sound = value }
+                    }),
+                    onCommit: { app.commitActiveTrack() })
             }
             .padding(16)
         }

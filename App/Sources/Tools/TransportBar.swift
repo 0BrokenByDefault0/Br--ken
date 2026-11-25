@@ -9,6 +9,8 @@ struct TransportBar: View {
     @Binding var metronome: Bool
     let onPlay: () -> Void
     let onStop: () -> Void
+    /// Called when a tempo drag ends.
+    var onTempoCommit: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 14) {
@@ -25,7 +27,7 @@ struct TransportBar: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("\(Int(tempo.rounded())) BPM")
                     .font(Theme.mono(15)).foregroundStyle(Color.ink)
-                Slider(value: $tempo, in: Self.tempoRange, step: 1)
+                Slider(value: $tempo, in: Self.tempoRange, step: 1, onEditingChanged: { if !$0 { onTempoCommit?() } })
                     .tint(Color.haze)
                     .frame(minHeight: Theme.minTarget)
             }

@@ -70,17 +70,31 @@ final class AppModel {
     }
 
     /// Applies `mutate` to the active track, saves it, then plays the result. No-op without an active track.
-    func updateActiveTrack(_ mutate: (inout Track) -> Void) {
+    /// With `persist: false` (a slider mid-drag) the change is kept in memory and heard, but not written to
+    /// disk; call `commitActiveTrack()` when the drag ends.
+    func updateActiveTrack(persist: Bool = true, _ mutate: (inout Track) -> Void) {
         guard var track = activeTrack else { return }
         mutate(&track)
-        save(track)
+        save(track, persist: persist)
         send(track)
+    }
+
+    /// Live change without saving (see `updateActiveTrack(persist:)`).
+    func previewActiveTrack(_ mutate: (inout Track) -> Void) {
+        updateActiveTrack(persist: false, mutate)
+    }
+
+    /// Writes the active track's current in-memory state to disk (the end of a slider drag).
+    func commitActiveTrack() {
+        guard let track = activeTrack else { return }
+        save(track)
     }
 
     /// Edits the active track's part for `role`, creating an empty one (`instrument`, `empty`) on the
     /// first edit. An existing part keeps its instrument. No-op without an active track.
-    func editActivePart(_ role: PartRole, instrument: InstrumentID, empty: PartContent, _ mutate: (inout Part) -> Void) {
-        updateActiveTrack { track in
+    func editActivePart(_ role: PartRole, instrument: InstrumentID, empty: PartContent, persist: Bool = true,
+                        _ mutate: (inout Part) -> Void) {
+        updateActiveTrack(persist: persist) { track in
             var part = track.part(role) ?? Part(role: role, instrument: instrument, content: empty)
             mutate(&part)
             track.setPart(part)
@@ -107,12 +121,15 @@ final class AppModel {
     /// Deletes the track's file. If it was the active track, there is no active track afterwards.
     func deleteTrack(id: UUID) {
         let wasActive = progress.activeTrackID == id
-        tracks.removeAll { $0.id == id }
         do {
             try trackStore.delete(id: id)
+        } catch let error as CocoaError where error.code == .fileNoSuchFile || error.code == .fileReadNoSuchFile {
+            // Already gone from disk: nothing left to keep.
         } catch {
             lastError = "Couldn't delete the track: \(error.localizedDescription)"
+            return  // still on disk, so it stays in the list
         }
+        tracks.removeAll { $0.id == id }
         if wasActive {
             stop()
             progress.activeTrackID = nil
@@ -122,8 +139,9 @@ final class AppModel {
 
     /// Plays the active track from the start (puts it back first if an audition replaced it).
     func play() {
+        guard let activeTrack else { return }
         auditioning = false
-        if let activeTrack { send(activeTrack) }
+        send(activeTrack)
         audio.play()
         isPlaying = true
     }
@@ -131,6 +149,8 @@ final class AppModel {
     /// Plays a temporary track (a Chord Finder audition). `stop()` restores the active track.
     func audition(_ track: Track) {
         auditioning = true
+        var track = track
+        if let activeTrack { track.tempo = activeTrack.tempo }  // always at the track's current tempo
         send(track)
         audio.play()
         isPlaying = true
@@ -143,6 +163,16 @@ final class AppModel {
             auditioning = false
             if let activeTrack { send(activeTrack) }
         }
+    }
+
+    func dismissError() { lastError = nil }
+
+    /// "My first beat" for the first track, then "Beat 2", "Beat 3"... skipping names already in use.
+    var defaultTrackName: String {
+        if tracks.isEmpty { return "My first beat" }
+        var n = tracks.count + 1
+        while tracks.contains(where: { $0.name == "Beat \(n)" }) { n += 1 }
+        return "Beat \(n)"
     }
 
     /// Saves lesson progress: the lesson the Lesson tab shows.
@@ -203,12 +233,13 @@ final class AppModel {
     }
 
     /// Writes the track and puts it in `tracks` (replacing the one with the same id, else first).
-    private func save(_ track: Track) {
+    private func save(_ track: Track, persist: Bool = true) {
         if let i = tracks.firstIndex(where: { $0.id == track.id }) {
             tracks[i] = track
         } else {
             tracks.insert(track, at: 0)
         }
+        guard persist else { return }
         do {
             try trackStore.save(track)
         } catch {

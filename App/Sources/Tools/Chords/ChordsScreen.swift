@@ -68,6 +68,7 @@ private struct ChordsBody: View {
                 $0.content = .chords(progression)
             }
         }
+        .onChange(of: app.activeTrack?.tempo) { _, tempo in if let tempo { finder.tempo = tempo } }
         .onChange(of: melody) { _, melody in finder.update(melody: melody) }
         .onChange(of: chordsContent) { _, content in
             if case .chords(let p)? = content, p != finder.progression { finder.progression = p }

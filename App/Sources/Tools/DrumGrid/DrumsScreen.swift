@@ -17,6 +17,7 @@ struct DrumsScreen: View {
 private struct DrumsBody: View {
     let app: AppModel
     @State private var grid: DrumGridModel
+    @State private var drag: SwingDrag
     private let key: Key
 
     init(app: AppModel, track: Track) {
@@ -25,8 +26,11 @@ private struct DrumsBody: View {
         var pattern = DrumPattern(lanes: [:])
         if case .drums(let p)? = track.part(.drums)?.content { pattern = p }
         let grid = DrumGridModel(pattern: pattern, bars: track.bars)
-        grid.onChange = { [weak app] pattern in
-            app?.editActivePart(.drums, instrument: .trapKit, empty: .drums(DrumPattern(lanes: [:]))) {
+        let drag = SwingDrag()
+        _drag = State(initialValue: drag)
+        grid.onChange = { [weak app, drag] pattern in
+            // A swing drag is heard live and saved once, when it ends.
+            app?.editActivePart(.drums, instrument: .trapKit, empty: .drums(DrumPattern(lanes: [:])), persist: !drag.active) {
                 $0.content = .drums(pattern)
             }
         }
@@ -46,7 +50,11 @@ private struct DrumsBody: View {
                 TrackTransport()
                 HStack(spacing: 12) {
                     Text("Swing").font(Theme.body(14)).foregroundStyle(Color.ink)
-                    Slider(value: Binding(get: { grid.swing }, set: { grid.swing = $0 }), in: DrumGridModel.swingRange)
+                    Slider(value: Binding(get: { grid.swing }, set: { grid.swing = $0 }), in: DrumGridModel.swingRange,
+                           onEditingChanged: { editing in
+                               drag.active = editing
+                               if !editing { app.commitActiveTrack() }
+                           })
                         .tint(Color.haze)
                         .frame(minHeight: Theme.minTarget)
                         .accessibilityLabel("Swing")
@@ -65,4 +73,9 @@ private struct DrumsBody: View {
             if case .drums(let p)? = content, p != grid.pattern { grid.pattern = p }
         }
     }
+}
+
+/// Whether the swing slider is being dragged (read by the grid's change callback).
+private final class SwingDrag {
+    var active = false
 }
