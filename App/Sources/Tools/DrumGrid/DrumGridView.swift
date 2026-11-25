@@ -5,13 +5,14 @@ import MusicCore
 enum RollRamp: String, CaseIterable, Identifiable {
     case up = "Up", flat = "Flat", down = "Down"
     var id: String { rawValue }
+    /// Always an ordered range; `descending` runs it from the top.
     var velocities: ClosedRange<Float> {
         switch self {
-        case .up: 0.35...1.0
+        case .up, .down: 0.35...1.0
         case .flat: 0.75...0.75
-        case .down: 1.0...0.35
         }
     }
+    var descending: Bool { self == .down }
 }
 
 extension RollRate {
@@ -44,7 +45,8 @@ struct DrumGridView: View {
     @State private var rate = RollRate.thirtySecond
     @State private var ramp = RollRamp.up
     @State private var velocityTarget: Target?
-    @State private var pressedPads: Set<DrumLane> = []
+    @State private var halfBar = 0
+    @State private var availableWidth: CGFloat = 390
 
     static let lanes = DrumLane.allCases
     static let padLanes: [DrumLane] = [.kick, .snare, .clap, .closedHat, .openHat, .perc]
@@ -52,6 +54,16 @@ struct DrumGridView: View {
     private let rowHeight: CGFloat = 38
     private let minCell: CGFloat = 21
 
+    /// Which steps are on screen and how wide they are. When 16 steps would be narrower than `minCell`,
+    /// Draw mode scrolls sideways and Roll mode pages by half bars (so drags never fight scrolling).
+    private struct Layout { var cell: CGFloat; var first: Int; var count: Int; var scrolls: Bool }
+    private var needsScroll: Bool { (availableWidth - gutter) / 16 < minCell }
+    private var paged: Bool { mode == .roll && needsScroll }
+    private var layout: Layout {
+        let room = availableWidth - gutter
+        if paged { return Layout(cell: room / 8, first: halfBar * 8, count: 8, scrolls: false) }
+        return Layout(cell: max(minCell, room / 16), first: 0, count: 16, scrolls: needsScroll)
+    }
     var body: some View {
         VStack(spacing: 10) {
             barSelector
@@ -60,10 +72,22 @@ struct DrumGridView: View {
             }
             .pickerStyle(.segmented)
             if mode == .roll { rollOptions }
+            if paged {
+                Picker("Steps", selection: $halfBar) {
+                    Text("Steps 1–8").tag(0)
+                    Text("Steps 9–16").tag(1)
+                }
+                .pickerStyle(.segmented)
+            }
+            if mode == .draw {
+                Text("Tap: add / remove · Hold a hit: velocity · Long-press a roll to clear it")
+                    .font(Theme.body(11)).foregroundStyle(Color.mute)
+            }
             gridArea
             if let target = velocityTarget { velocityBar(target) }
             pads
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { availableWidth = $0 }
     }
 
     // MARK: Controls
@@ -125,13 +149,13 @@ struct DrumGridView: View {
 
     private var gridArea: some View {
         GeometryReader { proxy in
-            let cell = max(minCell, (proxy.size.width - gutter) / 16)
+            let l = layout
             HStack(alignment: .top, spacing: 0) {
                 laneLabels
                 ScrollView(.horizontal, showsIndicators: false) {
-                    grid(cell: cell).overlay(alignment: .topLeading) { playhead(cell: cell) }
+                    grid(l).overlay(alignment: .topLeading) { playhead(l) }
                 }
-                .scrollDisabled(cell * 16 <= proxy.size.width - gutter + 0.5)
+                .scrollDisabled(!l.scrolls)
             }
         }
         .frame(height: rowHeight * CGFloat(Self.lanes.count))
@@ -160,46 +184,49 @@ struct DrumGridView: View {
         }
     }
 
-    private func grid(cell: CGFloat) -> some View {
-        let size = CGSize(width: cell * 16, height: rowHeight * CGFloat(Self.lanes.count))
+    private func grid(_ l: Layout) -> some View {
+        let cell = l.cell
+        let size = CGSize(width: cell * CGFloat(l.count), height: rowHeight * CGFloat(Self.lanes.count))
         return Canvas { context, size in
-            drawBackground(context, size: size, cell: cell)
+            drawBackground(context, size: size, l)
             for (row, lane) in Self.lanes.enumerated() {
                 let y = CGFloat(row) * rowHeight
-                for step in 0..<16 {
-                    drawStep(context, lane: lane, step: step, x: CGFloat(step) * cell, y: y, cell: cell)
+                for step in l.first..<(l.first + l.count) {
+                    drawStep(context, lane: lane, step: step, x: CGFloat(step - l.first) * cell, y: y, cell: cell)
                 }
             }
         }
         .frame(width: size.width, height: size.height)
         .contentShape(Rectangle())
-        .gesture(SpatialTapGesture().onEnded { tap in handleTap(at: tap.location, cell: cell) })
+        .gesture(SpatialTapGesture().onEnded { tap in handleTap(at: tap.location, l) })
         .gesture(
             LongPressGesture(minimumDuration: 0.35)
                 .sequenced(before: DragGesture(minimumDistance: 0))
                 .onEnded { value in
-                    if mode == .draw, case .second(true, let drag?) = value { handleHold(at: drag.startLocation, cell: cell) }
+                    if mode == .draw, case .second(true, let drag?) = value { handleHold(at: drag.startLocation, l) }
                 },
             including: mode == .draw ? .all : .none
         )
         .gesture(
-            DragGesture(minimumDistance: 10).onEnded { drag in handleRoll(drag, cell: cell) },
+            DragGesture(minimumDistance: 10).onEnded { drag in handleRoll(drag, l) },
             including: mode == .roll ? .all : .none
         )
     }
 
-    private func drawBackground(_ context: GraphicsContext, size: CGSize, cell: CGFloat) {
-        for step in 0..<16 where (step / 4) % 2 == 0 {  // shade beats 1 and 3
-            context.fill(Path(CGRect(x: CGFloat(step) * cell, y: 0, width: cell, height: size.height)),
+    private func drawBackground(_ context: GraphicsContext, size: CGSize, _ l: Layout) {
+        let cell = l.cell
+        for i in 0..<l.count where ((l.first + i) / 4) % 2 == 0 {  // shade beats 1 and 3
+            context.fill(Path(CGRect(x: CGFloat(i) * cell, y: 0, width: cell, height: size.height)),
                          with: .color(Color.haze.opacity(0.07)))
         }
         for row in 1..<Self.lanes.count {
             context.fill(Path(CGRect(x: 0, y: CGFloat(row) * rowHeight - 0.5, width: size.width, height: 0.5)),
                          with: .color(Color.mute.opacity(0.15)))
         }
-        for step in 0...16 {
-            context.fill(Path(CGRect(x: CGFloat(step) * cell, y: 0, width: step % 4 == 0 ? 1 : 0.5, height: size.height)),
-                         with: .color(Color.mute.opacity(step % 4 == 0 ? 0.35 : 0.15)))
+        for i in 0...l.count {
+            let strong = (l.first + i) % 4 == 0
+            context.fill(Path(CGRect(x: CGFloat(i) * cell, y: 0, width: strong ? 1 : 0.5, height: size.height)),
+                         with: .color(Color.mute.opacity(strong ? 0.35 : 0.15)))
         }
     }
 
@@ -221,54 +248,65 @@ struct DrumGridView: View {
         }
     }
 
-    private func playhead(cell: CGFloat) -> some View {
+    private func playhead(_ l: Layout) -> some View {
+        let cell = l.cell
         TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !isPlaying)) { _ in
             Canvas { context, size in
                 guard isPlaying else { return }
                 let tick = playheadTick() % max(1, model.loopTicks)
                 let barStart = model.selectedBar * Ticks.perBar
                 guard tick >= barStart, tick < barStart + Ticks.perBar else { return }
-                let step = (tick - barStart) / Ticks.perSixteenth
+                let step = (tick - barStart) / Ticks.perSixteenth - l.first
+                guard step >= 0, step < l.count else { return }
                 context.fill(Path(CGRect(x: CGFloat(step) * cell, y: 0, width: cell, height: size.height)),
                              with: .color(Color.amber.opacity(0.22)))
-                let x = CGFloat(tick - barStart) / CGFloat(Ticks.perSixteenth) * cell
+                let x = CGFloat(tick - barStart) / CGFloat(Ticks.perSixteenth) * cell - CGFloat(l.first) * cell
                 context.fill(Path(CGRect(x: x - 1, y: 0, width: 2, height: size.height)), with: .color(Color.amber))
             }
         }
-        .frame(width: cell * 16, height: rowHeight * CGFloat(Self.lanes.count))
+        .frame(width: cell * CGFloat(l.count), height: rowHeight * CGFloat(Self.lanes.count))
         .allowsHitTesting(false)
     }
 
-    private func cellAt(_ point: CGPoint, cell: CGFloat, clamp: Bool = false) -> Target? {
-        var step = Int((point.x / cell).rounded(.down)), row = Int((point.y / rowHeight).rounded(.down))
-        if clamp { step = min(15, max(0, step)); row = min(Self.lanes.count - 1, max(0, row)) }
-        guard step >= 0, step < 16, row >= 0, row < Self.lanes.count else { return nil }
-        return Target(lane: Self.lanes[row], step: step)
+    private func cellAt(_ point: CGPoint, _ l: Layout, clamp: Bool = false) -> Target? {
+        var i = Int((point.x / l.cell).rounded(.down)), row = Int((point.y / rowHeight).rounded(.down))
+        if clamp { i = min(l.count - 1, max(0, i)); row = min(Self.lanes.count - 1, max(0, row)) }
+        guard i >= 0, i < l.count, row >= 0, row < Self.lanes.count else { return nil }
+        return Target(lane: Self.lanes[row], step: l.first + i)
     }
 
-    private func handleTap(at point: CGPoint, cell: CGFloat) {
-        guard let t = cellAt(point, cell: cell) else { return }
-        Theme.lightHaptic()
-        if model.isRoll(lane: t.lane, step: t.step) {
+    private func handleTap(at point: CGPoint, _ l: Layout) {
+        guard let t = cellAt(point, l) else { return }
+        let isRoll = model.isRoll(lane: t.lane, step: t.step)
+        if isRoll {
+            // Draw mode never deletes a roll by accident; Roll mode clears it on tap.
+            guard mode == .roll else { return }
+            Theme.lightHaptic()
             model.clearRolls(lane: t.lane, step: t.step)
         } else if mode == .draw {
+            Theme.lightHaptic()
             let existed = !model.hits(lane: t.lane, step: t.step).isEmpty
             model.toggle(lane: t.lane, step: t.step)
             if !existed { onPad?(t.lane, 0.8) }
         }
     }
 
-    private func handleHold(at point: CGPoint, cell: CGFloat) {
-        guard let t = cellAt(point, cell: cell), !model.isRoll(lane: t.lane, step: t.step),
-              !model.hits(lane: t.lane, step: t.step).isEmpty else { return }
+    private func handleHold(at point: CGPoint, _ l: Layout) {
+        guard let t = cellAt(point, l), !model.hits(lane: t.lane, step: t.step).isEmpty else { return }
         Theme.lightHaptic()
-        velocityTarget = t
+        if model.isRoll(lane: t.lane, step: t.step) {
+            model.clearRolls(lane: t.lane, step: t.step)
+            if velocityTarget == t { velocityTarget = nil }
+        } else {
+            velocityTarget = t
+        }
     }
 
-    private func handleRoll(_ drag: DragGesture.Value, cell: CGFloat) {
-        guard let start = cellAt(drag.startLocation, cell: cell),
-              let end = cellAt(drag.location, cell: cell, clamp: true) else { return }
-        model.roll(lane: start.lane, fromStep: start.step, toStep: end.step, rate: rate, ramp: ramp.velocities)
+    private func handleRoll(_ drag: DragGesture.Value, _ l: Layout) {
+        guard let start = cellAt(drag.startLocation, l),
+              let end = cellAt(drag.location, l, clamp: true) else { return }
+        model.roll(lane: start.lane, fromStep: start.step, toStep: end.step, rate: rate, ramp: ramp.velocities,
+                   descending: ramp.descending)
         Theme.lightHaptic()
     }
 
@@ -277,23 +315,36 @@ struct DrumGridView: View {
     private var pads: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
             ForEach(Self.padLanes, id: \.self) { lane in
-                Text(lane.rawValue)
-                    .font(Theme.title(15)).foregroundStyle(pressedPads.contains(lane) ? Color.night : Color.ink)
-                    .frame(maxWidth: .infinity, minHeight: 64)
-                    .background(pressedPads.contains(lane) ? Color.amber : Color.panel, in: RoundedRectangle(cornerRadius: 14))
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in
-                                guard !pressedPads.contains(lane) else { return }
-                                pressedPads.insert(lane)
-                                onPad?(lane, 0.9)  // on touch-down, synchronously
-                            }
-                            .onEnded { _ in pressedPads.remove(lane) }
-                    )
-                    .accessibilityLabel("\(lane.rawValue) pad")
-                    .accessibilityAddTraits(.isButton)
+                PadView(lane: lane) { onPad?(lane, 0.9) }
             }
         }
+    }
+}
+
+/// One finger-drumming pad. Fires on touch-down; the highlight lives in a `@GestureState`, so a cancelled
+/// touch (a call, a system gesture) still un-highlights it.
+private struct PadView: View {
+    let lane: DrumLane
+    let onHit: () -> Void
+    @GestureState private var isDown = false
+
+    var body: some View {
+        Text(lane.rawValue)
+            .font(Theme.title(15)).foregroundStyle(isDown ? Color.night : Color.ink)
+            .frame(maxWidth: .infinity, minHeight: 64)
+            .background(isDown ? Color.amber : Color.panel, in: RoundedRectangle(cornerRadius: 14))
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .updating($isDown) { _, state, _ in
+                        if !state {
+                            state = true
+                            onHit()  // on touch-down, synchronously
+                            Theme.lightHaptic()
+                        }
+                    }
+            )
+            .accessibilityLabel("\(lane.rawValue) pad")
+            .accessibilityAddTraits(.isButton)
     }
 }

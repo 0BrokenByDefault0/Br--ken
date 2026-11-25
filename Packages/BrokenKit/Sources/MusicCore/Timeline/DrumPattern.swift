@@ -52,9 +52,10 @@ public struct DrumPattern: Hashable, Codable, Sendable {
         swing = try container.decodeIfPresent(Double.self, forKey: .swing) ?? 0
     }
 
-    /// Off-beat 16ths (`tick % 48 == 24`) move later by `round(swing * 12)` ticks; other ticks are unchanged.
+    /// Every tick inside an off-beat 16th step (`tick % 48` in 24..<48) moves later by `round(swing * 12)`
+    /// ticks, so a roll stays evenly spaced within its step; ticks in on-beat steps are unchanged.
     public func swungTick(_ tick: Int) -> Int {
-        guard tick % 48 == 24 else { return tick }
+        guard tick % 48 >= 24 else { return tick }
         return tick + Int((swing * 12).rounded())
     }
 
@@ -71,13 +72,17 @@ public struct DrumPattern: Hashable, Codable, Sendable {
         lanes[lane] = hits
     }
 
-    /// Replaces the lane's hits in `[from, to)` with a roll; velocities interpolate linearly from first to last hit.
-    public mutating func fillRoll(lane: DrumLane, from: Int, to: Int, rate: RollRate, velocities: ClosedRange<Float>) {
+    /// Replaces the lane's hits in `[from, to)` with a roll; velocities interpolate linearly from first to last hit
+    /// (`velocities.lowerBound` to `upperBound`, or the reverse when `descending`).
+    public mutating func fillRoll(lane: DrumLane, from: Int, to: Int, rate: RollRate, velocities: ClosedRange<Float>,
+                                  descending: Bool = false) {
         var hits = lanes[lane, default: []].filter { $0.tick < from || $0.tick >= to }
         let ticks = Array(stride(from: from, to: to, by: rate.rawValue))
         for (i, tick) in ticks.enumerated() {
             let t: Float = ticks.count > 1 ? Float(i) / Float(ticks.count - 1) : 0
-            let velocity = velocities.lowerBound + (velocities.upperBound - velocities.lowerBound) * t
+            let (a, b) = descending ? (velocities.upperBound, velocities.lowerBound)
+                                    : (velocities.lowerBound, velocities.upperBound)
+            let velocity = a + (b - a) * t
             hits.append(DrumHit(tick: tick, velocity: velocity))
         }
         hits.sort { $0.tick < $1.tick }

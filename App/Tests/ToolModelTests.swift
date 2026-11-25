@@ -190,6 +190,24 @@ struct DrumGridModelTests {
         #expect(hits.last?.velocity == 1.0)
     }
 
+    @Test func descendingRollRampsDown() {
+        let m = model()
+        m.roll(lane: .closedHat, fromStep: 0, toStep: 1, rate: .thirtySecond, ramp: 0.35...1.0, descending: true)
+        let hits = m.pattern.lanes[.closedHat] ?? []
+        #expect(hits.first?.velocity == 1.0)
+        #expect(hits.last?.velocity == 0.35)
+    }
+
+    @Test func everyRampCanRoll() {
+        for ramp in RollRamp.allCases {
+            let m = model()
+            m.roll(lane: .closedHat, fromStep: 0, toStep: 3, rate: .sixtyFourth, ramp: ramp.velocities,
+                   descending: ramp.descending)
+            #expect(!(m.pattern.lanes[.closedHat] ?? []).isEmpty)
+        }
+        #expect(RollRamp.down.descending && !RollRamp.up.descending && !RollRamp.flat.descending)
+    }
+
     @Test func clearRollsEmptiesTheStep() {
         let m = model()
         m.roll(lane: .closedHat, fromStep: 0, toStep: 1, rate: .thirtySecond, ramp: 0.75...0.75)

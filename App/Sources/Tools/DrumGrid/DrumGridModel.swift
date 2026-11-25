@@ -66,12 +66,14 @@ final class DrumGridModel {
         changed()
     }
 
-    /// Fills `fromStep...toStep` (inclusive, either order) with a roll whose velocities ramp across `ramp`.
-    func roll(lane: DrumLane, fromStep: Int, toStep: Int, rate: RollRate, ramp: ClosedRange<Float>) {
+    /// Fills `fromStep...toStep` (inclusive, either order) with a roll whose velocities ramp across `ramp`
+    /// (reversed when `descending`).
+    func roll(lane: DrumLane, fromStep: Int, toStep: Int, rate: RollRate, ramp: ClosedRange<Float>,
+              descending: Bool = false) {
         let lo = max(0, min(fromStep, toStep)), hi = min(Self.stepsPerBar - 1, max(fromStep, toStep))
         guard validStep(lo), validStep(hi) else { return }
         pattern.fillRoll(lane: lane, from: tickRange(step: lo).lowerBound, to: tickRange(step: hi).upperBound,
-                         rate: rate, velocities: ramp)
+                         rate: rate, velocities: ramp, descending: descending)
         changed()
     }
 

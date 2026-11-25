@@ -98,7 +98,9 @@ import Foundation
     #expect(d.swungTick(72) == 78)
     #expect(d.swungTick(0) == 0)          // on-beat 16ths and 8ths stay
     #expect(d.swungTick(48) == 48)
-    #expect(d.swungTick(12) == 12)        // roll ticks stay
+    #expect(d.swungTick(12) == 12)        // ticks in on-beat steps stay
+    #expect(d.swungTick(36) == 42)        // ticks inside an off-beat step move with it
+    #expect(d.swungTick(47) == 53)
     d.swing = 0.6
     #expect(d.swungTick(24) == 31)        // 7.2 rounds to 7
     let back = try JSONDecoder().decode(DrumPattern.self, from: JSONEncoder().encode(d))
@@ -106,4 +108,18 @@ import Foundation
     let old = try JSONDecoder().decode(DrumPattern.self, from: Data(#"{"lanes":{"kick":[{"tick":96,"velocity":0.8,"pitchOffset":0},{"tick":0,"velocity":0.8,"pitchOffset":0}]}}"#.utf8))
     #expect(old.swing == 0)
     #expect(old.lanes[.kick]!.map(\.tick) == [0, 96])
+}
+
+@Test func swingKeepsRollsEvenWithinTheStep() {
+    var d = DrumPattern(lanes: [:])
+    d.fillRoll(lane: .closedHat, from: 0, to: 48, rate: .thirtySecond, velocities: 0.5...0.5)
+    d.swing = 0.6
+    #expect(d.lanes[.closedHat]!.map { d.swungTick($0.tick) } == [0, 12, 31, 43])
+}
+
+@Test func descendingRollRampsDown() {
+    var d = DrumPattern(lanes: [:])
+    d.fillRoll(lane: .closedHat, from: 0, to: 48, rate: .thirtySecond, velocities: 0.35...1.0, descending: true)
+    let v = d.lanes[.closedHat]!.map(\.velocity)
+    #expect(v.first == 1.0 && v.last == 0.35)
 }
