@@ -136,7 +136,7 @@ private func notes(_ t: Track, _ role: PartRole) -> [NoteEvent] {
     let pitches = notes(working, .melody).map(\.pitch)
     #expect(pitches == [67, 70, 72], "A minor starter shifted up 3 semitones")
     #expect(pitches.allSatisfy { cMinor.contains(PitchClass($0)) })
-    #expect(CheckRunner.run([.inKey(role: .melody)], on: working).allSatisfy(\.passed))
+    #expect(CheckRunner.run([.inKey(role: .melody)], on: working).allSatisfy { $0.passed })
 }
 
 @MainActor
