@@ -486,6 +486,8 @@ struct KeepStepView: View {
 /// The mission text and the button that opens the Export sheet.
 struct KoalaStepView: View {
     let text: String
+    /// The track to export: Your Track, or the lesson's most recent working track.
+    let track: Track?
     @State private var exporting = false
 
     var body: some View {
@@ -500,32 +502,11 @@ struct KoalaStepView: View {
                         .background(Color.amber, in: RoundedRectangle(cornerRadius: 14))
                 }
                 .buttonStyle(PressableButtonStyle())
+                .disabled(track == nil)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
         }
-        .sheet(isPresented: $exporting) { exportSheet }
-    }
-
-    /// The Export sheet hook (Task 19 replaces the placeholder here).
-    private var exportSheet: some View { ExportPlaceholderSheet() }
-}
-
-private struct ExportPlaceholderSheet: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            Text("Export is coming in the next step of the build")
-                .font(Theme.title(18)).foregroundStyle(Color.ink)
-                .multilineTextAlignment(.center).padding(24)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.night.ignoresSafeArea())
-                .navigationTitle("Export")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-        }
-        .presentationDetents([.medium])
-        .preferredColorScheme(.dark)
+        .sheet(isPresented: $exporting) { if let track { ExportSheet(track: track) } }
     }
 }

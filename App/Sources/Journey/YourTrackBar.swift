@@ -6,6 +6,7 @@ import MusicCore
 struct YourTrackBar: View {
     @Environment(AppModel.self) private var model
     @State private var showSetup = false
+    @State private var showExport = false
 
     private static let roles: [PartRole] = [.melody, .chords, .drums]
 
@@ -20,6 +21,7 @@ struct YourTrackBar: View {
         .padding(14)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 16))
         .sheet(isPresented: $showSetup) { NewTrackSheet() }
+        .sheet(isPresented: $showExport) { if let track = model.activeTrack { ExportSheet(track: track) } }
     }
 
     private var emptyCard: some View {
@@ -63,6 +65,14 @@ struct YourTrackBar: View {
                     .contentShape(Rectangle())
                 }
                 .accessibilityHint("Opens your tracks")
+
+                Button { showExport = true } label: {
+                    Image(systemName: "square.and.arrow.up").font(.system(size: 20))
+                        .foregroundStyle(Color.haze)
+                        .frame(width: Theme.minTarget, height: Theme.minTarget)
+                }
+                .buttonStyle(PressableButtonStyle())
+                .accessibilityLabel("Export Your Track")
             }
             MiniTimeline(track: track, isPlaying: model.isPlaying, playheadTick: { model.audio.playheadTick })
                 .frame(height: 54)

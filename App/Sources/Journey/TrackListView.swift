@@ -8,6 +8,7 @@ struct TrackListView: View {
     @State private var renaming: Track?
     @State private var renameText = ""
     @State private var deleting: Track?
+    @State private var exporting: Track?
 
     var body: some View {
         List {
@@ -34,6 +35,7 @@ struct TrackListView: View {
             }
         }
         .sheet(isPresented: $showNew) { NewTrackSheet() }
+        .sheet(item: $exporting) { ExportSheet(track: $0) }
         .alert("Rename track", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } }),
                presenting: renaming) { track in
             TextField("Name", text: $renameText)
@@ -72,6 +74,7 @@ struct TrackListView: View {
             .accessibilityValue(isActive ? "Your Track" : "")
             .accessibilityHint("Makes this Your Track")
             Menu {
+                Button("Export", systemImage: "square.and.arrow.up") { exporting = track }
                 Button("Rename", systemImage: "pencil") { renameText = track.name; renaming = track }
                 Button("Delete", systemImage: "trash", role: .destructive) { deleting = track }
             } label: {

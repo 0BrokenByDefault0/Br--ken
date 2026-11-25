@@ -5,7 +5,7 @@ public enum ExportNaming {
     /// Key spelling: spaces are dropped and `#` becomes `sharp` ("F# minor" -> "Fsharpminor").
     /// `<name>-<tempo>bpm-<Key no spaces>[-<role>].wav`
     public static func fileName(track: Track, part: Part?) -> String {
-        var s = "\(sanitize(track.name))-\(Int(track.tempo.rounded()))bpm-\(sanitize(track.key.name.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "#", with: "sharp")))"
+        var s = "\(sanitize(track.name))-\(Int(Renderer.clampedTempo(track.tempo).rounded()))bpm-\(sanitize(track.key.name.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "#", with: "sharp")))"
         if let part { s += "-\(part.role.rawValue)" }
         return s + ".wav"
     }

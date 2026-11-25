@@ -78,6 +78,17 @@ final class LessonPlayerModel {
         return latestTask
     }
 
+    /// The track the Koala step exports: Your Track (the lesson's parts have been kept by now), else the
+    /// most recent earlier task's working track.
+    func exportTrack(at i: Int) -> Track? {
+        if let active = app.activeTrack { return active }
+        let latest = stride(from: min(i, steps.count) - 1, through: 0, by: -1).first {
+            if case .task = steps[$0] { return true }
+            return false
+        }
+        return latest.map { taskModel(at: $0).working }
+    }
+
     func keepRoles(at i: Int) -> [PartRole] {
         if case .keep(_, let roles) = steps[i] { return roles }
         return []
@@ -241,7 +252,7 @@ private struct LessonPlayerBody: View {
         case .keep(let message, _):
             KeepStepView(player: player, app: app, index: i, message: message)
         case .koala(let body):
-            KoalaStepView(text: body)
+            KoalaStepView(text: body, track: player.exportTrack(at: i))
         }
     }
 
