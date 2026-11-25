@@ -1,0 +1,23 @@
+{
+  "id": "sample",
+  "stage": "first-sounds",
+  "title": "Sample",
+  "summary": "Covers every step type.",
+  "steps": [
+    { "type": "idea", "title": "Tempo", "body": "**Tempo** is speed.", "deeper": "BPM means beats per minute." },
+    { "type": "listen", "title": "Hear it", "caption": "Slow vs fast",
+      "examples": [
+        { "label": "Slow", "explanation": "70 BPM",
+          "clip": { "tempo": 70, "key": "A minor", "bars": 1,
+                    "parts": [ { "role": "melody", "instrument": "bell", "melody": "A4:4 C5:4 E5:4 r:4" } ] } }
+      ] },
+    { "type": "task", "title": "Make drums", "prompt": "Add a kick on beat 1.", "tool": "drumGrid",
+      "targetRole": "drums", "uses": ["melody"],
+      "starter": { "tempo": 90, "key": "A minor", "bars": 1,
+                   "parts": [ { "role": "melody", "instrument": "bell", "melody": "A4:4 C5:4 E5:4 r:4" } ] },
+      "checks": [ { "kind": "laneHitCount", "lane": "kick", "min": 1 }, { "kind": "inKey", "role": "melody" } ],
+      "hints": ["Tap the first square."] },
+    { "type": "keep", "message": "Nice, keep it?", "roles": ["melody", "drums"] },
+    { "type": "koala", "body": "You got this!" }
+  ]
+}

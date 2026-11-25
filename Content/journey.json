@@ -1,1 +1,13 @@
-{"version":1,"stages":[]}
+{
+  "version": 1,
+  "stages": [
+    { "id": "first-sounds", "title": "First sounds", "tagline": "tempo, key, picking a vibe", "order": 1, "lessons": [] },
+    { "id": "the-idea", "title": "The idea", "tagline": "melody or loop as your seed", "order": 2, "lessons": [] },
+    { "id": "harmony", "title": "Harmony", "tagline": "chords that fit your melody", "order": 3, "lessons": [] },
+    { "id": "drums-groove", "title": "Drums & groove", "tagline": "patterns that lock with it", "order": 4, "lessons": [] },
+    { "id": "eight08-bass", "title": "808 & bass", "tagline": "following the chords, sliding", "order": 5, "lessons": [] },
+    { "id": "layers", "title": "Layers", "tagline": "counter-melodies, texture", "order": 6, "lessons": [] },
+    { "id": "arrangement", "title": "Arrangement", "tagline": "loop → intro/verse/hook/bridge", "order": 7, "lessons": [] },
+    { "id": "room-for-vocals", "title": "Leave room for vocals", "tagline": "space for the rapper or singer", "order": 8, "lessons": [] }
+  ]
+}

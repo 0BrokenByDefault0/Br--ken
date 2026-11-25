@@ -75,3 +75,6 @@ public struct DrumPattern: Hashable, Codable, Sendable {
         lanes[lane] = hits
     }
 }
+
+/// Lets `[DrumLane: T]` encode as a JSON object keyed by lane name.
+extension DrumLane: CodingKeyRepresentable {}

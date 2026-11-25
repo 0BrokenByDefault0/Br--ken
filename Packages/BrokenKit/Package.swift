@@ -11,7 +11,7 @@ let package = Package(
     targets: [
         .target(name: "MusicCore"),
         .target(name: "SoundEngine", dependencies: ["MusicCore"]),
-        .testTarget(name: "MusicCoreTests", dependencies: ["MusicCore"]),
+        .testTarget(name: "MusicCoreTests", dependencies: ["MusicCore"], exclude: ["Fixtures"]),
         .testTarget(name: "SoundEngineTests", dependencies: ["SoundEngine"]),
     ],
     swiftLanguageModes: [.v6]
