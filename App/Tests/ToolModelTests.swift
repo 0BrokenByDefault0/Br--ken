@@ -114,3 +114,32 @@ struct MetronomeTests {
         #expect(result.part(.drums) == base.part(.drums))
     }
 }
+
+// MARK: - Keyboard press tracking
+
+struct KeyPressTrackerTests {
+    @Test func pressReportsOnlyTheFirstTouch() {
+        var tracker = KeyPressTracker()
+        #expect(tracker.press(60))
+        #expect(!tracker.press(60))
+    }
+
+    @Test func releaseOfAnUnheldPitchIsIgnored() {
+        var tracker = KeyPressTracker()
+        #expect(!tracker.release(60))
+        _ = tracker.press(60)
+        #expect(tracker.release(60))
+        #expect(!tracker.release(60))
+    }
+
+    @Test func octaveChangeReleasesEveryHeldPitchOnce() {
+        var tracker = KeyPressTracker()
+        _ = tracker.press(64)
+        _ = tracker.press(60)
+        #expect(tracker.releaseAll() == [60, 64])
+        #expect(tracker.releaseAll().isEmpty)
+        // The late lift of the old finger must not send a second note-off, and new keys work.
+        #expect(!tracker.release(60))
+        #expect(tracker.press(72))
+    }
+}

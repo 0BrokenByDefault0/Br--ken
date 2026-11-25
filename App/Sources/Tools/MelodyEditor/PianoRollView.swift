@@ -5,15 +5,19 @@ import MusicCore
 /// Glide mode turns taps into glide toggles. Rows run high pitch at the top.
 struct PianoRollView: View {
     let model: PianoRollModel
-    let playheadTick: Int
+    /// Current loop position in ticks, read ~30 times a second by a small overlay while `isPlaying`; the
+    /// notes and grid are not redrawn for it.
+    let playheadTick: () -> Int
+    let isPlaying: Bool
     /// Called with the pitch when a note is added, so the caller can let the owner hear it.
     var onAudition: ((Int) -> Void)?
 
     @State private var glideMode = false
 
     private let cellWidth: CGFloat = 36
-    private let rowHeight: CGFloat = 30
+    private let rowHeight: CGFloat = 24
     private let gutter: CGFloat = 40
+    private static let openingPitch = 72  // C5; 72 down to 60 is C5–C4
 
     var body: some View {
         VStack(spacing: 8) {
@@ -28,15 +32,19 @@ struct PianoRollView: View {
                 Text("Tap: add / remove · Hold + drag: length")
                     .font(Theme.body(11)).foregroundStyle(Color.mute)
             }
-            ScrollView(.vertical) {
-                HStack(alignment: .top, spacing: 0) {
-                    pitchGutter
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        grid
+            ScrollViewReader { proxy in
+                ScrollView(.vertical) {
+                    HStack(alignment: .top, spacing: 0) {
+                        pitchGutter
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            grid.overlay(alignment: .topLeading) { playhead }
+                        }
                     }
                 }
+                // Open on C4–C5 (the top of that octave is 13 rows from the top of the view).
+                .onAppear { proxy.scrollTo(Self.openingPitch, anchor: .top) }
             }
-            .frame(height: 260)
+            .frame(height: rowHeight * 13)
             .background(Color.panel, in: RoundedRectangle(cornerRadius: 12))
         }
     }
@@ -55,6 +63,7 @@ struct PianoRollView: View {
                     .font(Theme.mono(10))
                     .foregroundStyle(model.key.contains(pc) ? Color.ink : Color.mute.opacity(0.5))
                     .frame(width: gutter, height: rowHeight)
+                    .id(pitch)
             }
         }
     }
@@ -90,10 +99,6 @@ struct PianoRollView: View {
                     context.stroke(slide, with: .color(Color.night), lineWidth: 2)
                 }
             }
-            if playheadTick >= 0 {
-                let x = CGFloat(playheadTick % max(1, model.loopTicks)) / CGFloat(Ticks.perSixteenth) * cellWidth
-                context.fill(Path(CGRect(x: x - 1, y: 0, width: 2, height: size.height)), with: .color(Color.amber))
-            }
         }
         .frame(width: gridSize.width, height: gridSize.height)
         .contentShape(Rectangle())
@@ -107,6 +112,18 @@ struct PianoRollView: View {
                     if case .second(true, let drag?) = value { handleResize(drag) }
                 }
         )
+    }
+
+    private var playhead: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !isPlaying)) { _ in
+            Canvas { context, size in
+                guard isPlaying else { return }
+                let x = CGFloat(playheadTick() % max(1, model.loopTicks)) / CGFloat(Ticks.perSixteenth) * cellWidth
+                context.fill(Path(CGRect(x: x - 1, y: 0, width: 2, height: size.height)), with: .color(Color.amber))
+            }
+        }
+        .frame(width: gridSize.width, height: gridSize.height)
+        .allowsHitTesting(false)
     }
 
     private func cell(at point: CGPoint) -> (step: Int, pitch: Int)? {

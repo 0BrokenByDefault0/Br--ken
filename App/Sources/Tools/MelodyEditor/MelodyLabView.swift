@@ -130,16 +130,19 @@ struct MelodyLabView: View {
                         .background(model.isRecording ? Color.clash : Color.panel, in: RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(PressableButtonStyle())
-                TimelineView(.animation(paused: !model.isPlaying)) { _ in
-                    PianoRollView(model: model.roll, playheadTick: model.isPlaying ? model.playheadTick : -1,
-                                  onAudition: { model.audition($0) })
-                }
-                KeyboardView(key: MelodyLabModel.key, scale: .naturalMinor, scaleLock: $scaleLock, octave: $octave,
-                             instrument: MelodyLabModel.instrument,
-                             onNote: { pitch, on in model.keyEvent(pitch: pitch, on: on) })
+                PianoRollView(model: model.roll, playheadTick: { model.playheadTick }, isPlaying: model.isPlaying,
+                              onAudition: { model.audition($0) })
                 SoundControlsView(settings: Binding(get: { model.sound }, set: { model.sound = $0 }))
             }
             .padding(16)
+        }
+        // The keyboard stays put at the bottom; only the rest scrolls.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            KeyboardView(key: MelodyLabModel.key, scale: .naturalMinor, scaleLock: $scaleLock, octave: $octave,
+                         instrument: MelodyLabModel.instrument,
+                         onNote: { pitch, on in model.keyEvent(pitch: pitch, on: on) })
+                .padding(.horizontal, 8).padding(.top, 8)
+                .background(Color.night)
         }
         .background(Color.night.ignoresSafeArea())
     }
