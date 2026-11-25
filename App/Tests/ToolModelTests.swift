@@ -247,3 +247,119 @@ struct DrumGridModelTests {
         #expect(seen.last?.swing == 0.2)
     }
 }
+
+// MARK: - Chords
+
+private let chordsKey = Key(tonic: PitchClass(9), mode: .minor)
+
+/// Bar 1 outlines A minor (A C E); bar 2 outlines F major (F A C).
+private let chordsMelody = NoteSequence(notes: [
+    NoteEvent(start: 0, length: 96, pitch: 69), NoteEvent(start: 96, length: 96, pitch: 72),
+    NoteEvent(start: 192, length: 96, pitch: 76), NoteEvent(start: 288, length: 96, pitch: 72),
+    NoteEvent(start: 384, length: 96, pitch: 77), NoteEvent(start: 480, length: 96, pitch: 69),
+    NoteEvent(start: 576, length: 96, pitch: 72), NoteEvent(start: 672, length: 96, pitch: 77),
+])
+
+@MainActor
+struct ChordFinderModelTests {
+    private func model() -> ChordFinderModel { ChordFinderModel(melody: chordsMelody, bars: 2, key: chordsKey) }
+
+    @Test func finderTopFitsLimitedToFive() {
+        let m = model()
+        #expect(m.fitsPerBar.count == 2)
+        #expect(m.fitsPerBar.allSatisfy { $0.count == 5 })
+        #expect(m.fitsPerBar[0][0].chord == Chord(root: PitchClass(9), quality: .minor))
+    }
+
+    @Test func chooseWritesSlotForBar() {
+        let m = model()
+        let fit = m.fitsPerBar[1][0]
+        m.choose(bar: 1, fit: fit)
+        #expect(m.progression.slots == [ChordSlot(start: 384, length: 384, chord: fit.chord)])
+    }
+
+    @Test func chooseReplacesOverlappingSlotAndMovesFocus() {
+        let m = model()
+        m.progression = ChordProgression(slots: [
+            ChordSlot(start: 0, length: 192, chord: Chord(root: PitchClass(0), quality: .major)),
+            ChordSlot(start: 192, length: 192, chord: Chord(root: PitchClass(2), quality: .minor)),
+        ])
+        let fit = m.fitsPerBar[0][0]
+        m.choose(bar: 0, fit: fit)
+        #expect(m.progression.slots == [ChordSlot(start: 0, length: 384, chord: fit.chord)])
+        #expect(m.focusedBar == 1)
+        m.choose(bar: 1, fit: m.fitsPerBar[1][0])
+        #expect(m.focusedBar == 1)
+        #expect(m.progression.slots.count == 2)
+    }
+
+    @Test func auditionTrackHasMelodyAndChord() {
+        let m = model()
+        let fit = m.fitsPerBar[1][0]
+        let track = m.audition(bar: 1, fit: fit)
+        #expect(track.bars == 2)
+        #expect(track.part(.melody)?.instrument == .bell)
+        #expect(track.part(.melody)?.content == .notes(chordsMelody))
+        #expect(track.part(.chords)?.instrument == .pad)
+        #expect(track.part(.chords)?.content
+            == .chords(ChordProgression(slots: [ChordSlot(start: 384, length: 384, chord: fit.chord)])))
+    }
+
+    @Test func placingKeepsTheEdgesOfALongSlot() {
+        let c = Chord(root: PitchClass(0), quality: .major)
+        let d = Chord(root: PitchClass(2), quality: .minor)
+        let p = ChordProgression(slots: [ChordSlot(start: 0, length: 768, chord: c)]).placing(d, start: 192, length: 192)
+        #expect(p.slots == [ChordSlot(start: 0, length: 192, chord: c), ChordSlot(start: 192, length: 192, chord: d),
+                            ChordSlot(start: 384, length: 384, chord: c)])
+    }
+
+    @Test func relativeScoreIsBestRelative() {
+        #expect(ChordFinderRules.relativeScore(4, best: 4) == 100)
+        #expect(ChordFinderRules.relativeScore(2, best: 4) == 50)
+        #expect(ChordFinderRules.relativeScore(-1, best: 4) == 0)
+        #expect(ChordFinderRules.relativeScore(1, best: 0) == 0)
+        #expect(ChordFinderRules.band(forRelative: 70) == .tone)
+        #expect(ChordFinderRules.band(forRelative: 69) == .color)
+        #expect(ChordFinderRules.band(forRelative: 40) == .color)
+        #expect(ChordFinderRules.band(forRelative: 39) == .clash)
+    }
+
+    @Test func chipRolesAndIntervalLabels() {
+        let am = Chord(root: PitchClass(9), quality: .minor)  // A C E
+        #expect(ChordFinderRules.chipRole(pitch: 69, chord: am) == .chordTone)
+        #expect(ChordFinderRules.chipRole(pitch: 77, chord: am) == .clash)      // F is a half step above E
+        #expect(ChordFinderRules.chipRole(pitch: 74, chord: am) == .colorTone)  // D
+        #expect(ChordFinderRules.intervalLabel(pitch: 69, chord: am) == "R")
+        #expect(ChordFinderRules.intervalLabel(pitch: 72, chord: am) == "♭3")
+        #expect(ChordFinderRules.intervalLabel(pitch: 76, chord: am) == "5")
+        #expect(ChordFinderRules.intervalLabel(pitch: 74, chord: am) == "11")
+        #expect(ChordFinderRules.intervalLabel(pitch: 67, chord: am) == "♭7")
+    }
+
+    @Test func reasonNamesChordTonesAndClashes() {
+        let fit = ChordFit(chord: Chord(root: PitchClass(9), quality: .minor), roman: "i", score: 1,
+                           matched: [PitchClass(9), PitchClass(4)], clashes: [PitchClass(5)])
+        #expect(ChordFinderRules.reason(for: fit, key: chordsKey)
+            == "A and E are chord tones; F rubs a half step above E")
+    }
+}
+
+struct ChordPadTests {
+    @Test func padsCoverTheScalePlusBorrowedDominant() {
+        let pads = ChordPad.pads(key: chordsKey)
+        #expect(pads.count == 8)
+        #expect(pads[7].borrowed && pads[7].triad.quality == .major)
+    }
+
+    @Test func variantsMapToQualities() {
+        let pads = ChordPad.pads(key: chordsKey)  // A minor: i, ii°, III, iv, v, VI, VII, V
+        #expect(pads[0].chord(.seventh).quality == .minor7)
+        #expect(pads[0].chord(.ninth).quality == .minor9)
+        #expect(pads[2].chord(.ninth).quality == .major9)      // III: Cmaj7 -> Cmaj9
+        #expect(pads[6].chord(.ninth).quality == .dominant7)   // VII: G7 stays a seventh
+        #expect(pads[1].chord(.ninth).quality == .halfDiminished7)
+        #expect(pads[3].chord(.sus2) == Chord(root: PitchClass(2), quality: .sus2))
+        #expect(pads[3].chord(.sus4).root == pads[3].triad.root)
+        #expect(pads[7].chord(.seventh).quality == .dominant7)
+    }
+}

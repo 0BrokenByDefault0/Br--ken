@@ -103,9 +103,9 @@ struct DrumLabView: View {
     }
 }
 
-/// Temporary root: switch between the melody lab and the drum lab. Both stay alive so edits survive switching.
+/// Temporary root: switch between the melody, chord and drum labs. All stay alive so edits survive switching.
 struct LabRootView: View {
-    private enum Lab: String, CaseIterable { case melody = "Melody", drums = "Drums" }
+    private enum Lab: String, CaseIterable { case melody = "Melody", chords = "Chords", drums = "Drums" }
 
     let audio: any AudioPlaying
     @State private var lab = Lab.melody
@@ -121,6 +121,9 @@ struct LabRootView: View {
                 MelodyLabView(audio: audio, isActive: lab == .melody)
                     .opacity(lab == .melody ? 1 : 0).allowsHitTesting(lab == .melody)
                     .accessibilityHidden(lab != .melody)
+                ChordsLabView(audio: audio, isActive: lab == .chords)
+                    .opacity(lab == .chords ? 1 : 0).allowsHitTesting(lab == .chords)
+                    .accessibilityHidden(lab != .chords)
                 DrumLabView(audio: audio, isActive: lab == .drums)
                     .opacity(lab == .drums ? 1 : 0).allowsHitTesting(lab == .drums)
                     .accessibilityHidden(lab != .drums)
