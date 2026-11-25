@@ -1,0 +1,322 @@
+{
+  "id": "drums-groove.drums-meet-melody",
+  "stage": "drums-groove",
+  "title": "Drums over melody, melody over drums",
+  "summary": "Fit drums around a melody and a melody around drums: match density, leave gaps, vary bar 2, place the open hat, add a touch of swing. Then build the drums you keep.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Two ways in",
+      "body": "There are two ways in, and both are normal:\n\n- **Drums first.** You have a beat, and the melody fills the spaces it leaves. You did this in The idea.\n- **Melody first.** You have a melody, and the drums fit around it. That's this lesson, over your melody and chords.\n\nEither way the rule is the same: **the busier one part, the simpler the other.** A melody full of fast notes wants plain drums. A slow melody with long notes leaves room for rolls and bouncing kicks. When both are busy, they fight for the same space.\n\nNext: one melody, matched drums vs crowded drums.",
+      "deeper": "**Density** is how many hits or notes land in a bar, and how fast they come. When every part is busy, nothing stands out, and later a vocal has nowhere to go.\n\n**Matching doesn't mean equal.** It means the parts take turns. A common trap pairing is a slow melody with long notes over fast hats and bouncing kicks. The opposite works too: a busy, plucky melody over just kick, snare and steady 8th hats.\n\n**Gaps.** Look at where your melody rests or holds a long note. That's where a kick, a roll or a fill can speak. Where the melody is busy, thin the drums out. The drums and melody end up answering each other instead of talking over each other."
+    },
+    {
+      "type": "listen",
+      "title": "Matched vs crowded",
+      "caption": "The same melody and chords at 140 BPM. The melody holds long notes and rests on the last two steps of bar 1. Only the drums change.",
+      "examples": [
+        {
+          "label": "Matched",
+          "explanation": "Kicks on steps 1, 7 and 11, the first two right on melody notes. 8th hats, and one roll exactly in the melody's rest at the end of bar 1. Every part has its own space.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x...x.....X.....x...x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.TTx.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Crowded",
+          "explanation": "Kicks on most off-beats, rolls in every beat, plus rim and percussion filling every gap. The melody's long notes get buried, and the rest is gone.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.xx.xx..x.xx.xxX.xx.xx..x.xx.xx",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x2x2TTx2x2TTx244x2x2TTx2x2TTx244",
+                  "rim": ".x...x.x.x...x.x.x...x.x.x...x.x",
+                  "perc": "..x...x...x...x...x...x...x...x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Change bar 2",
+      "body": "A loop that repeats exactly gets stale fast. A small change at the end of bar 2 keeps it alive and tells the listener the loop is about to come round:\n\n- **A fill**: a roll, or a quick run of snares or claps, in the last beat.\n- **A dropout**: pull the kick and hats for the last beat, so beat 1 hits harder when they come back.\n- **A moved kick**: bar 2's kick answers bar 1's instead of copying it.\n\nKeep bar 1 and most of bar 2 the same. One change at the end is enough.\n\nNext: the same loop with and without a bar 2 change.",
+      "deeper": "**Why the end?** The ear treats beat 1 as the landing point. A change just before it builds anticipation, and the next beat 1 resolves it. It's the same idea as a roll, scaled up. In a full song, fills mark the end of 4- and 8-bar phrases for the same reason.\n\n**Snare fills.** A common trap fill is a run of snares or claps in the last beat or two, often getting louder as it goes. Even one extra snare on the last step can do it.\n\n**Dropouts** work by contrast. A moment of near silence right before beat 1 makes the return hit harder. In Arrangement you'll do the same thing with whole sections."
+    },
+    {
+      "type": "listen",
+      "title": "Same loop, three endings",
+      "caption": "The same beat under the same melody and chords. B and C change only the end of bar 2, where the melody holds a long note.",
+      "examples": [
+        {
+          "label": "Bars identical",
+          "explanation": "Bar 2 copies bar 1 exactly. It grooves, but nothing tells you the loop is coming round.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x...x.....X.....x...x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Snare fill",
+          "explanation": "Four snares in the last beat of bar 2, quiet to loud. You feel the restart coming.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x...x.....X.....x...x.....",
+                  "snare": "........X...............X...gxxX",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Dropout",
+          "explanation": "After the snare in bar 2, the kick and hats stop until beat 1. Only the melody and chords hang there, so beat 1 lands harder when the drums come back.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x...x.....X.....x.........",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x......."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Open hats and swing",
+      "body": "Two more ways to make drums move with a melody:\n\n**Open hat.** A longer, splashier hat in the **OPEN** row. Use it sparingly, on an off-beat. The **&** of a beat is a classic spot. The next closed **HAT** cuts it short, like a real hi-hat closing, so the gap before that hat sets how long it rings.\n\n**Swing.** The **Swing** slider pushes every e and a step a little later. Straight 16ths feel exact and mechanical. A little swing makes them lope. It moves every drum lane, but not your melody, so start small.\n\nNext: where the open hat goes.",
+      "deeper": "**Open hats.** An open hat rings much longer than a closed one. Put a closed hat a step or two after it and that hat chokes it, the same way closing a real hi-hat cuts the sound. Leave a longer gap and it rings out. One or two open hats a bar read as accents; on every & they become part of the clock.\n\n**What swing does here.** The beat and the & stay put. Everything on an e or an a moves later, by up to about a third of a step at the top of the slider (60%). A roll inside a swung step moves as one, so it stays even. Kicks on an e or an a move too.\n\n**When to use it.** Trap hats are usually straight, and swing is more at home in boom bap and lo-fi. A little can still loosen a stiff 16th pattern. These listening clips can't carry swing, so try the slider on the grid in the task and listen to the hats against the melody."
+    },
+    {
+      "type": "listen",
+      "title": "Where the open hat goes",
+      "caption": "The same beat under the same melody and chords. Only the open hats change.",
+      "examples": [
+        {
+          "label": "One per bar",
+          "explanation": "One open hat on the & of 4 in each bar, choked by the closed hat on the next beat 1. A small lift into each new bar.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x...x.....X.....x...x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x...x.x.x.x.x.x.x...",
+                  "openHat": "..............x...............x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+              }
+            ]
+          }
+        },
+        {
+          "label": "On every &",
+          "explanation": "Open hats on every &, closed hats on the beats. Now the open hat is just part of the clock: busier, and none of them stands out as an accent.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x...x.....X.....x...x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x...x...x...x...x...x...x...x...",
+                  "openHat": "..x...x...x...x...x...x...x...x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Drums for your melody",
+      "prompt": "Now build the drums you keep, around your melody and chords:\n\n1. In **Bar 1**: **KICK** on step 1, **SNR** on step 9, hats. Echo a melody note or two with off-beat kicks.\n2. Add a hat roll where the melody leaves a gap.\n3. Tap **Copy to next**, then change the end of **Bar 2**: a fill, a dropout or a moved kick.\n4. Try an **OPEN** hat on an &, and nudge **Swing** to taste.\n\nThe snare needs to be on beat 3 in **both bars**. If Your Track has no melody or chords yet, a practice pair plays; it isn't saved. Your drums are.",
+      "tool": "drumGrid",
+      "targetRole": "drums",
+      "uses": [
+        "melody",
+        "chords"
+      ],
+      "starter": {
+        "tempo": 140,
+        "key": "A minor",
+        "bars": 2,
+        "parts": [
+          {
+            "role": "melody",
+            "instrument": "bell",
+            "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
+          },
+          {
+            "role": "chords",
+            "instrument": "pad",
+            "chords": "Am:16 F:16"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "drumHitOnBeats",
+          "lane": "snare",
+          "beats": [
+            3
+          ],
+          "everyBar": true
+        },
+        {
+          "kind": "hatRollPresent"
+        },
+        {
+          "kind": "barsDiffer",
+          "role": "drums"
+        }
+      ],
+      "hints": [
+        "Work in order: finish **Bar 1**, then tap **Copy to next**. Copy replaces everything in Bar 2, so make your bar 2 changes after copying.",
+        "Rolls need **Roll** mode: pick a **Rate** and drag along the **HAT** row. With the practice melody, steps 15–16 of Bar 1 sit right in its rest.",
+        "Check says the bars match? Changing a hit's velocity or the Swing doesn't count. In **Bar 2**, add or remove hits: snares on steps 13–16, say, or clear the kicks and hats from step 13 on."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Save it. These drums go into Your Track with your melody and chords: a full loop. Next stage, the 808 locks onto your kick.",
+      "roles": [
+        "drums"
+      ]
+    },
+    {
+      "type": "koala",
+      "body": "Take your drums into Koala:\n\n1. Tap **Export loop to Koala**, pick **Drums** under What to export, tap **Export**, then share the file and import it into Koala (the sheet shows how).\n2. In Koala, load it onto a pad and chop it so the kick, the snare and your hat roll each get their own pad.\n3. Over the loop, finger-drum a new bar 2 from the chops: a different fill each time round. When one sticks, record it."
+    }
+  ]
+}

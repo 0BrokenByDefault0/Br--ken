@@ -1,0 +1,203 @@
+{
+  "id": "drums-groove.trap-skeleton",
+  "stage": "drums-groove",
+  "title": "The trap skeleton",
+  "summary": "Kick, snare and hats each have one job. Build the half-time skeleton most trap beats start from, and hear why its slow snare leaves room for a voice.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Three lanes, three jobs",
+      "body": "You met half-time in First sounds. Now take the skeleton apart. Each lane has one job:\n\n- **Kick** is the weight. On **beat 1** it tells you where the bar starts.\n- **Snare** (or clap) is the backbeat, the hit your head nods to. In half-time it lands once a bar, on **beat 3**.\n- **Hats** are the clock. Steady 8ths or 16ths keep time between the big hits and set the energy.\n\nMost trap beats start from this skeleton. Everything else, from rolls to bouncing kicks, hangs off it.\n\nNext: the skeleton, built one lane at a time.",
+      "deeper": "**Why these jobs?** The kick is the lowest, heaviest sound, so wherever it lands feels like a downbeat. On beat 1 it marks the top of the bar.\n\nThe snare is loud and cuts through, and listeners nod on it, so its spacing sets the tempo you feel. One snare per bar at 140 BPM puts the nod at 70.\n\nHats are quiet, short and high, so they can play constantly without covering anything. Their speed sets how busy the beat feels without changing the nod.\n\n**Snare or clap?** Trap uses either, and often stacks both on the same step so they hit as one sound. In this kit the snare has a short pitched thump under bright noise. The clap is three quick bursts of noise a few milliseconds apart, so its attack is smeared instead of one sharp crack.\n\n**8ths or 16ths?** 8th hats (every other step) are laid back. 16th hats (every step) drive harder. Most beats move between the two, and rolls are how they do it. That's the next lesson."
+    },
+    {
+      "type": "listen",
+      "title": "Built one lane at a time",
+      "caption": "140 BPM, half-time. Each clip adds one lane to the one before.",
+      "examples": [
+        {
+          "label": "Kick",
+          "explanation": "Kick on beat 1, plus one on the & of 3. Weight, but nothing to nod to yet.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x....."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "+ snare on 3",
+          "explanation": "One snare per bar, on beat 3. Now there's a nod: slow and heavy.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X......."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "+ 8th hats",
+          "explanation": "Hats on every other step fill the gaps between the big hits. Same slow nod, but now it moves.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "+ clap on the snare",
+          "explanation": "A clap stacked on the same step as the snare. The backbeat gets thicker and a little smeared. Trap does this a lot.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "clap": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Room for a voice",
+      "body": "These beats are built to carry a rapper or singer. Half-time helps in two ways.\n\n**Fewer big hits.** One snare per bar instead of two leaves long stretches where the loudest drum isn't sounding. At 140 BPM that's about 1.7 seconds from snare to snare.\n\n**A slower nod.** The felt pulse is 70, but the hats still run at 140. A rapper can ride the slow nod with a laid-back flow, or rap fast along the hats. Both fit.\n\nThe catch: busy drums fill that space right back up. Keep the skeleton simple and let the voice have the gaps.\n\nNext: a line where a voice would sit, over normal time and half-time.",
+      "deeper": "**The numbers.** At 140 BPM a beat lasts 60 ÷ 140 ≈ 0.43 seconds and a bar about 1.71 seconds. Normal time puts a snare every two beats (about 0.86 seconds apart). Half-time puts one every four.\n\nThe snare is usually one of the loudest hits in a beat, and its crack sits in the same middle range as a lot of the voice. Fewer snare hits means fewer moments where it competes with the vocal. That's one reason, not a rule: plenty of normal-time beats carry vocals fine.\n\n**Two speeds in one beat.** Over 140 BPM half-time, a flow that moves in 16ths at 140 sounds quick and urgent, and a flow that sits on the 70 nod sounds relaxed. The same beat holds both, which is part of why half-time trap suits so many different flows."
+    },
+    {
+      "type": "listen",
+      "title": "Where the voice goes",
+      "caption": "A pluck line stands in for a vocal. Same line, same kick and hats in both. Only the snare changes.",
+      "examples": [
+        {
+          "label": "Normal time",
+          "explanation": "Snare on beats 2 and 4: four snare hits under the line every two bars. It works, but there's less air around the line.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "....X.......X.......X.......X...",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "melody",
+                "instrument": "pluck",
+                "melody": "A4:2 A4:1 A4:1 C5:2 A4:2 r:2 G4:2 A4:4 A4:2 A4:1 A4:1 C5:2 D5:2 r:2 C5:2 A4:4"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Half-time",
+          "explanation": "Snare on beat 3 only: half as many hits. The line gets long stretches with no snare under it, and the slow nod leaves it room.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "melody",
+                "instrument": "pluck",
+                "melody": "A4:2 A4:1 A4:1 C5:2 A4:2 r:2 G4:2 A4:4 A4:2 A4:1 A4:1 C5:2 D5:2 r:2 C5:2 A4:4"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Build the skeleton",
+      "prompt": "Build a half-time skeleton:\n\n1. **KICK** on step 1 (beat 1).\n2. **SNR** on step 9 (beat 3). Stack a **CLP** on it too if you like.\n3. **HAT** on at least 8 steps across both bars. 8ths (every other step) or 16ths, your call.\n\nThe kick and snare checks look at **every bar**: fill Bar 1, then tap **Copy to next** to fill both bars. If Your Track has a melody, it plays along while you work.",
+      "tool": "drumGrid",
+      "targetRole": "drums",
+      "uses": [],
+      "checks": [
+        {
+          "kind": "drumHitOnBeats",
+          "lane": "kick",
+          "beats": [
+            1
+          ],
+          "everyBar": true
+        },
+        {
+          "kind": "drumHitOnBeats",
+          "lane": "snare",
+          "beats": [
+            3
+          ],
+          "everyBar": true
+        },
+        {
+          "kind": "laneHitCount",
+          "lane": "closedHat",
+          "min": 8
+        }
+      ],
+      "hints": [
+        "Beats land on steps 1, 5, 9 and 13. The kick goes on step 1. The snare goes on step 9, the first step of the second shaded block.",
+        "The snare check reads only the **SNR** row; a clap on its own doesn't count. Hats go in the **HAT** row, not **OPEN**.",
+        "Bar 2 still empty? Pick **Bar 1**, then tap **Copy to next**. For hats, tap every other step from 1 to 15: that's 8 in one bar, 16 once you copy it."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Practice rep, so nothing goes into Your Track. Keep the skeleton in your head, though: the rest of this stage hangs rolls, bounce and fills off it.",
+      "roles": []
+    }
+  ]
+}

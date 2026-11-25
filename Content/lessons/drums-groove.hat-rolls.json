@@ -1,0 +1,200 @@
+{
+  "id": "drums-groove.hat-rolls",
+  "stage": "drums-groove",
+  "title": "Hi-hat rolls and movement",
+  "summary": "The four roll rates, velocity ramps and pitched rolls, and where rolls go so they push the beat forward instead of cluttering it.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Faster than the grid",
+      "body": "A **roll** is a burst of hats faster than the grid's 16th steps. In the drum grid, switch to **Roll**, pick a **Rate** and drag along the **HAT** row.\n\n- **1/32**: two hits per step. A quick stutter.\n- **1/16T**: three hits across two steps. A triplet gallop that pulls against the straight grid.\n- **1/32T**: three hits per step. A buzz.\n- **1/64**: four hits per step. Almost one smear of sound.\n\nRolls work like fills: a burst of tension that lands on the next big hit. That's why they cluster **right before the snare** and at the **end of a bar**.\n\nNext: straight hats vs rolled.",
+      "deeper": "**The math.** The app counts 96 ticks per beat, so one 16th step is 24 ticks. A 1/32 roll puts hits 12 ticks apart (two per step), 1/32T 8 apart (three per step), 1/64 6 apart (four per step). 1/16T puts them 16 apart, three across two steps, so drag it across an even number of steps to land back on the grid.\n\nAt 140 BPM a beat lasts about 0.43 seconds. A 1/64 roll packs 16 hits into it, about 37 a second, so fast it reads more like a buzz than separate hits.\n\n**Triplets** split time into threes where the rest of the beat splits into twos and fours. A 1/16T roll briefly rubs against the straight grid, and that rub is the gallop.\n\n**Why before the snare or at the end of a bar?** A roll raises the energy, and the ear wants it to land somewhere. The snare, or beat 1 of the next bar, is the landing."
+    },
+    {
+      "type": "listen",
+      "title": "Straight vs rolled",
+      "caption": "140 BPM half-time, same kick and snare in all three. Only the hats change.",
+      "examples": [
+        {
+          "label": "Straight 8ths",
+          "explanation": "Steady and tidy. It keeps time, but nothing pushes forward.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "8ths with two rolls",
+          "explanation": "A 1/16T roll into the snare in bar 1, and a 1/32 run over the last beat of bar 2 into the loop restart. Same hats otherwise, and the beat leans forward.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.TTx.x.x.x.x.x.x.x.x.x.2222"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "Rolls everywhere",
+          "explanation": "A roll in every beat. It's busy the whole way through, so no single roll leads anywhere.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x2x2TTx2x2TTx244x2x2TTx2x2TTx244"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Shape the roll",
+      "body": "Rate is only the start. Three more things shape a roll:\n\n- **Ramp.** In Roll mode, **Ramp** sets loudness from first hit to last. **Up** swells into the next hit, **Down** fades out of one, **Flat** keeps every hit the same.\n- **Pitch.** Trap producers often pitch a roll up or down as it runs. This grid plays every hat at one pitch, so pitched rolls are one for Koala.\n- **Placement.** The steps just before the snare push into it. The end of bar 2 sets up the loop restart. Put rolls everywhere and they stop meaning anything.\n\nFor single hits, hold a hit in **Draw** mode to set its velocity.\n\nNext: flat vs ramped.",
+      "deeper": "**Ramps in the grid.** Up runs from about a third of full loudness to full. Down runs the other way. Flat sits at three quarters. An Up ramp into the snare is the classic swell. A Down ramp right after a hit sounds like it's dying away.\n\n**Pitched rolls** step the hat up or down in pitch as the roll runs, often rising into a big moment or falling out of one. The movement in pitch adds a direction on top of the speed. In Koala, try it by playing a hat sample at different pitches.\n\n**Ghost hats.** Quiet hits between the main ones add movement without adding volume. In Draw mode, hold a hat, then drag the velocity slider that appears to the left. A pattern of loud and quiet hats grooves even with no roll at all."
+    },
+    {
+      "type": "listen",
+      "title": "Flat vs ramped",
+      "caption": "Clips can only change loudness step by step, so these ramps run over a 16th-note run at the end of bar 2. The **Ramp** setting does the same thing inside a roll.",
+      "examples": [
+        {
+          "label": "Flat",
+          "explanation": "Eight 16th hats at the end of bar 2, all the same loudness. It speeds up, but it doesn't build.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.xxxxxxxx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "Ramp up",
+          "explanation": "The same eight hats, quiet to full. They swell into beat 1 as the loop comes round.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.ggggxxxX"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "Ramp down",
+          "explanation": "Full to quiet. The run fades out before the loop restarts: calmer, less push into beat 1.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.Xxxxgggg"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Roll it",
+      "prompt": "Add rolls to this beat (or to your own, if Your Track has drums):\n\n1. Switch the mode to **Roll**, then pick a **Rate** and a **Ramp**.\n2. Drag along the **HAT** row across a step or two: try steps 7–8 in **Bar 1**, right before the snare, or steps 13–16 in **Bar 2**.\n3. Play it, then try another rate. In Roll mode, tap a roll to clear it.\n\nKeep at least **8 hats** across both bars, so the clock keeps ticking around your rolls.",
+      "tool": "drumGrid",
+      "targetRole": "drums",
+      "uses": [
+        "drums"
+      ],
+      "starter": {
+        "tempo": 140,
+        "key": "A minor",
+        "bars": 2,
+        "parts": [
+          {
+            "role": "drums",
+            "instrument": "trapKit",
+            "drums": {
+              "kick": "X.........x.....X......x..x.....",
+              "snare": "........X...............X.......",
+              "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+            }
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "hatRollPresent"
+        },
+        {
+          "kind": "laneHitCount",
+          "lane": "closedHat",
+          "min": 8
+        }
+      ],
+      "hints": [
+        "Rolls only happen in **Roll** mode, and only with a drag: a tap won't make one. Switch the mode, then drag sideways along the **HAT** row.",
+        "On a narrow screen, Roll mode shows half a bar at a time: switch with **Steps 1–8** and **Steps 9–16**. For **1/16T**, drag across two steps so the roll ends back on the grid.",
+        "Try this: **Bar 1**, Rate **1/16T**, Ramp **Up**, drag the **HAT** row across steps 7–8 into the snare. Then **Bar 2**, Rate **1/32**, drag across steps 13–16."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Practice rep, so nothing goes into Your Track. Next: the kick, and how where you put it makes a beat bounce.",
+      "roles": []
+    }
+  ]
+}

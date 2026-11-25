@@ -1,0 +1,200 @@
+{
+  "id": "drums-groove.kick-bounce",
+  "stage": "drums-groove",
+  "title": "Kick placement and bounce",
+  "summary": "Move kicks off the beat for bounce, keep them off the snare, and let the kick echo your melody's rhythm, the move the 808 builds on next.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Bounce lives between the beats",
+      "body": "Kicks on the beat (steps 1, 5, 9, 13) feel solid and square. Bounce comes from kicks **between** the beats, on the **e**, **&** and **a** steps. That's **syncopation**: a hit where the ear doesn't expect one, so the groove leans forward.\n\nTwo rules keep it clean:\n\n- **Keep beat 1.** One solid kick anchors the bar, so the off-beat kicks have something to push against.\n- **Keep the snare's step for the snare.** A kick on beat 3 lands with the snare, and the backbeat loses its snap. Put the kick just before or just after instead.\n\nNext: square kicks vs bouncing kicks.",
+      "deeper": "**Counting the off-beats.** Each beat is four steps: the beat, then e, &, a. Beat 2 is step 5, so its e, & and a are steps 6, 7 and 8. The & of 3 is step 11.\n\nThe & is half a beat off; the e and a are only a 16th away from a beat. Hits on the e and a are on weaker parts of the beat than the &, so they sound more syncopated.\n\n**Why it bounces.** The ear predicts hits on the beat. A kick a 16th before a beat, on an a, arrives early and pulls you into the next beat. A kick just after a beat, on an e, sounds like a late answer to it. Trap kick patterns mix these with the long gaps of half-time, so the kick seems to talk.\n\n**Framing the snare.** In half-time the snare owns beat 3. Kicks on the a of 2 (step 8) or the & of 3 (step 11) lead into the snare and bounce out of it without covering it."
+    },
+    {
+      "type": "listen",
+      "title": "Square vs bouncing",
+      "caption": "Same snare and hats at 140 BPM. Only the kick moves, and every clip has three kicks per bar.",
+      "examples": [
+        {
+          "label": "On the beat",
+          "explanation": "Kicks on beats 1, 2 and 4. Solid but stiff: every hit lands where you expect it.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X...x.......x...X...x.......x...",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "Syncopated",
+          "explanation": "Beat 1 stays. The other two move off the beat: one on the a of 2, right before the snare, and one on the & of 3, just after it. Same count, and now it bounces.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X......x..x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "One kick on the snare",
+          "explanation": "The same as the syncopated clip, but the kick from the a of 2 moved onto beat 3, under the snare. The backbeat gets thick and blunt, and the push into the snare is gone.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.......x.x.....X.......x.x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Let the kick echo the melody",
+      "body": "Where should the off-beat kicks go? Your melody already has an answer. Listen for where its notes **start**, especially the ones between beats, and put kicks on some of those steps.\n\nWhen kick and melody hit together, they lock: the beat sounds written for that melody, not pasted under it. Don't copy every note. Pick two or three that define its rhythm, and skip any that land on the snare.\n\nThis sets up the next stage, too. The **808** often follows the kick's rhythm, so a kick that echoes the melody hands the 808 a part that grooves with everything.\n\nNext: one melody, two kick patterns.",
+      "deeper": "**Why it locks.** When two parts hit at the same moment, the ear hears them as one rhythm. Shared off-beat hits stand out most, because they're the unexpected ones. So echoing the melody's syncopations ties the drums to it more than doubling its on-beat notes would.\n\n**How to pick.** Write down the steps where the melody's notes start. In the next clips that's steps 1, 4, 7, 11 and 14 in each bar. Step 1 is your beat-1 kick. Step 4 is the a of 1, step 7 the & of 2, step 11 the & of 3 just after the snare, and step 14 the e of 4. Pick two or three of them. Leaving some out keeps the kick from turning into a copy of the melody."
+    },
+    {
+      "type": "listen",
+      "title": "Random vs echoing",
+      "caption": "Same melody, snare and hats. The melody's notes start on steps 1, 4, 7, 11 and 14 in each bar. Both kick patterns have three kicks per bar, two of them off the beat.",
+      "examples": [
+        {
+          "label": "Kick ignores the melody",
+          "explanation": "Off-beat kicks on steps 3 and 10, where no melody note starts. Each part bounces on its own, and they don't quite talk to each other.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.x......x......X.x......x......",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "A4:3 C5:3 E5:4 D5:3 C5:3 A4:3 C5:3 E5:4 G4:3 A4:3"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Kick echoes the melody",
+          "explanation": "Off-beat kicks on steps 7 and 11, both steps where a melody note starts. Same number of kicks, and now drums and melody move as one.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x...x.....X.....x...x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "A4:3 C5:3 E5:4 D5:3 C5:3 A4:3 C5:3 E5:4 G4:3 A4:3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Make it bounce",
+      "prompt": "Give the kick some bounce, locked to the melody:\n\n1. Play the loop and listen for where the melody's notes start. With the practice melody, that's steps 1, 4, 7, 11 and 14.\n2. Keep the **KICK** on step 1. Add kicks on two or three of the melody's off-beat steps.\n3. Keep the **SNR** on step 9, with no kick under it.\n\nYou need at least **2 off-beat kicks** in total, and the snare on beat 3 in **both bars**: use **Copy to next**. A practice melody and skeleton load for anything Your Track doesn't have yet; they aren't saved.",
+      "tool": "drumGrid",
+      "targetRole": "drums",
+      "uses": [
+        "melody",
+        "drums"
+      ],
+      "starter": {
+        "tempo": 140,
+        "key": "A minor",
+        "bars": 2,
+        "parts": [
+          {
+            "role": "melody",
+            "instrument": "bell",
+            "melody": "A4:3 C5:3 E5:4 D5:3 C5:3 A4:3 C5:3 E5:4 G4:3 A4:3"
+          },
+          {
+            "role": "drums",
+            "instrument": "trapKit",
+            "drums": {
+              "kick": "X...............X...............",
+              "snare": "........X...............X.......",
+              "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+            }
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "syncopatedKicks",
+          "min": 2
+        },
+        {
+          "kind": "drumHitOnBeats",
+          "lane": "snare",
+          "beats": [
+            3
+          ],
+          "everyBar": true
+        }
+      ],
+      "hints": [
+        "Off-beat means any step that isn't 1, 5, 9 or 13. Steps 2–4, 6–8, 10–12 and 14–16 all count.",
+        "Play the loop with the grid open and watch the playhead. Where you hear a melody note start between beats, tap that step in the **KICK** row. With the practice melody, steps 7 and 11 are good bets.",
+        "Check says the snare is missing? It looks at every bar. Fill **SNR** step 9 in **Bar 1**, then tap **Copy to next**. Copy carries your kicks over too."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Practice rep, so nothing goes into Your Track. Remember the move, though: in 808 & bass, you'll lock the 808 to a kick like this.",
+      "roles": []
+    }
+  ]
+}
