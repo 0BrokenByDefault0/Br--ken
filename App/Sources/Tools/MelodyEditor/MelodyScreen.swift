@@ -2,7 +2,9 @@ import SwiftUI
 import MusicCore
 import Observation
 
-/// Melody tool state on the active track's melody part (created empty on the first edit).
+/// Melody tool state: the piano roll over a melody part, and live recording from the keyboard.
+/// Where edits go and which loop plays are injected, so the Melody tab (the active track) and a lesson
+/// task (its working track) share it.
 @Observable @MainActor
 final class MelodyToolModel {
     static let defaultInstrument = InstrumentID.bell
@@ -10,23 +12,34 @@ final class MelodyToolModel {
     let roll: PianoRollModel
     private(set) var isRecording = false
     let instrument: InstrumentID
-    private let app: AppModel
+    private let audio: any AudioPlaying
+    private let isPlaying: () -> Bool
+    private let startPlayback: () -> Void
     private var recorder = LiveRecorder()
 
-    init(app: AppModel, track: Track) {
-        self.app = app
-        instrument = track.part(.melody)?.instrument ?? Self.defaultInstrument
+    /// `part`: the melody part being edited (nil when there is none yet). `write` gets the sequence after
+    /// every edit; recording starts the loop with `play` when `isPlaying` says it is stopped.
+    init(part: Part?, bars: Int, key: Key, audio: any AudioPlaying, isPlaying: @escaping () -> Bool,
+         play: @escaping () -> Void, write: @escaping (NoteSequence) -> Void) {
+        self.audio = audio
+        self.isPlaying = isPlaying
+        startPlayback = play
+        instrument = part?.instrument ?? Self.defaultInstrument
         var sequence = NoteSequence(notes: [])
-        if case .notes(let s)? = track.part(.melody)?.content { sequence = s }
-        roll = PianoRollModel(sequence: sequence, bars: track.bars, key: track.key,
-                              lowestPitch: 48 + track.key.tonic.rawValue)
-        roll.onChange = { [weak self] sequence in self?.write(sequence) }
+        if case .notes(let s)? = part?.content { sequence = s }
+        roll = PianoRollModel(sequence: sequence, bars: bars, key: key, lowestPitch: 48 + key.tonic.rawValue)
+        roll.onChange = write
     }
 
-    private func write(_ sequence: NoteSequence) {
-        app.editActivePart(.melody, instrument: Self.defaultInstrument, empty: .notes(NoteSequence(notes: []))) {
-            $0.content = .notes(sequence)
-        }
+    /// On the active track's melody part (created empty on the first edit), looping the active track.
+    convenience init(app: AppModel, track: Track) {
+        self.init(part: track.part(.melody), bars: track.bars, key: track.key, audio: app.audio,
+                  isPlaying: { [weak app] in app?.isPlaying ?? false },
+                  play: { [weak app] in app?.play() },
+                  write: { [weak app] sequence in
+                      app?.editActivePart(.melody, instrument: MelodyToolModel.defaultInstrument,
+                                          empty: .notes(NoteSequence(notes: []))) { $0.content = .notes(sequence) }
+                  })
     }
 
     func toggleRecording() {
@@ -35,7 +48,7 @@ final class MelodyToolModel {
         } else {
             recorder = LiveRecorder()
             isRecording = true
-            if !app.isPlaying { app.play() }
+            if !isPlaying() { startPlayback() }
         }
     }
 
@@ -48,16 +61,16 @@ final class MelodyToolModel {
 
     func keyEvent(pitch: Int, on: Bool) {
         if on {
-            app.audio.noteOn(instrument, pitch, 0.8)
-            if isRecording { recorder.noteOn(pitch: pitch, atTick: app.audio.playheadTick) }
+            audio.noteOn(instrument, pitch, 0.8)
+            if isRecording { recorder.noteOn(pitch: pitch, atTick: audio.playheadTick) }
         } else {
-            app.audio.noteOff(instrument, pitch)
-            if isRecording { recorder.noteOff(pitch: pitch, atTick: app.audio.playheadTick) }
+            audio.noteOff(instrument, pitch)
+            if isRecording { recorder.noteOff(pitch: pitch, atTick: audio.playheadTick) }
         }
     }
 
     func audition(_ pitch: Int) {
-        let audio = app.audio, instrument = instrument
+        let audio = audio, instrument = instrument
         audio.noteOn(instrument, pitch, 0.8)
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(250))

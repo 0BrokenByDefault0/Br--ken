@@ -223,7 +223,7 @@ final class AppModel {
         return working
     }
 
-    /// Copies `roles` from the working track into the active track (creating "My first beat" from the
+    /// Copies `roles` that have content from the working track into the active track (creating "My first beat" from the
     /// working track's tempo, key, and length if there is none), makes it active, completes the lesson,
     /// and saves both.
     func keep(roles: [PartRole], from working: Track, lessonID: String) {
@@ -231,18 +231,22 @@ final class AppModel {
             ?? Track(name: "My first beat", createdAt: Date(), tempo: working.tempo, key: working.key,
                      bars: working.bars, parts: [])
         for role in roles {
-            if let part = working.part(role) { track.setPart(part) }
+            // An empty part (a skipped task) is never kept: it would add an empty part, or replace a real
+            // part with silence. A replaced part keeps the saved part's mute.
+            guard var part = working.part(role), part.hasContent else { continue }
+            if let saved = track.part(role) { part.muted = saved.muted }
+            track.setPart(part)
         }
         commitKept(track, lessonID: lessonID)
     }
 
-    /// The keep after a track-setup task: applies the working track's name, tempo, and key to the active
-    /// track (its parts stay), or creates the active track from them. Completes the lesson and saves.
+    /// The keep after a track-setup task: applies the working track's tempo and key to the active track
+    /// (its name and parts stay), or creates the active track from the working track's name, tempo, and
+    /// key. Completes the lesson and saves.
     func keepSetup(from working: Track, lessonID: String) {
         var track = activeTrack
             ?? Track(name: working.name, createdAt: Date(), tempo: working.tempo, key: working.key,
                      bars: working.bars, parts: [])
-        track.name = working.name
         track.tempo = working.tempo
         track.key = working.key
         commitKept(track, lessonID: lessonID)
@@ -290,6 +294,17 @@ final class AppModel {
             try progressStore.save(progress)
         } catch {
             lastError = "Couldn't save progress: \(error.localizedDescription)"
+        }
+    }
+}
+
+extension Part {
+    /// False for a part with no notes, no chord slots, or no drum hits.
+    var hasContent: Bool {
+        switch content {
+        case .notes(let sequence): !sequence.notes.isEmpty
+        case .chords(let progression): !progression.slots.isEmpty
+        case .drums(let pattern): pattern.lanes.values.contains { !$0.isEmpty }
         }
     }
 }

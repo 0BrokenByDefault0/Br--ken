@@ -24,6 +24,10 @@ final class TaskStepModel {
     private(set) var hintIndex = 0
 
     private let app: AppModel
+    // Tool models, built once for this task the first time the tool view asks for them.
+    @ObservationIgnored private var melodyModel: MelodyToolModel?
+    @ObservationIgnored private var drumModel: DrumGridModel?
+    @ObservationIgnored private var finderModel: ChordFinderModel?
 
     init(step: LessonStep, lessonID: String, app: AppModel) {
         guard case .task(let title, let prompt, let tool, let targetRole, let uses, _, let checks, let hints) = step else {
@@ -112,6 +116,46 @@ final class TaskStepModel {
     }
 
     var targetPart: Part? { targetRole.flatMap { working.part($0) } }
+
+    // MARK: - Tool models
+
+    /// The melody editor on the target part (melodyEditor tasks).
+    var melodyTool: MelodyToolModel {
+        if let melodyModel { return melodyModel }
+        let app = app
+        let model = MelodyToolModel(part: targetPart, bars: working.bars, key: working.key, audio: app.audio,
+                                    isPlaying: { [weak app] in app?.isPlaying ?? false },
+                                    play: { [weak self] in self?.play() },
+                                    write: { [weak self] sequence in self?.editTarget { $0.content = .notes(sequence) } })
+        melodyModel = model
+        return model
+    }
+
+    /// The drum grid on the target part (drumGrid tasks).
+    var drumGrid: DrumGridModel {
+        if let drumModel { return drumModel }
+        var pattern = DrumPattern(lanes: [:])
+        if case .drums(let p)? = targetPart?.content { pattern = p }
+        let model = DrumGridModel(pattern: pattern, bars: working.bars)
+        model.onChange = { [weak self] pattern in self?.editTarget { $0.content = .drums(pattern) } }
+        drumModel = model
+        return model
+    }
+
+    /// The Chord Finder over the working track's melody, writing the target part (chordFinder tasks).
+    var chordFinder: ChordFinderModel {
+        if let finderModel { return finderModel }
+        var melody = NoteSequence(notes: [])
+        if case .notes(let s)? = working.part(.melody)?.content { melody = s }
+        let model = ChordFinderModel(melody: melody, bars: working.bars, key: working.key)
+        model.tempo = working.tempo
+        if case .chords(let p)? = targetPart?.content { model.progression = p }
+        finderModel = model
+        return model
+    }
+
+    /// Ends a live take still being recorded, writing it into the working track (leaving the step).
+    func finishRecording() { melodyModel?.stopped() }
 
     /// Loops the working track at its own tempo.
     func play() { app.audition(working, atTrackTempo: false) }

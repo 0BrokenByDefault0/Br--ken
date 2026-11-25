@@ -3,7 +3,7 @@ import MusicCore
 
 /// Name, tempo (60–180) and key for a track. `onDone` gets the choices when the confirm button is
 /// tapped; with `live` (inside a lesson step) there is no button or scroll view of its own, and `onDone`
-/// gets every change as it happens.
+/// gets every change as it happens. `showsName: false` hides the name field (the name passed in is kept).
 struct TrackSetupView: View {
     static let tempoRange: ClosedRange<Double> = 60...180
     static let hintText = "Trap 130–170 · Cloud 60–80 or 130–160"
@@ -14,10 +14,11 @@ struct TrackSetupView: View {
     @State private var tonic: Int
     private let confirmTitle: String
     private let live: Bool
+    private let showsName: Bool
     private let onDone: (String, Double, Key) -> Void
 
     init(tempo: Double = AppModel.defaultTempo, key: Key = AppModel.defaultKey, name: String = "My first beat",
-         confirmTitle: String = "Create track", live: Bool = false,
+         confirmTitle: String = "Create track", live: Bool = false, showsName: Bool = true,
          onDone: @escaping (String, Double, Key) -> Void) {
         _name = State(initialValue: name)
         _tempo = State(initialValue: min(max(tempo, Self.tempoRange.lowerBound), Self.tempoRange.upperBound).rounded())
@@ -25,6 +26,7 @@ struct TrackSetupView: View {
         _tonic = State(initialValue: key.tonic.rawValue)
         self.confirmTitle = confirmTitle
         self.live = live
+        self.showsName = showsName
         self.onDone = onDone
     }
 
@@ -57,12 +59,14 @@ struct TrackSetupView: View {
 
     private var form: some View {
         VStack(alignment: .leading, spacing: 20) {
-            section("Name") {
-                TextField("Track name", text: $name)
-                    .font(Theme.body(17)).foregroundStyle(Color.ink)
-                    .padding(.horizontal, 12)
-                    .frame(minHeight: Theme.minTarget)
-                    .background(Color.panel, in: RoundedRectangle(cornerRadius: 12))
+            if showsName {
+                section("Name") {
+                    TextField("Track name", text: $name)
+                        .font(Theme.body(17)).foregroundStyle(Color.ink)
+                        .padding(.horizontal, 12)
+                        .frame(minHeight: Theme.minTarget)
+                        .background(Color.panel, in: RoundedRectangle(cornerRadius: 12))
+                }
             }
             section("Tempo") {
                 VStack(alignment: .leading, spacing: 4) {

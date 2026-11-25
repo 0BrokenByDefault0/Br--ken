@@ -9,8 +9,10 @@ final class LessonPlayerModel {
     let lesson: Lesson
     private(set) var index = 0
     private(set) var finished = false
-    /// Indexes of keep steps that have saved to Your Track.
-    private(set) var kept: Set<Int> = []
+    /// What each keep step (by index) saved to Your Track.
+    private(set) var saved: [Int: [PartRole]] = [:]
+    /// Per keep step, the roles Your Track already has that the owner chose to replace (default: keep mine).
+    private(set) var replaceChoices: [Int: Set<PartRole>] = [:]
     // Built lazily from view bodies, so not observed.
     @ObservationIgnored private var taskModels: [Int: TaskStepModel] = [:]
     private let app: AppModel
@@ -51,10 +53,15 @@ final class LessonPlayerModel {
         finished = true
     }
 
-    /// Back to the first step, for going through the lesson again.
+    /// Back to the first step with fresh task models (work, results, and hints) and nothing saved, for
+    /// going through the lesson again.
     func restart() {
+        stopPlayback()
         finished = false
         index = 0
+        taskModels = [:]
+        saved = [:]
+        replaceChoices = [:]
     }
 
     // MARK: - Keep
@@ -83,30 +90,76 @@ final class LessonPlayerModel {
     /// True when the keep step at `i` saves a track setup (name, tempo, key) rather than parts.
     func keepsSetup(at i: Int) -> Bool { keepSource(forKeepAt: i)?.tool == .trackSetup }
 
-    /// The keep step's roles that saving would replace: Your Track already has a different part for them.
+    /// Indexes of keep steps that have saved.
+    var kept: Set<Int> { Set(saved.keys) }
+
+    /// The track the keep step at `i` saves from: its source task's working track, or (with no earlier
+    /// task) the working track for the keep step itself.
+    func keepWorking(at i: Int) -> Track {
+        keepSource(forKeepAt: i)?.working ?? app.workingTrack(for: steps[i], lessonID: lesson.id)
+    }
+
+    /// The keep step's roles the owner hasn't built yet (no part, or an empty one): they are not saved.
+    func emptyRoles(forKeepAt i: Int) -> [PartRole] {
+        guard !keepsSetup(at: i) else { return [] }
+        let working = keepWorking(at: i)
+        return keepRoles(at: i).filter { !(working.part($0)?.hasContent ?? false) }
+    }
+
+    /// The keep step's roles that saving would replace: Your Track already has a different part for them
+    /// (a mute alone doesn't count; it is a listening preference).
     func conflictingRoles(forKeepAt i: Int) -> [PartRole] {
         guard !keepsSetup(at: i), let active = app.activeTrack else { return [] }
-        let working = keepSource(forKeepAt: i)?.working
+        let working = keepWorking(at: i)
         return keepRoles(at: i).filter { role in
-            guard let mine = active.part(role), let theirs = working?.part(role) else { return false }
-            return mine != theirs
+            guard let mine = active.part(role), let theirs = working.part(role), theirs.hasContent else { return false }
+            return !Self.samePart(mine, theirs)
         }
     }
 
-    /// Saves `roles` (the keep step's roles the owner agreed to) to Your Track and completes the lesson.
+    private static func samePart(_ a: Part, _ b: Part) -> Bool {
+        a.role == b.role && a.instrument == b.instrument && a.content == b.content && a.sound == b.sound
+    }
+
+    func replaces(_ role: PartRole, atKeep i: Int) -> Bool {
+        replaceChoices[i]?.contains(role) ?? false
+    }
+
+    func setReplace(_ replace: Bool, role: PartRole, atKeep i: Int) {
+        var choices = replaceChoices[i] ?? []
+        if replace { choices.insert(role) } else { choices.remove(role) }
+        replaceChoices[i] = choices
+    }
+
+    /// What "Save to Your Track" saves: the roles with content, minus conflicts the owner keeps.
+    func rolesToSave(atKeep i: Int) -> [PartRole] {
+        let empty = emptyRoles(forKeepAt: i), conflicts = conflictingRoles(forKeepAt: i)
+        return keepRoles(at: i).filter { !empty.contains($0) && (!conflicts.contains($0) || replaces($0, atKeep: i)) }
+    }
+
+    /// "Save to Your Track": saves the chosen roles and completes the lesson.
+    func saveKeep(at i: Int) {
+        keep(at: i, roles: rolesToSave(atKeep: i))
+    }
+
+    /// Saves `roles` (empty parts are skipped) to Your Track and completes the lesson. After a track-setup
+    /// task it saves the tempo and key instead.
     func keep(at i: Int, roles: [PartRole]) {
         stopPlayback()
         let source = keepSource(forKeepAt: i)
         if let source, source.tool == .trackSetup {
             app.keepSetup(from: source.working, lessonID: lesson.id)
+            saved[i] = []
         } else {
-            let working = source?.working ?? app.workingTrack(for: steps[i], lessonID: lesson.id)
+            let working = keepWorking(at: i)
             app.keep(roles: roles, from: working, lessonID: lesson.id)
+            saved[i] = roles.filter { working.part($0)?.hasContent ?? false }
         }
-        kept.insert(i)
     }
 
+    /// Leaving a step: a live take still recording is written into the working track first.
     private func stopPlayback() {
+        taskModels[index]?.finishRecording()
         if app.isPlaying { app.stop() }
     }
 
@@ -162,6 +215,8 @@ private struct LessonPlayerBody: View {
             }
         }
         .background(Color.night.ignoresSafeArea())
+        // Leaving a finished lesson: opening it again starts at step 1, not on "Lesson done".
+        .onDisappear { if player.finished { player.restart() } }
     }
 
     private var header: some View {
@@ -183,8 +238,8 @@ private struct LessonPlayerBody: View {
             ListenStepView(app: app, title: title, caption: caption, examples: examples)
         case .task:
             TaskStepView(task: player.taskModel(at: i), app: app)
-        case .keep(let message, let roles):
-            KeepStepView(player: player, app: app, index: i, message: message, roles: roles)
+        case .keep(let message, _):
+            KeepStepView(player: player, app: app, index: i, message: message)
         case .koala(let body):
             KoalaStepView(text: body)
         }

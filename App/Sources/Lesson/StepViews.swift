@@ -197,40 +197,9 @@ private struct PlayheadBar: View {
 struct TaskStepView: View {
     let task: TaskStepModel
     let app: AppModel
-    @State private var melody: LessonMelodyTool?
-    @State private var grid: DrumGridModel?
-    @State private var finder: ChordFinderModel?
     @State private var showSevenths = false
     @State private var scaleLock = false
     @State private var octave = 4
-
-    init(task: TaskStepModel, app: AppModel) {
-        self.task = task
-        self.app = app
-        let working = task.working
-        switch task.tool {
-        case .melodyEditor:
-            _melody = State(initialValue: LessonMelodyTool(task: task, app: app))
-        case .drumGrid:
-            var pattern = DrumPattern(lanes: [:])
-            if case .drums(let p)? = task.targetPart?.content { pattern = p }
-            let grid = DrumGridModel(pattern: pattern, bars: working.bars)
-            grid.onChange = { [weak task] pattern in task?.editTarget { $0.content = .drums(pattern) } }
-            _grid = State(initialValue: grid)
-        case .chordFinder:
-            let finder = ChordFinderModel(melody: Self.melody(of: working), bars: working.bars, key: working.key)
-            finder.tempo = working.tempo
-            if case .chords(let p)? = task.targetPart?.content { finder.progression = p }
-            _finder = State(initialValue: finder)
-        case .chordPads, .trackSetup:
-            break
-        }
-    }
-
-    private static func melody(of track: Track) -> NoteSequence {
-        if case .notes(let s)? = track.part(.melody)?.content { return s }
-        return NoteSequence(notes: [])
-    }
 
     private var progression: ChordProgression {
         if case .chords(let p)? = task.targetPart?.content { return p }
@@ -251,7 +220,8 @@ struct TaskStepView: View {
             .padding(16)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if let melody {
+            if task.tool == .melodyEditor {
+                let melody = task.melodyTool
                 KeyboardView(key: task.working.key, scale: task.working.key.mode == .major ? .major : .naturalMinor,
                              scaleLock: $scaleLock, octave: $octave, instrument: melody.instrument,
                              onNote: { pitch, on in melody.keyEvent(pitch: pitch, on: on) })
@@ -259,7 +229,7 @@ struct TaskStepView: View {
                     .background(Color.night)
             }
         }
-        .onChange(of: app.isPlaying) { _, playing in if !playing { melody?.stopped() } }
+        .onChange(of: app.isPlaying) { _, playing in if !playing { task.finishRecording() } }
     }
 
     private var playRow: some View {
@@ -281,22 +251,23 @@ struct TaskStepView: View {
     private var tool: some View {
         switch task.tool {
         case .trackSetup:
-            TrackSetupView(tempo: task.working.tempo, key: task.working.key, name: task.working.name, live: true) { name, tempo, key in
+            // Your Track keeps its name; a name is only asked for when the lesson creates the track.
+            TrackSetupView(tempo: task.working.tempo, key: task.working.key, name: task.working.name,
+                           live: true, showsName: app.activeTrack == nil) { name, tempo, key in
                 task.edit { $0.name = name; $0.tempo = tempo; $0.key = key }
             }
         case .melodyEditor:
-            if let melody {
-                Button { melody.toggleRecording() } label: {
-                    Label(melody.isRecording ? "Recording… tap to finish" : "Record from keyboard", systemImage: "record.circle")
-                        .font(Theme.title(16))
-                        .foregroundStyle(melody.isRecording ? Color.night : Color.clash)
-                        .frame(maxWidth: .infinity, minHeight: Theme.minTarget)
-                        .background(melody.isRecording ? Color.clash : Color.panel, in: RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(PressableButtonStyle())
-                PianoRollView(model: melody.roll, playheadTick: { app.audio.playheadTick }, isPlaying: app.isPlaying,
-                              onAudition: { melody.audition($0) })
+            let melody = task.melodyTool
+            Button { melody.toggleRecording() } label: {
+                Label(melody.isRecording ? "Recording… tap to finish" : "Record from keyboard", systemImage: "record.circle")
+                    .font(Theme.title(16))
+                    .foregroundStyle(melody.isRecording ? Color.night : Color.clash)
+                    .frame(maxWidth: .infinity, minHeight: Theme.minTarget)
+                    .background(melody.isRecording ? Color.clash : Color.panel, in: RoundedRectangle(cornerRadius: 12))
             }
+            .buttonStyle(PressableButtonStyle())
+            PianoRollView(model: melody.roll, playheadTick: { app.audio.playheadTick }, isPlaying: app.isPlaying,
+                          onAudition: { melody.audition($0) })
         case .chordPads:
             let instrument = task.targetPart?.instrument ?? .pad
             ChordPadsView(key: task.working.key,
@@ -309,29 +280,27 @@ struct TaskStepView: View {
                               if on { app.audio.noteOn(instrument, pitch, 0.8) } else { app.audio.noteOff(instrument, pitch) }
                           })
         case .chordFinder:
-            if let finder {
-                ChordFinderView(model: finder, isPlaying: app.isPlaying,
-                                onPlay: { app.audition($0, atTrackTempo: false) }, onStop: { app.stop() })
-                    .onChange(of: finder.progression) { _, p in
-                        if task.targetPart?.content != .chords(p) { task.editTarget { $0.content = .chords(p) } }
-                    }
-            }
-        case .drumGrid:
-            if let grid {
-                HStack(spacing: 12) {
-                    Text("Swing").font(Theme.body(14)).foregroundStyle(Color.ink)
-                    Slider(value: Binding(get: { grid.swing }, set: { grid.swing = $0 }), in: DrumGridModel.swingRange)
-                        .tint(Color.haze)
-                        .frame(minHeight: Theme.minTarget)
-                        .accessibilityLabel("Swing")
-                    Text("\(Int((grid.swing * 100).rounded()))%")
-                        .font(Theme.mono(13)).foregroundStyle(Color.mute).frame(width: 44, alignment: .trailing)
+            let finder = task.chordFinder
+            ChordFinderView(model: finder, isPlaying: app.isPlaying,
+                            onPlay: { app.audition($0, atTrackTempo: false) }, onStop: { app.stop() })
+                .onChange(of: finder.progression) { _, p in
+                    if task.targetPart?.content != .chords(p) { task.editTarget { $0.content = .chords(p) } }
                 }
-                .padding(.horizontal, 12)
-                .background(Color.panel, in: RoundedRectangle(cornerRadius: 14))
-                DrumGridView(model: grid, playheadTick: { app.audio.playheadTick }, isPlaying: app.isPlaying,
-                             onPad: { lane, v in app.audio.noteOn(.trapKit, lane.midiNote, v) })
+        case .drumGrid:
+            let grid = task.drumGrid
+            HStack(spacing: 12) {
+                Text("Swing").font(Theme.body(14)).foregroundStyle(Color.ink)
+                Slider(value: Binding(get: { grid.swing }, set: { grid.swing = $0 }), in: DrumGridModel.swingRange)
+                    .tint(Color.haze)
+                    .frame(minHeight: Theme.minTarget)
+                    .accessibilityLabel("Swing")
+                Text("\(Int((grid.swing * 100).rounded()))%")
+                    .font(Theme.mono(13)).foregroundStyle(Color.mute).frame(width: 44, alignment: .trailing)
             }
+            .padding(.horizontal, 12)
+            .background(Color.panel, in: RoundedRectangle(cornerRadius: 14))
+            DrumGridView(model: grid, playheadTick: { app.audio.playheadTick }, isPlaying: app.isPlaying,
+                         onPad: { lane, v in app.audio.noteOn(.trapKit, lane.midiNote, v) })
         }
     }
 
@@ -395,79 +364,16 @@ struct TaskStepView: View {
     }
 }
 
-/// Melody editing inside a task: the piano roll and live recording write the working track's target part.
-@Observable @MainActor
-final class LessonMelodyTool {
-    let roll: PianoRollModel
-    let instrument: InstrumentID
-    private(set) var isRecording = false
-    private let task: TaskStepModel
-    private let app: AppModel
-    private var recorder = LiveRecorder()
-
-    init(task: TaskStepModel, app: AppModel) {
-        self.task = task
-        self.app = app
-        let working = task.working
-        instrument = task.targetPart?.instrument ?? MelodyToolModel.defaultInstrument
-        var sequence = NoteSequence(notes: [])
-        if case .notes(let s)? = task.targetPart?.content { sequence = s }
-        roll = PianoRollModel(sequence: sequence, bars: working.bars, key: working.key,
-                              lowestPitch: 48 + working.key.tonic.rawValue)
-        roll.onChange = { [weak task] sequence in task?.editTarget { $0.content = .notes(sequence) } }
-    }
-
-    func toggleRecording() {
-        if isRecording {
-            finishRecording()
-        } else {
-            recorder = LiveRecorder()
-            isRecording = true
-            if !app.isPlaying { task.play() }
-        }
-    }
-
-    func stopped() { if isRecording { finishRecording() } }
-
-    private func finishRecording() {
-        isRecording = false
-        roll.merge(recorder.result(loopTicks: roll.loopTicks))
-    }
-
-    func keyEvent(pitch: Int, on: Bool) {
-        if on {
-            app.audio.noteOn(instrument, pitch, 0.8)
-            if isRecording { recorder.noteOn(pitch: pitch, atTick: app.audio.playheadTick) }
-        } else {
-            app.audio.noteOff(instrument, pitch)
-            if isRecording { recorder.noteOff(pitch: pitch, atTick: app.audio.playheadTick) }
-        }
-    }
-
-    func audition(_ pitch: Int) {
-        let audio = app.audio, instrument = instrument
-        audio.noteOn(instrument, pitch, 0.8)
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(250))
-            audio.noteOff(instrument, pitch)
-        }
-    }
-}
-
 // MARK: - Keep
 
-/// Shows the message and saves the lesson's result to Your Track. For each role Your Track already has
-/// (with a different part), it asks first: replace it, or keep the owner's.
+/// Shows the message and saves the lesson's result to Your Track. Roles the owner hasn't built are named
+/// and skipped; for each role Your Track already has (with a different part) the owner picks Replace or
+/// Keep mine (the default) before one "Save to Your Track" tap.
 struct KeepStepView: View {
     let player: LessonPlayerModel
     let app: AppModel
     let index: Int
     let message: String
-    let roles: [PartRole]
-    @State private var asking: PartRole?
-    @State private var queue: [PartRole] = []
-    @State private var chosen: [PartRole] = []
-    @State private var saved: [PartRole]?
 
     private var isSetup: Bool { player.keepsSetup(at: index) }
 
@@ -476,40 +382,73 @@ struct KeepStepView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Keep it").font(Theme.title(26)).foregroundStyle(Color.ink)
                 Text(LessonText.markdown(message)).font(Theme.body(17)).foregroundStyle(Color.ink)
-                if player.kept.contains(index) {
-                    savedPanel
+                if let saved = player.saved[index] {
+                    savedPanel(saved)
                 } else {
-                    Text(isSetup ? "Saves the name, tempo, and key to Your Track."
-                         : roles.isEmpty ? "Marks this lesson done on Your Track."
-                         : "Saves your \(LessonText.list(roles)) to Your Track.")
-                        .font(Theme.body(15)).foregroundStyle(Color.mute)
-                    saveButton("Save to Your Track")
+                    plan
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
         }
-        .confirmationDialog(asking.map { "Your Track already has \(LessonText.roleName($0))" } ?? "",
-                            isPresented: Binding(get: { asking != nil }, set: { dialogPresented($0) }),
-                            titleVisibility: .visible) {
-            Button("Replace", role: .destructive) { answer(replace: true) }
-            Button("Keep mine", role: .cancel) { answer(replace: false) }
-        } message: {
-            Text("Replace it with the one from this lesson, or keep yours?")
-        }
     }
 
-    private var savedPanel: some View {
+    @ViewBuilder
+    private var plan: some View {
+        let toSave = player.rolesToSave(atKeep: index)
+        ForEach(player.emptyRoles(forKeepAt: index), id: \.self) { role in
+            notBuilt(role)
+        }
+        ForEach(player.conflictingRoles(forKeepAt: index), id: \.self) { role in
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Your Track already has \(LessonText.roleName(role))")
+                    .font(Theme.title(15)).foregroundStyle(Color.ink)
+                Picker("Your Track already has \(LessonText.roleName(role))",
+                       selection: Binding(get: { player.replaces(role, atKeep: index) },
+                                          set: { player.setReplace($0, role: role, atKeep: index) })) {
+                    Text("Keep mine").tag(false)
+                    Text("Replace").tag(true)
+                }
+                .pickerStyle(.segmented)
+                .frame(minHeight: Theme.minTarget)
+            }
+            .padding(12)
+            .background(Color.panel, in: RoundedRectangle(cornerRadius: 12))
+        }
+        Text(isSetup ? "Saves the tempo and key to Your Track."
+             : toSave.isEmpty ? "Nothing new to save; this marks the lesson done."
+             : "Saves your \(LessonText.list(toSave)) to Your Track.")
+            .font(Theme.body(15)).foregroundStyle(Color.mute)
+        Button { player.saveKeep(at: index) } label: {
+            Text("Save to Your Track").font(Theme.title(17)).foregroundStyle(Color.night)
+                .frame(maxWidth: .infinity, minHeight: Theme.minTarget + 6)
+                .background(Color.amber, in: RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(PressableButtonStyle())
+    }
+
+    private func notBuilt(_ role: PartRole) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Image(systemName: "exclamationmark.circle").foregroundStyle(Color.amber)
+            Text("You haven't made a \(LessonText.roleName(role)) part yet — go back to the task, or continue without it.")
+                .font(Theme.body(15)).foregroundStyle(Color.ink)
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(Color.panel, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func savedPanel(_ saved: [PartRole]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Saved to Your Track", systemImage: "checkmark.circle.fill")
                 .font(Theme.title(18)).foregroundStyle(Color.tone)
-            if let saved, !isSetup {
-                let skipped = roles.filter { !saved.contains($0) }
+            if !isSetup {
+                let skipped = player.keepRoles(at: index).filter { !saved.contains($0) }
                 if !saved.isEmpty {
                     Text("Saved: \(LessonText.list(saved))").font(Theme.body(15)).foregroundStyle(Color.ink)
                 }
                 if !skipped.isEmpty {
-                    Text("Kept yours: \(LessonText.list(skipped))").font(Theme.body(15)).foregroundStyle(Color.mute)
+                    Text("Not saved: \(LessonText.list(skipped))").font(Theme.body(15)).foregroundStyle(Color.mute)
                 }
             }
             if let track = app.activeTrack {
@@ -533,61 +472,12 @@ struct KeepStepView: View {
                 .padding(12)
                 .background(Color.night, in: RoundedRectangle(cornerRadius: 12))
             }
-            Button("Save again") { save() }
+            Button("Save again") { player.saveKeep(at: index) }
                 .font(Theme.body(15)).foregroundStyle(Color.haze)
                 .frame(minHeight: Theme.minTarget)
         }
         .padding(14)
         .background(Color.panel, in: RoundedRectangle(cornerRadius: 16))
-    }
-
-    private func saveButton(_ title: String) -> some View {
-        Button { save() } label: {
-            Text(title).font(Theme.title(17)).foregroundStyle(Color.night)
-                .frame(maxWidth: .infinity, minHeight: Theme.minTarget + 6)
-                .background(Color.amber, in: RoundedRectangle(cornerRadius: 14))
-        }
-        .buttonStyle(PressableButtonStyle())
-    }
-
-    private func save() {
-        let conflicts = player.conflictingRoles(forKeepAt: index)
-        chosen = roles.filter { !conflicts.contains($0) }
-        queue = conflicts
-        askNext()
-    }
-
-    private func askNext() {
-        if queue.isEmpty {
-            player.keep(at: index, roles: chosen)
-            saved = chosen
-        } else {
-            asking = queue.removeFirst()
-        }
-    }
-
-    private func answer(replace: Bool) {
-        guard let role = asking else { return }
-        if replace { chosen.append(role) }
-        asking = nil
-        if queue.isEmpty {
-            askNext()
-        } else {
-            // Let this dialog finish dismissing before the next one is presented.
-            Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(400))
-                askNext()
-            }
-        }
-    }
-
-    /// A dismissal without a button (tapping outside) counts as "Keep mine".
-    private func dialogPresented(_ presented: Bool) {
-        guard !presented, let role = asking else { return }
-        Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(50))
-            if asking == role { answer(replace: false) }
-        }
     }
 }
 

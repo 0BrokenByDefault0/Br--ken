@@ -654,9 +654,10 @@ private func threeNotes() throws -> Part {
     let mine = other.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
     other.updateActiveTrack { $0.setPart(try! threeNotes()) }
     let player2 = LessonPlayerModel(lesson: lesson, app: other)
-    player2.taskModel(at: 0).edit { $0.tempo = 160; $0.key = cMinor }
+    player2.taskModel(at: 0).edit { $0.name = "Renamed"; $0.tempo = 160; $0.key = cMinor }
     player2.keep(at: 1, roles: [])
     #expect(other.activeTrack?.id == mine.id)
+    #expect(other.activeTrack?.name == "Mine", "a setup keep never renames Your Track")
     #expect(other.tracks.count == 1)
     #expect(other.activeTrack?.tempo == 160)
     #expect(other.activeTrack?.key == cMinor)
@@ -679,4 +680,172 @@ private func threeNotes() throws -> Part {
     #expect(player.finished)
     #expect(model.progress.completedLessons.contains("harmony.find"))
     #expect(ProgressStore(fileURL: sandbox.progressURL).load().completedLessons.contains("harmony.find"))
+}
+
+@MainActor
+@Test func keepSkipsEmptyPartsAndLeavesSavedPartIntact() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        melodyTask(), .keep(message: "k", roles: [.melody]),
+    ])
+
+    // Task skipped: the empty target part is not saved.
+    let skipped = LessonPlayerModel(lesson: lesson, app: model)
+    #expect(skipped.emptyRoles(forKeepAt: 1) == [.melody])
+    #expect(skipped.rolesToSave(atKeep: 1).isEmpty)
+    skipped.saveKeep(at: 1)
+    #expect(model.activeTrack?.part(.melody) == nil, "no empty part is added")
+    #expect(skipped.saved[1] == [])
+    #expect(model.progress.completedLessons.contains("harmony.find"), "the lesson still completes")
+
+    // A saved melody exists and the task's melody was cleared: the saved melody stays.
+    let melody = try threeNotes()
+    model.updateActiveTrack { $0.setPart(melody) }
+    let cleared = LessonPlayerModel(lesson: lesson, app: model)
+    cleared.taskModel(at: 0).editTarget { $0.content = .notes(NoteSequence(notes: [])) }
+    #expect(cleared.emptyRoles(forKeepAt: 1) == [.melody])
+    #expect(cleared.conflictingRoles(forKeepAt: 1).isEmpty, "an empty part never asks to replace")
+    cleared.keep(at: 1, roles: [.melody])  // even when asked directly, AppModel.keep skips empty parts
+    #expect(model.activeTrack?.part(.melody)?.content == melody.content)
+}
+
+@MainActor
+@Test func keepWithoutEarlierTaskFallsBackToYourTrack() throws {
+    let model = try Sandbox().makeModel()
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        .idea(title: "i", body: "b", deeper: nil), .keep(message: "k", roles: [.melody]),
+    ])
+    let none = LessonPlayerModel(lesson: lesson, app: model)
+    #expect(none.emptyRoles(forKeepAt: 1) == [.melody])
+    none.saveKeep(at: 1)
+    let created = try #require(model.activeTrack, "a keep with no track creates one")
+    #expect(created.parts.isEmpty)
+    #expect(model.progress.completedLessons.contains("harmony.find"))
+
+    let melody = try threeNotes()
+    model.updateActiveTrack { $0.setPart(melody) }
+    let again = LessonPlayerModel(lesson: lesson, app: model)
+    #expect(again.emptyRoles(forKeepAt: 1).isEmpty)
+    #expect(again.conflictingRoles(forKeepAt: 1).isEmpty)
+    again.saveKeep(at: 1)
+    #expect(model.activeTrack?.part(.melody) == melody, "Your Track is saved back unchanged")
+    #expect(model.tracks.count == 1)
+}
+
+@MainActor
+@Test func conflictsIgnoreMuteAndReplaceKeepsSavedMute() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+    var melody = try threeNotes()
+    melody.muted = true
+    model.updateActiveTrack { $0.setPart(melody) }
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        melodyTask(), .keep(message: "k", roles: [.melody]),
+    ])
+    let player = LessonPlayerModel(lesson: lesson, app: model)
+    #expect(player.taskModel(at: 0).working.part(.melody)?.muted == false)
+    #expect(player.conflictingRoles(forKeepAt: 1).isEmpty, "only the mute differs: nothing to replace")
+
+    let newNotes = try Notation.melody("E5:4 D5:4 C5:4 A4:4")
+    player.taskModel(at: 0).editTarget { $0.content = .notes(newNotes) }
+    #expect(player.conflictingRoles(forKeepAt: 1) == [.melody])
+    player.setReplace(true, role: .melody, atKeep: 1)
+    player.saveKeep(at: 1)
+    #expect(model.activeTrack?.part(.melody)?.content == .notes(newNotes))
+    #expect(model.activeTrack?.part(.melody)?.muted == true, "Replace keeps the saved part's mute")
+}
+
+@MainActor
+@Test func replaceChoicesDecideSavedRoles() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+    model.updateActiveTrack {
+        $0.setPart(try! threeNotes())
+        $0.setPart(Part(role: .drums, instrument: .trapKit, content: .drums(DrumPattern(lanes: [.kick: [DrumHit(tick: 0, velocity: 1)]]))))
+    }
+    let both = LessonStep.task(title: "t", prompt: "p", tool: .drumGrid, targetRole: .drums, uses: [],
+                               starter: nil, checks: [], hints: [])
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        both, .keep(message: "k", roles: [.melody, .drums, .chords]),
+    ])
+    let player = LessonPlayerModel(lesson: lesson, app: model)
+    player.taskModel(at: 0).edit {
+        $0.setPart(Part(role: .melody, instrument: .bell, content: .notes(try! Notation.melody("C5:4"))))
+        $0.setPart(Part(role: .drums, instrument: .trapKit, content: .drums(DrumPattern(lanes: [.snare: [DrumHit(tick: 96, velocity: 1)]]))))
+    }
+    #expect(player.conflictingRoles(forKeepAt: 1) == [.melody, .drums])
+    #expect(player.emptyRoles(forKeepAt: 1) == [.chords])
+    #expect(player.rolesToSave(atKeep: 1).isEmpty, "the default is Keep mine")
+    player.setReplace(true, role: .drums, atKeep: 1)
+    #expect(player.replaces(.drums, atKeep: 1))
+    #expect(player.rolesToSave(atKeep: 1) == [.drums])
+    player.setReplace(true, role: .melody, atKeep: 1)
+    player.setReplace(false, role: .drums, atKeep: 1)
+    #expect(player.rolesToSave(atKeep: 1) == [.melody])
+    player.saveKeep(at: 1)
+    #expect(player.saved[1] == [.melody])
+    #expect(notes(try #require(model.activeTrack), .melody).map(\.pitch) == [72])
+    #expect(model.activeTrack?.part(.drums)?.content == .drums(DrumPattern(lanes: [.kick: [DrumHit(tick: 0, velocity: 1)]])))
+}
+
+@MainActor
+@Test func taskToolModelsAreBuiltOnce() throws {
+    let model = try Sandbox().makeModel()
+    let task = TaskStepModel(step: melodyTask(), lessonID: "harmony.find", app: model)
+    let melody1 = task.melodyTool, melody2 = task.melodyTool
+    let grid1 = task.drumGrid, grid2 = task.drumGrid
+    let finder1 = task.chordFinder, finder2 = task.chordFinder
+    #expect(melody1 === melody2)
+    #expect(grid1 === grid2)
+    #expect(finder1 === finder2)
+    task.melodyTool.roll.toggle(step: 0, pitch: 69)
+    #expect(notes(task.working, .melody).map(\.pitch) == [69], "roll edits write the working track")
+}
+
+@MainActor
+@Test func leavingTaskWhileRecordingKeepsTheTake() throws {
+    let audio = FakeAudio()
+    let model = try Sandbox().makeModel(audio: audio)
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        melodyTask(), .idea(title: "i", body: "b", deeper: nil),
+    ])
+    let player = LessonPlayerModel(lesson: lesson, app: model)
+    let task = player.taskModel(at: 0)
+    let tool = task.melodyTool
+    tool.toggleRecording()
+    #expect(tool.isRecording)
+    #expect(model.isPlaying, "recording starts the loop")
+    audio.playheadTick = 0
+    tool.keyEvent(pitch: 69, on: true)
+    audio.playheadTick = 96
+    tool.keyEvent(pitch: 69, on: false)
+    player.next()
+    #expect(!tool.isRecording)
+    #expect(!model.isPlaying)
+    #expect(notes(task.working, .melody).map(\.pitch) == [69], "the take is written before leaving")
+}
+
+@MainActor
+@Test func restartResetsLessonState() throws {
+    let model = try Sandbox().makeModel()
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        melodyTask(hints: ["one"]), .keep(message: "k", roles: [.melody]),
+    ])
+    let player = LessonPlayerModel(lesson: lesson, app: model)
+    let first = player.taskModel(at: 0)
+    _ = first.nextHint()
+    player.setReplace(true, role: .melody, atKeep: 1)
+    player.saveKeep(at: 1)
+    player.next()
+    player.next()
+    #expect(player.finished)
+    player.restart()
+    #expect(!player.finished)
+    #expect(player.index == 0)
+    #expect(player.kept.isEmpty)
+    #expect(!player.replaces(.melody, atKeep: 1))
+    let fresh = player.taskModel(at: 0)
+    #expect(fresh !== first, "fresh task models")
+    #expect(fresh.hintIndex == 0)
 }
