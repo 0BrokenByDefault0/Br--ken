@@ -1,0 +1,214 @@
+{
+  "id": "the-idea.what-sticks",
+  "stage": "the-idea",
+  "title": "What makes a melody stick",
+  "summary": "Motifs, rhythm before pitch, space and range: why some melodies stay in your head and others don't.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "A motif is the hook",
+      "body": "The melodies that stick aren't long. They're built on a **motif**: a tiny idea of just a few notes, played again and again.\n\nRepetition is what makes it catchy. The first time round, the listener hears something new. The second time, they recognize it. By the third, they know what's coming and can hum along.\n\nRandom notes do the opposite. Every note is a surprise, so nothing sticks, even when every note is in key.\n\nNext: 12 notes in A minor with no pattern, then 12 notes that are one 3-note motif played four times.",
+      "deeper": "A **motif** is the smallest piece of a melody you'd recognize on its own: a short cell of pitches plus a rhythm. Longer melodies are usually built by repeating and varying a motif, not by writing new material for every bar.\n\nIn a beat the loop already repeats, so a 2-bar melody plays dozens of times in one song. A motif inside it gives the ear something to hold onto from the very first pass.\n\nThe motif in example B splits each half bar **3 + 3 + 2**: notes on 16th steps 1, 4 and 7, then again on 9, 12 and 15. That split is called the **tresillo**, and it's one of the most widely used rhythms in popular music, hip hop included."
+    },
+    {
+      "type": "listen",
+      "title": "Random notes vs a motif",
+      "caption": "Same drums, same pad (Am, then F), same sound, and 12 notes in each. The only difference is whether anything repeats.",
+      "examples": [
+        {
+          "label": "Random notes",
+          "explanation": "12 notes, all in A minor, with no repeated shape or rhythm. Nothing is wrong, but there's nothing to remember either.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "F5:2 B4:3 E5:1 G5:4 D5:1 A4:3 C5:2 G5:5 E5:1 A4:2 D5:6 F5:2"
+              }
+            ]
+          }
+        },
+        {
+          "label": "One 3-note motif, four times",
+          "explanation": "C, E, A in a 3 + 3 + 2 rhythm, played four times. By the third time you can sing it. Same key, same number of notes; repetition is the whole difference.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "C5:3 E5:3 A4:2 C5:3 E5:3 A4:2 C5:3 E5:3 A4:2 C5:3 E5:3 A4:2 "
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Rhythm first, and leave space",
+      "body": "Two habits make a motif hit harder.\n\n**Rhythm first.** Find a rhythm that bounces before you worry about which notes. Even on a single note, a good rhythm already grooves with the drums. Then pick pitches to fill the slots.\n\n**Leave space.** Rests are part of the melody. A gap lets the motif land, makes the next entry hit harder, and leaves room for a rapper.\n\nAnd keep the **range** tight: motifs that stay within about an octave and move mostly to neighbouring notes are easy to follow and easy to hum.",
+      "deeper": "**Why rhythm first?** The rhythm is what locks the melody to the drums. Fixing it first also shrinks the problem: once you have three slots, you only choose three notes, and you can try different notes in them without losing the groove.\n\n**Space.** These beats are built to carry vocals. Gaps in the melody are where a rapper's lines can sit without fighting it, and a melody that never stops leaves nowhere to breathe.\n\n**Range.** A **step** moves to the neighbouring note in the scale; anything bigger is a **leap**. Steps are easy to follow and to sing. A leap stands out, so save it for the note you want to stand out. An **octave** is 12 half steps, from one A to the next A."
+    },
+    {
+      "type": "listen",
+      "title": "Busy, spaced, and rhythm only",
+      "caption": "Same drums and pad. A and B use the same three notes, C, E and A; only the rhythm and the gaps change. C keeps B's rhythm and drops the pitches to a single A.",
+      "examples": [
+        {
+          "label": "No space",
+          "explanation": "C, E, A cycling in steady 8th notes for two bars, never stopping. It's in key and it repeats, but nothing lands, and a rapper would have to fight it.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "C5:2 E5:2 A4:2 C5:2 E5:2 A4:2 C5:2 E5:2 A4:2 C5:2 E5:2 A4:2 C5:2 E5:2 A4:2 C5:2"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Rhythm and space",
+          "explanation": "The same three notes in a 3 + 3 + 4 rhythm, then a gap of 6 steps, twice. The gap makes each entry hit, and there's room for a voice.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "C5:3 E5:3 A4:4 r:6 C5:3 E5:3 A4:4 r:6"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Just the rhythm",
+          "explanation": "B's rhythm on one note, A. It still bounces against the drums. That's why you start with the rhythm: get it right and the pitches only have to dress it.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "A4:3 A4:3 A4:4 r:6 A4:3 A4:3 A4:4 r:6"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Write a 1-bar motif",
+      "prompt": "Write one motif of **3 to 6 notes** in **bar 1**, and leave **bar 2 empty**. The empty bar is your space, and the next lesson is about what to put there.\n\nRhythm first: tap a rhythm on one row of the piano roll, press play, and change it until it bounces. Then move notes to other rows. Keep them close together.",
+      "tool": "melodyEditor",
+      "targetRole": "melody",
+      "uses": [],
+      "checks": [
+        {
+          "kind": "inKey",
+          "role": "melody"
+        },
+        {
+          "kind": "noteCount",
+          "role": "melody",
+          "min": 3,
+          "max": 6
+        }
+      ],
+      "hints": [
+        "Start from the 3 + 3 + 2 rhythm: tap the 1st, 4th and 7th cells of bar 1 on the same row and play it. Then shift a note or two up or down a row.",
+        "Keep it close: try degrees 1, 3 and 5 (A, C and E in A minor). The keys marked **1** are home. Scale lock only guards the keyboard, so check that piano-roll notes sit on tinted rows.",
+        "The check counts every melody note in both bars, including a melody Your Track already has (edits in a practice lesson aren't saved). Too many? Delete notes in bar 2 first, then trim bar 1 until 3 to 6 are left."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "That was a practice rep, so nothing goes into Your Track yet. You'll write the melody you keep at the end of this stage, in From fumbling to finding.",
+      "roles": []
+    }
+  ]
+}

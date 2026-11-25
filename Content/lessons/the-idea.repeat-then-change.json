@@ -1,0 +1,200 @@
+{
+  "id": "the-idea.repeat-then-change",
+  "stage": "the-idea",
+  "title": "Repeat, then change one thing",
+  "summary": "AAAB and ABAB phrasing, call and response, and changing one thing at a time so a loop stays fresh.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Repeat, then change one thing",
+      "body": "Play a motif once and it's an idea. Repeat it and it's a hook. But repeat it forever with no change and the ear tunes out.\n\nThe fix: **AAAB**. Play the phrase three times, then change it the fourth time. The repeats build an expectation; the change pays it off and signals that the loop is about to come round.\n\nChange **one thing**: the pitches, the rhythm, or just the ending. Change everything and it stops sounding like the same idea.\n\nNext: four bars of AAAA, then AAAB.",
+      "deeper": "Letters label phrases: the same letter means the same phrase, a new letter means a different one. **AAAB** is one phrase three times, then a changed version. **ABAB** alternates two phrases.\n\nChanging one part of a phrase while keeping the rest is called **variation**. There are three easy dials:\n\n- **Pitch:** same rhythm, different notes.\n- **Rhythm:** same notes, moved or held longer.\n- **Ending:** the same phrase with only the last note or two changed.\n\nKeeping the rhythm is the safest choice, because the rhythm is what tells the ear it's still the same idea."
+    },
+    {
+      "type": "listen",
+      "title": "AAAA vs AAAB",
+      "caption": "Four bars each, over the same drums and pad (Am, F, Am, F). Bars 1 to 3 are identical in both. Listen to bar 4, and to how bar 1 sounds when it comes back.",
+      "examples": [
+        {
+          "label": "AAAA",
+          "explanation": "The same bar four times: E, C, A, C, E. Catchy at first, but by bar 4 nothing new is happening.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16 Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:3 C5:3 A4:2 r:2 C5:2 E5:4 E5:3 C5:3 A4:2 r:2 C5:2 E5:4 E5:3 C5:3 A4:2 r:2 C5:2 E5:4 E5:3 C5:3 A4:2 r:2 C5:2 E5:4"
+              }
+            ]
+          }
+        },
+        {
+          "label": "AAAB",
+          "explanation": "Bars 1 to 3 are the same. Bar 4 keeps the rhythm and the first three notes, and changes the last two to G and F. That F sits a half step above the E that starts bar 1, so it tips you back into the loop.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 4,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....X.........x.....X......x..x.....",
+                  "snare": "........X...............X...............X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16 Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:3 C5:3 A4:2 r:2 C5:2 E5:4 E5:3 C5:3 A4:2 r:2 C5:2 E5:4 E5:3 C5:3 A4:2 r:2 C5:2 E5:4 E5:3 C5:3 A4:2 r:2 G5:2 F5:4"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Call and response",
+      "body": "**Call and response** is two phrases talking. Bar 1 asks; bar 2 answers.\n\nThe easy way to write an answer: keep bar 1's **rhythm** and change the **notes**, especially the last one. The same rhythm tells the ear it's the same idea. The new notes make it a reply.\n\nThe call ends away from home, so it hangs. The answer lands home. In a 2-bar loop that becomes ABAB, resolving every two bars.\n\nNext: an answer that keeps the rhythm, then a bar 2 where everything changes.",
+      "deeper": "Call and response comes from African musical traditions and runs through gospel, blues, funk and hip hop. In a beat it can be one instrument answering itself, as here, or two instruments trading phrases.\n\nWhy the same rhythm? If bar 2 has a new rhythm *and* new notes, the ear hears two unrelated ideas. Keep one dial fixed and the second bar sounds like a reply to the first.\n\nWhere the phrase ends matters too. Ending on the home note (A in A minor) sounds finished, and ending elsewhere sounds like a question. That's the next lesson."
+    },
+    {
+      "type": "listen",
+      "title": "An answer vs a new idea",
+      "caption": "Two-bar loops over the same drums and pad (Am, then F). Bar 1 is the same call in both. Looped, each one becomes ABAB.",
+      "examples": [
+        {
+          "label": "Same rhythm, new ending",
+          "explanation": "Bar 2 copies bar 1's rhythm and notes, except the last note: A, the home note, instead of D. The call hangs; the answer lands. Only one thing changed.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:3 C5:3 A4:2 r:2 C5:2 D5:4 E5:3 C5:3 A4:2 r:2 C5:2 A4:4"
+              }
+            ]
+          }
+        },
+        {
+          "label": "Everything changes",
+          "explanation": "Bar 2 has a different rhythm and a different run of notes. Each bar is fine on its own, but nothing ties them together, so it sounds like two ideas glued side by side.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:3 C5:3 A4:2 r:2 C5:2 D5:4 G5:2 F5:2 E5:2 C5:2 r:1 A5:3 F5:4"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Make bar 2 answer",
+      "prompt": "The starter plays the same motif in both bars: AA. Turn bar 2 into an answer.\n\n**Keep bar 2's rhythm**: every note keeps the step it starts on, and you don't add or remove notes. **Change the pitch** of at least one note, starting with the last. Ending bar 2 on the home note (A in A minor, the most strongly tinted row) makes it sound like a reply.\n\nPress play and listen to the loop as you go.",
+      "tool": "melodyEditor",
+      "targetRole": "melody",
+      "uses": [
+        "melody"
+      ],
+      "starter": {
+        "tempo": 140,
+        "key": "A minor",
+        "bars": 2,
+        "parts": [
+          {
+            "role": "melody",
+            "instrument": "bell",
+            "melody": "E4:3 G4:3 A4:2 r:2 G4:2 E4:4 E4:3 G4:3 A4:2 r:2 G4:2 E4:4"
+          }
+        ]
+      },
+      "checks": [
+        {
+          "kind": "inKey",
+          "role": "melody"
+        },
+        {
+          "kind": "barRhythmRepeats",
+          "role": "melody"
+        },
+        {
+          "kind": "barsDiffer",
+          "role": "melody"
+        }
+      ],
+      "hints": [
+        "To change a note's pitch, tap it in the piano roll to remove it, then tap the cell above or below it at the same step. Hold and drag if you want its old length back.",
+        "The check compares where notes **start** in each bar. Adding a note, removing one, or moving one to another step breaks the rhythm match. Changing a pitch or a length doesn't.",
+        "Simplest pass: move only the last note of bar 2 to the home row, A in A minor. If Your Track already has a melody, you're editing that instead of the starter: give bar 2 the same rhythm as bar 1 with at least one note changed."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Practice rep done, so nothing goes into Your Track. Keep the move, though: repeat the rhythm, change the notes. You'll use it on the melody you keep at the end of this stage.",
+      "roles": []
+    }
+  ]
+}
