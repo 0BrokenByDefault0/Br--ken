@@ -172,6 +172,17 @@ private func expectRestartWhenStopped(after name: Notification.Name) throws {
 }
 
 @MainActor
+@Test func audioErrorCanBeDismissed() throws {
+    let engine = FlakyEngine()
+    engine.failing = true
+    let host = AudioHost(session: FakeSession(), makeEngine: { engine }, center: NotificationCenter())
+    #expect(throws: Boom.self) { try host.start() }
+    #expect(host.lastError != nil)
+    host.dismissError()
+    #expect(host.lastError == nil)
+}
+
+@MainActor
 @Test func sessionIsPlaybackCategory() throws {
     let host = AudioHost(session: SystemAudioSession(), makeEngine: { FakeEngine() }, center: NotificationCenter())
     try host.start()

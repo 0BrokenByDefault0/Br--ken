@@ -471,3 +471,41 @@ struct ChordFinderFixTests {
         #expect(ChordProgression(slots: []).chords(inBar: 0).isEmpty)
     }
 }
+
+// MARK: - Live recording latency
+
+struct LatencyCompensationTests {
+    @Test func secondsBecomeTicksAtTheTempo() {
+        // 25 ms at 150 BPM: 0.025 s x 2.5 beats/s x 96 ticks/beat = 6 ticks.
+        #expect(LatencyCompensation.ticks(seconds: 0.025, tempo: 150) == 6)
+        #expect(LatencyCompensation.ticks(seconds: 0.0125, tempo: 120) == 2)  // 2.4 rounds down
+        #expect(LatencyCompensation.ticks(seconds: 0, tempo: 140) == 0)
+        #expect(LatencyCompensation.ticks(seconds: -1, tempo: 140) == 0, "never negative")
+        #expect(LatencyCompensation.ticks(seconds: .nan, tempo: 140) == 0)
+    }
+
+    @Test func heardTickWrapsWithinTheLoop() {
+        #expect(LatencyCompensation.heardTick(playhead: 100, latency: 16, loopTicks: 768) == 84)
+        #expect(LatencyCompensation.heardTick(playhead: 4, latency: 6, loopTicks: 768) == 766, "wraps to the loop end")
+        #expect(LatencyCompensation.heardTick(playhead: 10, latency: 0, loopTicks: 768) == 10)
+        #expect(LatencyCompensation.heardTick(playhead: 10, latency: 2000, loopTicks: 768) == (10 - 2000 % 768 + 768) % 768)
+        #expect(LatencyCompensation.heardTick(playhead: 10, latency: 5, loopTicks: 0) == 10, "no loop: unchanged")
+    }
+
+    @MainActor
+    @Test func playerReportsLatencyAtTheTrackTempo() {
+        let player = AudioPlayer(latencySeconds: { 0.025 })
+        #expect(player.latencyTicks == 0, "no track yet")
+        player.setTrack(Track(name: "t", createdAt: Date(), tempo: 150, key: Key(tonic: PitchClass(9), mode: .minor),
+                              bars: 2, parts: []))
+        #expect(player.latencyTicks == 6)
+    }
+}
+
+// MARK: - Part names
+
+struct PartRoleNameTests {
+    @Test func displayNames() {
+        #expect(PartRole.allCases.map(\.displayName) == ["Melody", "Chords", "Drums", "808", "Counter", "Texture"])
+    }
+}

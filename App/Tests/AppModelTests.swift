@@ -1,6 +1,8 @@
 import Testing
 import Foundation
+import AVFoundation
 import MusicCore
+import SoundEngine
 @testable import Broken
 
 @MainActor
@@ -8,6 +10,7 @@ private final class FakeAudio: AudioPlaying {
     var tracksSet: [Track] = []
     var playheadTick = 0
     var isPlaying = false
+    var latencyTicks = 0
     func setTrack(_ t: Track) { tracksSet.append(t) }
     func play() { isPlaying = true }
     func stop() { isPlaying = false }
@@ -45,7 +48,7 @@ private struct Sandbox {
     }
 
     @MainActor
-    func makeModel(audio: FakeAudio? = nil) throws -> AppModel {
+    func makeModel(audio: (any AudioPlaying)? = nil) throws -> AppModel {
         AppModel(content: try ContentLibrary(directory: contentDir),
                  trackStore: TrackStore(directory: tracksDir),
                  progressStore: ProgressStore(fileURL: progressURL),
@@ -595,12 +598,29 @@ private func threeNotes() throws -> Part {
         ClipPart(role: .melody, instrument: .bell, melody: "D4:4 F4:4"),
         ClipPart(role: .chords, instrument: .pad, chords: "Dm:16 Bb:16"),
     ])
-    let all = try ListenPlayback.track(for: clip, muted: [])
+    let base = try ListenPlayback.track(for: clip)
+    let all = ListenPlayback.track(base, mutedParts: [])
     #expect(all.parts.allSatisfy { !$0.muted })
     #expect(all.tempo == 92)
-    let noChords = try ListenPlayback.track(for: clip, muted: [.chords])
+    let noChords = ListenPlayback.track(base, mutedParts: [1])
     #expect(noChords.part(.chords)?.muted == true)
     #expect(noChords.part(.melody)?.muted == false)
+    #expect(noChords.parts.map(\.id) == base.parts.map(\.id), "the cached example keeps its parts")
+    #expect(ListenPlayback.partLabels(base) == ["Melody", "Chords"])
+}
+
+@MainActor
+@Test func listenSameRolePartsMuteIndependentlyWithDistinctLabels() throws {
+    let clip = Clip(tempo: 92, key: "D minor", bars: 2, parts: [
+        ClipPart(role: .chords, instrument: .pad, chords: "Dm:32"),
+        ClipPart(role: .chords, instrument: .keys, chords: "Bb:32"),
+        ClipPart(role: .chords, instrument: .pluck, chords: "F:32"),
+        ClipPart(role: .bass808, instrument: .eight08, melody: "D2:32"),
+    ])
+    let base = try ListenPlayback.track(for: clip)
+    let middleMuted = ListenPlayback.track(base, mutedParts: [1])
+    #expect(middleMuted.parts.map(\.muted) == [false, true, false, false], "only the tapped part mutes")
+    #expect(ListenPlayback.partLabels(base) == ["Chords 1", "Chords 2", "Chords 3", "808"])
 }
 
 @MainActor
@@ -793,7 +813,10 @@ private func threeNotes() throws -> Part {
     }
     #expect(player.conflictingRoles(forKeepAt: 1) == [.melody, .drums])
     #expect(player.emptyRoles(forKeepAt: 1) == [.chords])
-    #expect(player.rolesToSave(atKeep: 1).isEmpty, "the default is Keep mine")
+    #expect(player.rolesToSave(atKeep: 1) == [.drums],
+            "the task's own edit of the saved drums defaults to Replace; the melody (not its part) to Keep mine")
+    player.setReplace(false, role: .drums, atKeep: 1)
+    #expect(player.rolesToSave(atKeep: 1).isEmpty)
     player.setReplace(true, role: .drums, atKeep: 1)
     #expect(player.replaces(.drums, atKeep: 1))
     #expect(player.rolesToSave(atKeep: 1) == [.drums])
@@ -865,4 +888,240 @@ private func threeNotes() throws -> Part {
     let fresh = player.taskModel(at: 0)
     #expect(fresh !== first, "fresh task models")
     #expect(fresh.hintIndex == 0)
+}
+
+// MARK: - Final fix wave
+
+private func chordsTask(tool: ToolKind, uses: [PartRole]) -> LessonStep {
+    .task(title: "Chords", prompt: "p", tool: tool, targetRole: .chords, uses: uses, starter: starter,
+          checks: [], hints: [])
+}
+
+private func chordsLesson(_ id: String, tool: ToolKind, uses: [PartRole]) -> Lesson {
+    Lesson(id: id, stage: "harmony", title: "t", summary: "s", steps: [
+        chordsTask(tool: tool, uses: uses), .keep(message: "k", roles: [.chords]),
+    ])
+}
+
+@MainActor
+@Test func keepDefaultsToReplaceForTheOwnersEditOfTheirSavedPart() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "D minor"))
+    let found = try Notation.chords("Dm:16 Bb:16")
+    let first = LessonPlayerModel(lesson: chordsLesson("harmony.chords-from-melody", tool: .chordFinder, uses: [.melody]),
+                                  app: model)
+    first.taskModel(at: 0).editTarget { $0.content = .chords(found) }
+    first.saveKeep(at: 1)
+    #expect(model.activeTrack?.part(.chords)?.content == .chords(found))
+
+    let second = LessonPlayerModel(lesson: chordsLesson("harmony.sound-expensive", tool: .chordPads, uses: [.melody, .chords]),
+                                   app: model)
+    #expect(second.taskModel(at: 0).working.part(.chords)?.content == .chords(found), "the task starts from the saved chords")
+    let richer = try Notation.chords("Dm7:16 Bbmaj7:16")
+    second.taskModel(at: 0).editTarget { $0.content = .chords(richer) }
+    #expect(second.conflictingRoles(forKeepAt: 1) == [.chords])
+    #expect(second.replaces(.chords, atKeep: 1), "an edit of the owner's own saved part defaults to Replace")
+    #expect(second.rolesToSave(atKeep: 1) == [.chords])
+    second.saveKeep(at: 1)
+    #expect(model.activeTrack?.part(.chords)?.content == .chords(richer))
+    #expect(second.saved[1] == [.chords])
+
+    // Back to the task for another edit: the saved part is still the owner's own work.
+    let again = try Notation.chords("Dm9:16 Bbmaj7:16")
+    second.taskModel(at: 0).editTarget { $0.content = .chords(again) }
+    #expect(second.replaces(.chords, atKeep: 1))
+    second.saveKeep(at: 1)
+    #expect(model.activeTrack?.part(.chords)?.content == .chords(again))
+}
+
+@MainActor
+@Test func keepDefaultsToKeepMineWhenTheSavedPartIsDifferent() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "D minor"))
+    let mine = try Notation.chords("Dm:16 Bb:16")
+    model.updateActiveTrack { $0.setPart(Part(role: .chords, instrument: .pad, content: .chords(mine))) }
+    let player = LessonPlayerModel(lesson: chordsLesson("harmony.sound-expensive", tool: .chordPads, uses: [.melody, .chords]),
+                                   app: model)
+    let task = player.taskModel(at: 0)
+    // Your Track's chords change elsewhere (the Chords tab) after the task started.
+    let elsewhere = try Notation.chords("Gm:16 F:16")
+    model.updateActiveTrack { $0.setPart(Part(role: .chords, instrument: .pad, content: .chords(elsewhere))) }
+    task.editTarget { $0.content = .chords(try! Notation.chords("Dm7:16 Bbmaj7:16")) }
+    #expect(player.conflictingRoles(forKeepAt: 1) == [.chords])
+    #expect(!player.replaces(.chords, atKeep: 1), "a saved part that isn't the task's starting part defaults to Keep mine")
+    #expect(player.rolesToSave(atKeep: 1).isEmpty)
+    player.saveKeep(at: 1)
+    #expect(model.activeTrack?.part(.chords)?.content == .chords(elsewhere))
+}
+
+@MainActor
+@Test func changingTheChoiceAfterSavingThenSavingAgainAppliesIt() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "D minor"))
+    let player = LessonPlayerModel(lesson: chordsLesson("harmony.sound-expensive", tool: .chordPads, uses: [.melody, .chords]),
+                                   app: model)
+    let task = player.taskModel(at: 0)
+    let elsewhere = try Notation.chords("Gm:16 F:16")
+    model.updateActiveTrack { $0.setPart(Part(role: .chords, instrument: .pad, content: .chords(elsewhere))) }
+    let mine = try Notation.chords("Dm7:16 Bbmaj7:16")
+    task.editTarget { $0.content = .chords(mine) }
+    player.saveKeep(at: 1)  // default Keep mine
+    #expect(player.saved[1] == [])
+    #expect(model.activeTrack?.part(.chords)?.content == .chords(elsewhere))
+    #expect(player.conflictingRoles(forKeepAt: 1) == [.chords], "the choice is still offered after saving")
+    player.setReplace(true, role: .chords, atKeep: 1)
+    player.saveKeep(at: 1)  // "Save again"
+    #expect(player.saved[1] == [.chords])
+    #expect(model.activeTrack?.part(.chords)?.content == .chords(mine))
+}
+
+private func hasClick(_ track: Track?) -> Bool {
+    track?.parts.contains { part in
+        if part.role == .texture, case .drums(let p) = part.content { return p.lanes[.rim] != nil }
+        return false
+    } ?? false
+}
+
+@MainActor
+@Test func metronomeIsOnlyMixedIntoTheActiveTrack() throws {
+    let audio = FakeAudio()
+    let model = try Sandbox().makeModel(audio: audio)
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+    model.metronome = true
+    let example = Track(name: "Example", createdAt: Date(), tempo: 92, key: try Key(parsing: "D minor"), bars: 2, parts: [])
+    model.audition(example, atTrackTempo: false)
+    #expect(audio.tracksSet.last?.name == "Example")
+    #expect(!hasClick(audio.tracksSet.last), "a lesson loop or example plays without the click")
+    model.updateAudition(example)
+    #expect(!hasClick(audio.tracksSet.last))
+    model.play()
+    #expect(audio.tracksSet.last?.name == "Mine")
+    #expect(hasClick(audio.tracksSet.last), "the active track plays with the click")
+}
+
+@MainActor
+@Test func keepSetupTransposesPartsIntoTheNewKey() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+    let kick = DrumPattern(lanes: [.kick: [DrumHit(tick: 0, velocity: 1)]])
+    model.updateActiveTrack {
+        $0.setPart(try! threeNotes())  // A4 C5 E5
+        $0.setPart(Part(role: .chords, instrument: .pad, content: .chords(try! Notation.chords("Am:16 F:16"))))
+        $0.setPart(Part(role: .drums, instrument: .trapKit, content: .drums(kick)))
+    }
+    let setup = LessonStep.task(title: "Set up", prompt: "p", tool: .trackSetup, targetRole: nil, uses: [],
+                                starter: nil, checks: [], hints: [])
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        setup, .keep(message: "k", roles: []),
+    ])
+    let player = LessonPlayerModel(lesson: lesson, app: model)
+    let cMinor = try Key(parsing: "C minor")
+    player.taskModel(at: 0).edit { $0.key = cMinor }
+    player.keep(at: 1, roles: [])
+    let track = try #require(model.activeTrack)
+    #expect(track.key == cMinor)
+    #expect(notes(track, .melody).map(\.pitch) == [72, 75, 79], "A minor to C minor moves up 3")
+    #expect(track.part(.chords)?.content == .chords(try Notation.chords("Cm:16 Ab:16")))
+    #expect(track.part(.drums)?.content == .drums(kick), "drums are untouched")
+
+    // The same key again changes nothing.
+    let player2 = LessonPlayerModel(lesson: lesson, app: model)
+    player2.keep(at: 1, roles: [])
+    #expect(notes(try #require(model.activeTrack), .melody).map(\.pitch) == [72, 75, 79])
+}
+
+@MainActor
+@Test func toolTabsFollowTheKeyAfterKeepSetup() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+    let before = try #require(model.activeTrack)
+    let setup = LessonStep.task(title: "Set up", prompt: "p", tool: .trackSetup, targetRole: nil, uses: [],
+                                starter: nil, checks: [], hints: [])
+    let lesson = Lesson(id: "harmony.find", stage: "harmony", title: "t", summary: "s", steps: [
+        setup, .keep(message: "k", roles: []),
+    ])
+    let player = LessonPlayerModel(lesson: lesson, app: model)
+    let cMinor = try Key(parsing: "C minor")
+    player.taskModel(at: 0).edit { $0.key = cMinor }
+    player.keep(at: 1, roles: [])
+    let after = try #require(model.activeTrack)
+    #expect(after.toolIdentity != before.toolIdentity, "the Chords and Melody tabs rebuild on a key change")
+    #expect(ChordFinderModel(track: after).key == cMinor)
+    #expect(MelodyToolModel(app: model, track: after).roll.key == cMinor)
+}
+
+@MainActor
+@Test func glideModeOnlyFor808() throws {
+    let model = try Sandbox().makeModel()
+    func tool(_ instrument: InstrumentID) -> MelodyToolModel {
+        MelodyToolModel(part: Part(role: .melody, instrument: instrument, content: .notes(NoteSequence(notes: []))),
+                        bars: 2, key: AppModel.defaultKey, audio: model.audio, isPlaying: { false }, play: {}, write: { _ in })
+    }
+    #expect(tool(.eight08).showsGlide)
+    #expect(!tool(.bell).showsGlide)
+    #expect(!tool(.pad).showsGlide)
+}
+
+@MainActor
+@Test func liveRecordingSubtractsOutputLatency() throws {
+    let audio = FakeAudio()
+    audio.latencyTicks = 16
+    let model = try Sandbox().makeModel(audio: audio)
+    model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+    let tool = MelodyToolModel(app: model, track: try #require(model.activeTrack))
+    tool.toggleRecording()
+    audio.playheadTick = 40  // heard at 24
+    tool.keyEvent(pitch: 69, on: true)
+    audio.playheadTick = 100  // heard at 84
+    tool.keyEvent(pitch: 69, on: false)
+    tool.toggleRecording()
+    let recorded = notes(try #require(model.activeTrack), .melody)
+    #expect(recorded.map(\.start) == [24])
+    #expect(recorded.map(\.length) == [72])
+}
+
+private final class StubSession: AudioSessionControlling {
+    func configure() throws {}
+}
+
+private final class StubEngine: AudioEngineControlling {
+    var isRunning = false
+    func start() throws { isRunning = true }
+    func stop() { isRunning = false }
+}
+
+/// Renders one block so the renderer applies queued commands and publishes its play state.
+private func renderBlock(_ renderer: Renderer) {
+    var left = [Float](repeating: 0, count: 256), right = [Float](repeating: 0, count: 256)
+    left.withUnsafeMutableBufferPointer { l in
+        right.withUnsafeMutableBufferPointer { r in renderer.render(frames: 256, left: l.baseAddress!, right: r.baseAddress!) }
+    }
+}
+
+@MainActor
+@Test func mediaResetKeepsAppPlayStateTrue() throws {
+    for playing in [true, false] {
+        let player = AudioPlayer()
+        var renderers: [Renderer] = []
+        let center = NotificationCenter()
+        let host = AudioHost(session: StubSession(), makeEngine: {
+            let renderer = Renderer(sampleRate: 48_000)
+            renderers.append(renderer)
+            player.attach(renderer)
+            return StubEngine()
+        }, center: center)
+        try host.start()
+        let model = try Sandbox().makeModel(audio: player)
+        model.startTrack(name: "Mine", tempo: 140, key: try Key(parsing: "A minor"))
+        if playing { model.play() }
+        renderBlock(renderers[0])
+        #expect(player.isPlaying == playing)
+
+        center.post(name: AVAudioSession.mediaServicesWereResetNotification, object: nil)
+        #expect(renderers.count == 2, "the reset built a new renderer")
+        renderBlock(renderers[1])
+        #expect(model.isPlaying == playing)
+        #expect(player.isPlaying == model.isPlaying, "the rebuilt renderer resumes (or stays stopped) to match the app")
+        withExtendedLifetime(host) {}
+    }
 }
