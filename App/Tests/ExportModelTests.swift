@@ -62,6 +62,8 @@ struct ExportModelTests {
         let urls = try await ExportModel(track: track([melody(), c]), directory: tempDir())
             .export(scope: .part(c.id), loopReady: false)
         #expect(urls.map(\.lastPathComponent) == ["My-Beat-140bpm-Aminor-chords.wav"])
+        let samples = try Self.pcmSamples(urls[0])
+        #expect(samples.contains { $0 != 0 })
     }
 
     @Test func exportedFileFrameCountExact() async throws {
@@ -88,5 +90,49 @@ struct ExportModelTests {
         let urls = try await model.export(scope: .fullMix, loopReady: false)
         #expect(urls.count == 1)
         #expect(try FileManager.default.contentsOfDirectory(atPath: dir.path).count == 1)
+    }
+
+    @Test func fullMixWithNothingAudibleThrows() async {
+        let allMuted = track([melody(muted: true), drums(muted: true)])
+        let empty = Part(role: .chords, instrument: .pad, content: .notes(NoteSequence(notes: [])))
+        for t in [allMuted, track([empty]), track([])] {
+            let dir = tempDir()
+            await #expect(throws: ExportError.self) {
+                _ = try await ExportModel(track: t, directory: dir).export(scope: .fullMix, loopReady: true)
+            }
+            #expect(!FileManager.default.fileExists(atPath: dir.appendingPathComponent("My-Beat-140bpm-Aminor.wav").path))
+        }
+    }
+
+    @Test func duplicateRoleStemsGetSuffix() async throws {
+        let urls = try await ExportModel(track: track([melody(), melody()]), directory: tempDir())
+            .export(scope: .stems, loopReady: false)
+        #expect(urls.map(\.lastPathComponent).sorted()
+                == ["My-Beat-140bpm-Aminor-melody-2.wav", "My-Beat-140bpm-Aminor-melody.wav"])
+    }
+
+    @Test func missingPartThrows() async {
+        await #expect(throws: ExportError.self) {
+            _ = try await ExportModel(track: track([melody()]), directory: tempDir())
+                .export(scope: .part(UUID()), loopReady: false)
+        }
+    }
+
+    /// 16-bit little-endian samples of the WAV "data" chunk.
+    private static func pcmSamples(_ url: URL) throws -> [Int16] {
+        let data = try Data(contentsOf: url)
+        var offset = 12
+        while offset + 8 <= data.count {
+            let id = String(decoding: data[offset..<offset + 4], as: UTF8.self)
+            let size = data[offset + 4..<offset + 8].enumerated().reduce(0) { $0 | Int($1.element) << (8 * $1.offset) }
+            if id == "data" {
+                let body = data[offset + 8..<min(data.count, offset + 8 + size)]
+                return stride(from: body.startIndex, to: body.endIndex - 1, by: 2).map {
+                    Int16(bitPattern: UInt16(body[$0]) | UInt16(body[$0 + 1]) << 8)
+                }
+            }
+            offset += 8 + size + (size & 1)
+        }
+        return []
     }
 }

@@ -28,6 +28,7 @@ struct ExportSheet: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    .disabled(model.isExporting)
                     .tint(Color.haze)
                     .frame(minHeight: Theme.minTarget)
 
@@ -36,6 +37,7 @@ struct ExportSheet: View {
                     Toggle("Loop-ready (tails wrap)", isOn: $loopReady)
                         .font(Theme.body(16)).foregroundStyle(Color.ink)
                         .tint(Color.haze)
+                        .disabled(model.isExporting)
                         .frame(minHeight: Theme.minTarget)
 
                     Button {

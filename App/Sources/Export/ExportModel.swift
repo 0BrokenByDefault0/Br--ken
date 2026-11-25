@@ -59,13 +59,17 @@ final class ExportModel {
     nonisolated private static func render(track: Track, scope: ExportScope, loopReady: Bool,
                                            directory: URL) throws -> [URL] {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        var renderTrack = track
         var jobs: [(name: String, only: UUID?)] = []
         switch scope {
         case .fullMix:
+            guard track.parts.contains(where: { !$0.muted && $0.hasContent }) else { throw ExportError.nothingToExport }
             jobs = [(ExportNaming.fileName(track: track, part: nil), nil)]
         case .part(let id):
             guard let part = track.parts.first(where: { $0.id == id }) else { throw ExportError.partMissing }
             jobs = [(ExportNaming.fileName(track: track, part: part), id)]
+            // The renderer skips muted parts, so render a copy with this one switched on.
+            if let i = renderTrack.parts.firstIndex(where: { $0.id == id }) { renderTrack.parts[i].muted = false }
         case .stems:
             var used = Set<String>()
             for part in track.parts where !part.muted && part.hasContent {
@@ -82,15 +86,13 @@ final class ExportModel {
         }
         var out: [URL] = []
         for job in jobs {
-            let buffer = OfflineRenderer.render(track: track, onlyPart: job.only, loopReady: loopReady)
+            let buffer = OfflineRenderer.render(track: renderTrack, onlyPart: job.only, loopReady: loopReady)
             let url = directory.appendingPathComponent(job.name)
             try WAVWriter.write(buffer, sampleRate: 48_000, to: url)
             out.append(url)
         }
         return out
     }
-
-    nonisolated private static func hasContent(_ part: Part) -> Bool { part.hasContent }
 }
 
 enum ExportError: LocalizedError {
@@ -98,7 +100,7 @@ enum ExportError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .partMissing: "That part isn't in the track any more."
-        case .nothingToExport: "No part has any notes yet."
+        case .nothingToExport: "Nothing to export: no unmuted part has any notes yet."
         }
     }
 }
