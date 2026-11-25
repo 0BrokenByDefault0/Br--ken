@@ -46,16 +46,18 @@ struct ChordFinderView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     ForEach(0..<model.bars, id: \.self) { bar in
-                        let chord = model.progression.chord(at: bar * Ticks.perBar)
+                        let chords = model.progression.chords(inBar: bar)
                         Button { model.focusedBar = bar } label: {
                             VStack(spacing: 1) {
                                 Text("Bar \(bar + 1)").font(Theme.mono(10)).foregroundStyle(Color.mute)
-                                Text(chord?.symbol(in: model.key) ?? "–")
+                                Text(chords.isEmpty ? "–" : chords.map { $0.symbol(in: model.key) }.joined(separator: " | "))
                                     .font(Theme.mono(15, weight: .bold)).foregroundStyle(Color.ink)
-                                Text(chord.flatMap { model.key.roman(of: $0) } ?? " ")
+                                    .lineLimit(1).minimumScaleFactor(0.6)
+                                Text(chords.isEmpty ? " " : chords.map { model.key.roman(of: $0) ?? "?" }.joined(separator: " | "))
                                     .font(Theme.mono(10)).foregroundStyle(Color.haze)
+                                    .lineLimit(1).minimumScaleFactor(0.6)
                             }
-                            .frame(width: 84, height: 56)
+                            .frame(width: 96, height: 56)
                             .background(Color.panel, in: RoundedRectangle(cornerRadius: 10))
                             .overlay(RoundedRectangle(cornerRadius: 10)
                                 .stroke(model.focusedBar == bar ? Color.haze : Color.clear, lineWidth: 1.5))

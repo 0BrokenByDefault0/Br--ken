@@ -18,13 +18,13 @@ enum ChordFinderRules {
         value >= 70 ? .tone : (value >= 40 ? .color : .clash)
     }
 
-    /// Same rule as `ChordFinder`: a chord tone, or a clash if it is a half step above a chord tone, else a color tone.
+    /// Uses `ChordFinder.role`, the same rule that scores the fits.
     static func chipRole(pitch: Int, chord: Chord) -> ChipRole {
-        let tones = chord.pitchClasses
-        let pc = PitchClass(pitch)
-        if tones.contains(pc) { return .chordTone }
-        if tones.contains(PitchClass(pc.rawValue - 1)) { return .clash }
-        return .colorTone
+        switch ChordFinder.role(of: PitchClass(pitch), in: chord) {
+        case .chordTone: return .chordTone
+        case .color: return .colorTone
+        case .clash: return .clash
+        }
     }
 
     private static let intervalNames = ["R", "♭2", "9", "♭3", "3", "11", "♭5", "5", "♭6", "6", "♭7", "7"]
@@ -71,6 +71,17 @@ extension ChordProgression {
     }
 }
 
+extension ChordProgression {
+    /// The distinct chords sounding in `bar` (at its start and at its second half), in order.
+    func chords(inBar bar: Int) -> [Chord] {
+        var result: [Chord] = []
+        for tick in [bar * Ticks.perBar, bar * Ticks.perBar + Ticks.perBar / 2] {
+            if let c = chord(at: tick), c != result.last { result.append(c) }
+        }
+        return result
+    }
+}
+
 extension Key {
     /// Roman numeral of `chord` among the diatonic and borrowed chords, if it is one of them.
     func roman(of chord: Chord) -> String? {
@@ -83,12 +94,21 @@ extension Key {
 final class ChordFinderModel {
     static let fitsShown = 5
 
-    let melody: NoteSequence
+    private(set) var melody: NoteSequence
     let bars: Int
     let key: Key
     var tempo: Double = 140
     private(set) var fitsPerBar: [[ChordFit]]
-    var progression = ChordProgression(slots: [])
+    /// Placing a different chord in a bar (pads, or `choose`) drops that bar's tapped selection, so the
+    /// chips and header follow the slot.
+    var progression = ChordProgression(slots: []) {
+        didSet {
+            for bar in Array(selection.keys) where oldValue.chord(at: bar * Ticks.perBar) != progression.chord(at: bar * Ticks.perBar)
+                || oldValue.chord(at: bar * Ticks.perBar + Ticks.perBar / 2) != progression.chord(at: bar * Ticks.perBar + Ticks.perBar / 2) {
+                selection[bar] = nil
+            }
+        }
+    }
     /// The fit last tapped in each bar; chips are colored under it.
     private(set) var selection: [Int: ChordFit] = [:]
     var focusedBar = 0
@@ -97,8 +117,19 @@ final class ChordFinderModel {
         self.melody = melody
         self.bars = bars
         self.key = key
-        fitsPerBar = ChordFinder.fitsPerBar(melody: melody, bars: bars, key: key)
-            .map { Array($0.prefix(Self.fitsShown)) }
+        fitsPerBar = Self.topFits(melody: melody, bars: bars, key: key)
+    }
+
+    private static func topFits(melody: NoteSequence, bars: Int, key: Key) -> [[ChordFit]] {
+        ChordFinder.fitsPerBar(melody: melody, bars: bars, key: key).map { Array($0.prefix(fitsShown)) }
+    }
+
+    /// Replaces the melody and re-ranks every bar. Tapped selections are dropped (their fits are stale);
+    /// the chosen progression stays.
+    func update(melody: NoteSequence) {
+        self.melody = melody
+        fitsPerBar = Self.topFits(melody: melody, bars: bars, key: key)
+        selection = [:]
     }
 
     func select(bar: Int, fit: ChordFit) { selection[bar] = fit }
@@ -106,7 +137,7 @@ final class ChordFinderModel {
     /// Writes the chord into the bar (start bar*384, length 384), replacing what overlaps, and moves focus to the next bar.
     func choose(bar: Int, fit: ChordFit) {
         progression = progression.placing(fit.chord, start: bar * Ticks.perBar, length: Ticks.perBar)
-        selection[bar] = fit
+        selection[bar] = nil
         focusedBar = min(bar + 1, max(bars - 1, 0))
     }
 

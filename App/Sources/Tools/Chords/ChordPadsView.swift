@@ -45,6 +45,43 @@ struct ChordPad: Equatable {
     }
 }
 
+/// Pad press bookkeeping: every note-on gets exactly one note-off, and the voicing released is the one
+/// that was pressed (even if the pad's quality changed meanwhile). A pad stays "touching" until its touch
+/// ends, so repeated drag events and the events after a long-press do not re-sound it.
+struct PadTouchState {
+    private var touching: Set<Int> = []
+    private var sounding: [Int: [Int]] = [:]
+    private var long: Set<Int> = []
+
+    func isSounding(_ pad: Int) -> Bool { sounding[pad] != nil }
+
+    /// The pitches to note-on, or nil if this touch already pressed the pad.
+    mutating func press(_ pad: Int, voicing: [Int]) -> [Int]? {
+        guard touching.insert(pad).inserted else { return nil }
+        long.remove(pad)
+        sounding[pad] = voicing
+        return voicing
+    }
+
+    /// A hold: stops the sound (the quality switcher opens) and marks the touch as not a tap.
+    mutating func longPress(_ pad: Int) -> [Int] {
+        long.insert(pad)
+        return sounding.removeValue(forKey: pad) ?? []
+    }
+
+    /// Ends the touch. `release` are the pitches to note-off; `place` is true for a completed tap
+    /// (not a hold). Safe to call twice per touch (lift and gesture reset), in either order.
+    mutating func finish(_ pad: Int, completed: Bool) -> (release: [Int], place: Bool) {
+        touching.remove(pad)
+        return (sounding.removeValue(forKey: pad) ?? [], completed && !long.contains(pad))
+    }
+
+    mutating func releaseAll() -> [Int] {
+        defer { touching.removeAll(); sounding.removeAll() }
+        return sounding.values.flatMap { $0 }.sorted()
+    }
+}
+
 /// Chord pads (tap to hear, hold a pad to switch its quality) and a slot strip to place chords in.
 /// A pad sounds on touch-down and stops on release; notes are always released on cancel or disappear.
 struct ChordPadsView: View {
@@ -56,9 +93,7 @@ struct ChordPadsView: View {
     /// Note-on (true) / note-off (false) for each pitch of a pressed pad.
     let onNote: (Int, Bool) -> Void
 
-    @State private var tracker = KeyPressTracker()  // pad indices that are down
-    @State private var voicings: [Int: [Int]] = [:]
-    @State private var longPressed: Set<Int> = []
+    @State private var touches = PadTouchState()
     @State private var overrides: [Int: PadVariant] = [:]
     @State private var switcherPad: Int?
     @State private var twoPerBar = false
@@ -101,10 +136,9 @@ struct ChordPadsView: View {
 
     private func padView(_ index: Int, _ pad: ChordPad) -> some View {
         let chord = current(index, pad)
-        let down = tracker.isHeld(index)
+        let down = touches.isSounding(index)
         return PadCell(onPress: { press(index, chord) },
-                       onBegin: { longPressed.remove(index) },
-                       onFinish: { tapped in finish(index, chord, tapped: tapped) },
+                       onFinish: { completed in finish(index, chord, completed: completed) },
                        onLongPress: { longPress(index) }) {
             VStack(spacing: 2) {
                 Text(chord.symbol(in: key)).font(Theme.mono(17, weight: .bold))
@@ -123,36 +157,28 @@ struct ChordPadsView: View {
     }
 
     private func press(_ index: Int, _ chord: Chord) {
-        guard !longPressed.contains(index), tracker.press(index) else { return }
-        let voicing = Voicer.closeVoicing(chord)
-        voicings[index] = voicing
-        for pitch in voicing { onNote(pitch, true) }  // synchronous, on touch-down
+        guard let pitches = touches.press(index, voicing: Voicer.closeVoicing(chord)) else { return }
+        for pitch in pitches { onNote(pitch, true) }  // synchronous, on touch-down
         onChord(chord)
     }
 
     /// Releases the pad's notes. A completed tap (not a hold, not a cancel) also fills the selected slot.
-    private func finish(_ index: Int, _ chord: Chord, tapped: Bool) {
-        if tapped, !longPressed.contains(index), let slot = selectedSlot {
+    private func finish(_ index: Int, _ chord: Chord, completed: Bool) {
+        let result = touches.finish(index, completed: completed)
+        for pitch in result.release { onNote(pitch, false) }
+        if result.place, let slot = selectedSlot {
             progression = progression.placing(chord, start: slot * slotLength, length: slotLength)
             selectedSlot = slot + 1 < slotCount ? slot + 1 : nil
-        }
-        if tracker.release(index) {
-            for pitch in voicings.removeValue(forKey: index) ?? [] { onNote(pitch, false) }
         }
     }
 
     private func longPress(_ index: Int) {
-        longPressed.insert(index)
-        if tracker.release(index) {
-            for pitch in voicings.removeValue(forKey: index) ?? [] { onNote(pitch, false) }
-        }
+        for pitch in touches.longPress(index) { onNote(pitch, false) }
         switcherPad = index
     }
 
     private func releaseAll() {
-        for index in tracker.releaseAll() {
-            for pitch in voicings.removeValue(forKey: index) ?? [] { onNote(pitch, false) }
-        }
+        for pitch in touches.releaseAll() { onNote(pitch, false) }
     }
 
     private var slotStrip: some View {
@@ -174,19 +200,28 @@ struct ChordPadsView: View {
             }
         }
         .onChange(of: twoPerBar) { _, _ in selectedSlot = nil }
+        .onChange(of: bars) { _, _ in
+            if let s = selectedSlot, s >= slotCount { selectedSlot = nil }
+        }
     }
 
     private func slotCell(_ i: Int) -> some View {
-        let chord = progression.chord(at: i * slotLength)
+        // At 1 per bar a bar may hold two chords (placed at 2 per bar): show both.
+        let chords = twoPerBar ? (progression.chord(at: i * slotLength).map { [$0] } ?? [])
+                               : progression.chords(inBar: i)
         let selected = selectedSlot == i
         let label = twoPerBar ? "\(i / 2 + 1)\(i % 2 == 0 ? "a" : "b")" : "\(i + 1)"
         return Button { selectedSlot = selected ? nil : i } label: {
             VStack(spacing: 2) {
                 Text("Bar \(label)").font(Theme.mono(10)).foregroundStyle(Color.mute)
-                Text(chord?.symbol(in: key) ?? "–").font(Theme.mono(15, weight: .bold)).foregroundStyle(Color.ink)
-                Text(chord.flatMap { key.roman(of: $0) } ?? " ").font(Theme.mono(10)).foregroundStyle(Color.haze)
+                Text(chords.isEmpty ? "–" : chords.map { $0.symbol(in: key) }.joined(separator: " | "))
+                    .font(Theme.mono(15, weight: .bold)).foregroundStyle(Color.ink)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                Text(chords.isEmpty ? " " : chords.map { key.roman(of: $0) ?? "?" }.joined(separator: " | "))
+                    .font(Theme.mono(10)).foregroundStyle(Color.haze)
+                    .lineLimit(1).minimumScaleFactor(0.6)
             }
-            .frame(width: twoPerBar ? 70 : 96, height: 64)
+            .frame(width: twoPerBar ? 70 : 110, height: 64)
             .background(Color.panel, in: RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected ? Color.amber : Color.clear, lineWidth: 2))
         }
@@ -195,12 +230,11 @@ struct ChordPadsView: View {
     }
 }
 
-/// One pad's touch handling: reports each touch-down (`onBegin` once per touch, `onPress` on every drag event), a hold after 0.5 s, and the finish
-/// (`tapped` is true for a normal lift, false when the system cancelled the touch).
+/// One pad's touch handling: reports touch-down (`onPress` on every drag event; `PadTouchState` makes repeats harmless), a hold after 0.5 s, and the finish
+/// (`completed` is true for a normal lift, false when the system cancelled the touch; both can arrive, in either order).
 private struct PadCell<Content: View>: View {
     let onPress: () -> Void
-    let onBegin: () -> Void
-    let onFinish: (Bool) -> Void
+    let onFinish: (_ completed: Bool) -> Void
     let onLongPress: () -> Void
     @ViewBuilder let content: () -> Content
     @GestureState private var touching = false
@@ -216,7 +250,7 @@ private struct PadCell<Content: View>: View {
             )
             .simultaneousGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in onLongPress() })
             .onChange(of: touching) { _, isTouching in
-                if isTouching { onBegin() } else { onFinish(false) }
+                if !isTouching { onFinish(false) }
             }
     }
 }

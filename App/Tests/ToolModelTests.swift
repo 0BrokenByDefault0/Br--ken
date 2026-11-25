@@ -363,3 +363,111 @@ struct ChordPadTests {
         #expect(pads[7].chord(.seventh).quality == .dominant7)
     }
 }
+
+struct PadTouchStateTests {
+    private let voicing = [57, 60, 64]
+
+    @Test func tapSoundsOnceAndReleasesTheSameNotes() {
+        var s = PadTouchState()
+        #expect(s.press(0, voicing: voicing) == voicing)
+        #expect(s.press(0, voicing: voicing) == nil)  // repeated drag events
+        let end = s.finish(0, completed: true)
+        #expect(end.release == voicing && end.place)
+        let reset = s.finish(0, completed: false)  // the gesture reset arrives too
+        #expect(reset.release.isEmpty && !reset.place)
+    }
+
+    @Test func tapAfterLongPressSounds() {
+        var s = PadTouchState()
+        _ = s.press(0, voicing: voicing)
+        #expect(s.longPress(0) == voicing)                  // hold stops the sound
+        #expect(s.press(0, voicing: voicing) == nil)        // finger jitter does not re-sound it
+        let cancel = s.finish(0, completed: false)           // the dialog cancels the touch
+        #expect(cancel.release.isEmpty && !cancel.place)
+        #expect(s.press(0, voicing: voicing) == voicing)    // the next tap is heard
+        #expect(s.finish(0, completed: true).place)
+    }
+
+    @Test func holdThenLiftDoesNotPlace() {
+        var s = PadTouchState()
+        _ = s.press(0, voicing: voicing)
+        _ = s.longPress(0)
+        #expect(!s.finish(0, completed: true).place)
+        #expect(s.finish(0, completed: false).release.isEmpty)
+    }
+
+    @Test func gestureResetBeforeLiftStillPlaces() {
+        var s = PadTouchState()
+        _ = s.press(0, voicing: voicing)
+        #expect(s.finish(0, completed: false).release == voicing)
+        #expect(s.finish(0, completed: true).place)
+    }
+
+    @Test func qualityChangeMidPressReleasesTheOriginalVoicing() {
+        var s = PadTouchState()
+        _ = s.press(0, voicing: voicing)
+        // The pad's chord changes to a 7th while held; a later finish still releases what was pressed.
+        #expect(s.finish(0, completed: true).release == voicing)
+    }
+
+    @Test func releaseAllHandsBackEverythingSounding() {
+        var s = PadTouchState()
+        _ = s.press(0, voicing: [57, 60])
+        _ = s.press(1, voicing: [59])
+        #expect(s.releaseAll() == [57, 59, 60])
+        #expect(s.releaseAll().isEmpty)
+        #expect(s.press(0, voicing: [57]) == [57])
+    }
+}
+
+@MainActor
+struct ChordFinderFixTests {
+    private func model() -> ChordFinderModel { ChordFinderModel(melody: chordsMelody, bars: 2, key: chordsKey) }
+
+    @Test func placingAChordClearsTheBarSelection() {
+        let m = model()
+        m.select(bar: 0, fit: m.fitsPerBar[0][1])
+        m.select(bar: 1, fit: m.fitsPerBar[1][1])
+        #expect(m.chord(forBar: 0) == m.fitsPerBar[0][1].chord)
+        // A pad places a chord into bar 0.
+        m.progression = m.progression.placing(Chord(root: PitchClass(0), quality: .major), start: 0, length: 384)
+        #expect(m.selection[0] == nil)
+        #expect(m.selection[1] != nil)
+        #expect(m.chord(forBar: 0) == Chord(root: PitchClass(0), quality: .major))
+    }
+
+    @Test func chooseClearsTheSelection() {
+        let m = model()
+        let fit = m.fitsPerBar[0][1]
+        m.select(bar: 0, fit: fit)
+        m.choose(bar: 0, fit: fit)
+        #expect(m.selection[0] == nil)
+        #expect(m.chord(forBar: 0) == fit.chord)
+    }
+
+    @Test func updateMelodyRerankssAndKeepsProgression() {
+        let m = model()
+        m.choose(bar: 0, fit: m.fitsPerBar[0][0])
+        let kept = m.progression
+        // Bar 1 now outlines G major (G B D).
+        let g = NoteSequence(notes: [NoteEvent(start: 0, length: 96, pitch: 67), NoteEvent(start: 96, length: 96, pitch: 71),
+                                     NoteEvent(start: 192, length: 96, pitch: 74)])
+        m.select(bar: 1, fit: m.fitsPerBar[1][0])
+        m.update(melody: g)
+        #expect(m.melody == g)
+        #expect(m.fitsPerBar[0][0].chord == Chord(root: PitchClass(7), quality: .major))
+        #expect(m.fitsPerBar.allSatisfy { $0.count == 5 })
+        #expect(m.selection.isEmpty)
+        #expect(m.progression == kept)
+    }
+
+    @Test func barShowsBothChordsOfTwoPerBar() {
+        let a = Chord(root: PitchClass(9), quality: .minor)
+        let f = Chord(root: PitchClass(5), quality: .major)
+        let p = ChordProgression(slots: [ChordSlot(start: 0, length: 192, chord: a), ChordSlot(start: 192, length: 192, chord: f),
+                                         ChordSlot(start: 384, length: 384, chord: a)])
+        #expect(p.chords(inBar: 0) == [a, f])
+        #expect(p.chords(inBar: 1) == [a])
+        #expect(ChordProgression(slots: []).chords(inBar: 0).isEmpty)
+    }
+}

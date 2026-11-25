@@ -31,3 +31,10 @@ import Foundation
 @Test func emptyWindowReturnsCandidatesWithoutCrash() throws {
     #expect(!ChordFinder.fits(melody: NoteSequence(notes: []), window: 0..<384, key: try Key(parsing: "A minor")).isEmpty)
 }
+
+@Test func toneRolesFollowTheFinderRule() throws {
+    let am = try Chord(parsing: "Am")  // A C E
+    #expect(ChordFinder.role(of: PitchClass(9), in: am) == .chordTone)
+    #expect(ChordFinder.role(of: PitchClass(5), in: am) == .clash)  // F is a half step above E
+    #expect(ChordFinder.role(of: PitchClass(2), in: am) == .color)  // D
+}

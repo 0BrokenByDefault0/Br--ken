@@ -14,7 +14,23 @@ public struct ChordFit: Hashable, Sendable {
     }
 }
 
+/// How a melody pitch class sits against a chord.
+public enum ToneRole: Sendable {
+    case chordTone, color, clash
+}
+
 public enum ChordFinder {
+    /// A chord tone; a clash if it is a half step above a chord tone; otherwise a color tone.
+    public static func role(of pc: PitchClass, in chord: Chord) -> ToneRole {
+        roleIn(pc, tones: chord.pitchClasses)
+    }
+
+    private static func roleIn(_ pc: PitchClass, tones: Set<PitchClass>) -> ToneRole {
+        if tones.contains(pc) { return .chordTone }
+        if tones.contains(PitchClass(pc.rawValue - 1)) { return .clash }
+        return .color
+    }
+
     /// Ranks diatonic triads, diatonic sevenths and borrowed chords by how well they fit the melody in `window`.
     public static func fits(melody: NoteSequence, window: Range<Int>, key: Key) -> [ChordFit] {
         let (weights, melodyPCs) = weightsAndPitchClasses(melody: melody, window: window)
@@ -53,13 +69,14 @@ public enum ChordFinder {
         for raw in melodyPCs {
             let w = weights[raw]!
             let pc = PitchClass(raw)
-            if tones.contains(pc) {
+            switch roleIn(pc, tones: tones) {
+            case .chordTone:
                 score += w
                 matched.append(pc)
-            } else if tones.contains(PitchClass(raw - 1)) {
+            case .clash:
                 score -= w
                 clashes.append(pc)
-            } else {
+            case .color:
                 score += 0.25 * w
             }
         }
