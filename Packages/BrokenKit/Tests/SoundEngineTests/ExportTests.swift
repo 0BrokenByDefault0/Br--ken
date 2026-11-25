@@ -88,8 +88,8 @@ private func manualRender(_ t: Track, frames count: Int) -> StereoBuffer {
     #expect(tag(36) == "data")
     #expect(u32(40) == UInt32(frames * 4))
     for i in [0, 1, 17, 500, 999] {
-        let sl = Float(Int16(bitPattern: u16(44 + i * 4))) / 32768
-        let sr = Float(Int16(bitPattern: u16(46 + i * 4))) / 32768
+        let sl = Float(Int16(bitPattern: u16(44 + i * 4))) / 32767
+        let sr = Float(Int16(bitPattern: u16(46 + i * 4))) / 32767
         #expect(abs(sl - l[i]) <= 1.0 / 32768)
         #expect(abs(sr - r[i]) <= 1.0 / 32768)
     }
