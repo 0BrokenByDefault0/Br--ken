@@ -104,7 +104,7 @@
       "caption": "Same four chords, Am, F, C, G, same drums, same pad sound. A plays every chord in root position, the way a pad sounds when you tap it. B is how the slots play them. Listen to the top notes.",
       "examples": [
         {
-          "label": "Root position every time",
+          "label": "Root position: Am F C G",
           "explanation": "Am, F, C, G, each stacked from its root. Every note leaps at every change: the top line goes E, C, G, D, and each chord sounds like it starts over.",
           "clip": {
             "tempo": 140,
@@ -160,7 +160,7 @@
           }
         },
         {
-          "label": "Voice-led",
+          "label": "Voice-led: Am F C G",
           "explanation": "The same chords. Shared notes hold and the rest step: the top line goes E, F, E, D. The chords flow into each other.",
           "clip": {
             "tempo": 140,
@@ -189,7 +189,7 @@
     {
       "type": "task",
       "title": "Upgrade your chords",
-      "prompt": "Your chords are plain triads. Make them expensive:\n\n1. Hold a pad and pick **7** or **9**, or flip on **7ths** to change every pad.\n2. Tap a slot, then tap the upgraded pad. Keep the same chord, just richer: Am becomes Am7 or Am9.\n3. Upgrade **at least 2** slots, then press play and hear it with the melody.\n\nIf Your Track has no melody or chords yet, practice ones load in. Only the chords are saved.",
+      "prompt": "Upgrade any plain triads until at least 2 chords are 7ths or 9ths:\n\n1. Hold a pad and pick **7** or **9**, or flip on **7ths** to change every pad.\n2. Tap a slot, then tap the upgraded pad. Keep the same chord, just richer: Am becomes Am7 or Am9.\n3. Press play and hear it with the melody.\n\nIf Your Track has no melody or chords yet, practice ones load in. Only the chords are saved.",
       "tool": "chordPads",
       "targetRole": "chords",
       "uses": [
@@ -204,7 +204,7 @@
           {
             "role": "melody",
             "instrument": "bell",
-            "melody": "E5:6 G5:2 E5:4 C5:4 E5:6 C5:2 A4:8"
+            "melody": "E5:6 D5:2 C5:6 r:2 F5:6 E5:2 C5:8"
           },
           {
             "role": "chords",

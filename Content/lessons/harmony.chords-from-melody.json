@@ -17,7 +17,7 @@
       "examples": [
         {
           "label": "Chord tone: Am",
-          "explanation": "C is in Am (A, C, E), and so are the A and E. The long notes sit right on the chord; the short B and D are color tones passing by.",
+          "explanation": "C is in Am (A, C, E), and so are the A and E. The long notes sit right on the chord; the shorter B and D are color tones passing by.",
           "clip": {
             "tempo": 140,
             "key": "A minor",
@@ -77,7 +77,7 @@
         },
         {
           "label": "Clash: Em",
-          "explanation": "Em is E, G, B, and C sits a half step above B. Every time the long C lands, it grinds against the B in the chord. Both are in key, and it still sounds wrong.",
+          "explanation": "Em is E, G, B, and C sits a half step above B. Every time the long C lands, it rubs against the B in the chord. Both are in key, and it grinds.",
           "clip": {
             "tempo": 140,
             "key": "A minor",
@@ -217,7 +217,7 @@
     },
     {
       "type": "keep",
-      "message": "Save it. These chords go into Your Track under your melody. Next lesson you'll make them sound expensive.",
+      "message": "Save it. These chords go into Your Track under the melody. Next lesson you'll make them sound expensive.",
       "roles": [
         "chords"
       ]

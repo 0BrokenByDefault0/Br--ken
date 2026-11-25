@@ -7,13 +7,70 @@
     {
       "type": "idea",
       "title": "Numbers, not names",
-      "body": "Musicians often name chords by number, not letter. Each chord gets the **Roman numeral** of the scale note it's built on: I for the 1st, IV for the 4th, and so on. Lowercase means minor, uppercase major, ° diminished.\n\nIn any minor key that gives: **i, ii°, III, iv, v, VI, VII**.\n\nWhy numbers? They work in every key. **i–VI** is Am to F in A minor, and Cm to Ab in C minor: the same sound, moved. Your pads show both name and numeral, so any progression here works in your key.\n\nNext: four progressions you'll hear all over minor-key beats.",
+      "body": "Musicians often name chords by number, not letter. Each chord gets the **Roman numeral** of the scale note it's built on: I for the 1st, IV for the 4th, and so on. Lowercase means minor, uppercase major, ° diminished.\n\nIn any minor key that gives: **i, ii°, III, iv, v, VI, VII**.\n\nWhy numbers? They work in every key. **i–VI** is Am to F in A minor, and Cm to Ab in C minor: the same sound, moved. Your pads show both name and numeral, so in a minor key any progression here works in yours.\n\nNext: i–VI in A minor, then in C minor.",
       "deeper": "The full set in A minor:\n\n- **i** Am (A C E)\n- **ii°** Bdim (B D F)\n- **III** C (C E G)\n- **iv** Dm (D F A)\n- **v** Em (E G B)\n- **VI** F (F A C)\n- **VII** G (G B D)\n\nA progression written in numerals is a recipe; the key picks the ingredients. i–iv–v is Am–Dm–Em in A minor, Em–Am–Bm in E minor, and Fm–Bbm–Cm in F minor.\n\nThese numerals come from the **natural minor** scale, the one your key uses. The last part of this lesson adds one chord from outside it."
+    },
+    {
+      "type": "listen",
+      "title": "Same recipe, two keys",
+      "caption": "Same drums, same pad, the same i–VI recipe: home chord for a bar, then the VI. Only the key changes.",
+      "examples": [
+        {
+          "label": "i–VI in A minor",
+          "explanation": "Am, then F. This is the version the rest of the lesson uses.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 F:16"
+              }
+            ]
+          }
+        },
+        {
+          "label": "i–VI in C minor",
+          "explanation": "Cm, then Ab. Different notes, played a bit lower, but the same move: two notes stay and one steps up a half step (G to Ab, like E to F in A minor). Same mood.",
+          "clip": {
+            "tempo": 140,
+            "key": "C minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X......x..x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Cm:16 Ab:16"
+              }
+            ]
+          }
+        }
+      ]
     },
     {
       "type": "idea",
       "title": "Four progressions to know",
-      "body": "A few progressions turn up again and again in minor-key beats:\n\n- **i–VI**: two chords, back and forth. Dark and hypnotic, with lots of room for a vocal.\n- **i–VI–III–VII**: three major chords after the home chord. More emotional, a little hopeful.\n- **i–iv–v**: all minor. Dark from start to finish.\n- **i–iv–VI–v**: dark, with one brighter chord (VI) before the v pulls it back down.\n\nAll four start on **i**, so every pass of the loop begins at home.\n\nNext: i–VI against i–VI–III–VII.",
+      "body": "A few progressions turn up again and again in minor-key beats:\n\n- **i–VI**: two chords, back and forth. Dark and hypnotic, with lots of room for a vocal.\n- **i–VI–III–VII**: three major chords after the home chord. More emotional, a little hopeful.\n- **i–iv–v**: all minor. Dark from start to finish.\n- **i–iv–VI–v**: dark, with one brighter chord (VI) before the v pulls it back down.\n\nAll four start on **i**, so every pass of the loop begins at home. In a major key, start on vi for the same moods (vi–IV–I–V).\n\nNext: i–VI against i–VI–III–VII.",
       "deeper": "In A minor:\n\n- i–VI: **Am–F**\n- i–VI–III–VII: **Am–F–C–G**\n- i–iv–v: **Am–Dm–Em**\n- i–iv–VI–v: **Am–Dm–F–Em**\n\nWhy i–VI sounds so smooth: Am (A C E) and F (F A C) share two notes, A and C. Only one note really changes, E to F, so the move is soft and the mood stays put.\n\nAm–F–C–G uses the same four chords as the well-known pop progression C–G–Am–F, just started from Am. Starting on Am makes it the home chord, so the same chords sound darker.\n\nMoods come from the chord qualities: the more minor chords, the darker it stays; each major chord adds light. Tempo, sound and melody shift the mood too, so treat these as starting points."
     },
     {
@@ -133,7 +190,7 @@
     {
       "type": "idea",
       "title": "The borrowed V",
-      "body": "In your key, the chord on the 5th note is minor: **v**. In A minor that's Em (E, G, B). Raise its middle note a half step, G to **G#**, and you get **V**: E major (E, G#, B).\n\nG# sits a half step below A, the home note, so it pulls hard toward it. Put V at the end of the loop and the restart on **i** lands like a release.\n\nThe G# comes from **harmonic minor**, which you met in Stage 1, so the pad says **V ·borrowed**. Add a 7th, **E7**, for even more pull.\n\nNext: the same loop ending on v, V, then V7.",
+      "body": "In a minor key, the chord on the 5th note is minor: **v**. In A minor that's Em (E, G, B). Raise its middle note a half step, G to **G#**, and you get **V**: E major (E, G#, B).\n\nG# sits a half step below A, the home note, so it pulls hard toward it. Put V at the end of the loop and the restart on **i** lands like a release.\n\nThe G# comes from **harmonic minor**, which you met in Stage 1, so the pad says **V ·borrowed**. Add a 7th, **E7**, for even more pull.\n\nNext: the same loop ending on v, V, then V7.",
       "deeper": "A minor is A B C D E F G. **Harmonic minor** raises the 7th note: A B C D E F G#. Build the chord on the 5th with that G# and you get **E** (E G# B), or **E7** (E G# B D) with a 7th on top.\n\nA note a half step below home is called the **leading tone**, because it leads into home. In natural minor, G is a whole step below A, so v drifts back to i softly. G# is only a half step away, so V pulls back strongly.\n\nIn E7 a second note resolves too: D steps down to C, the middle note of Am.\n\nV to i is the classic way minor-key music says \"back home\". Keeping v minor sounds darker and less pushy; V sounds more dramatic.\n\nG# isn't in your key's scale, so in a melody it can sound wrong unless V is under it. This lesson's key check accepts V and V7 in minor keys."
     },
     {
@@ -221,7 +278,7 @@
     {
       "type": "task",
       "title": "Four chords in your key",
-      "prompt": "Lay out a four-chord progression in your key:\n\n1. Switch the slot strip to **2 / bar**. Now there are four slots: 1a, 1b, 2a, 2b.\n2. Tap slot **1a**, then four pads in a row. Each pad fills the next slot.\n3. Press play and listen.\n\nCopy one of the four progressions, or make your own. Start on **i** so it sounds like home. At 2 / bar each chord lasts half a bar, so it moves twice as fast as the examples.",
+      "prompt": "Lay out a four-chord progression in your key:\n\n1. Switch the slot strip to **2 / bar**. Now there are four slots: 1a, 1b, 2a, 2b.\n2. Tap slot **1a**, then four pads in a row. Each pad fills the next slot.\n3. Press play and listen.\n\nCopy one of the four progressions, or make your own. In a minor key, start on **i** so it sounds like home; in a major key, start on vi for the same moods (vi–IV–I–V). At 2 / bar each chord lasts half a bar, so it moves twice as fast as the examples.",
       "tool": "chordPads",
       "targetRole": "chords",
       "uses": [],

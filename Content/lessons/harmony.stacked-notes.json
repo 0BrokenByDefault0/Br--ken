@@ -7,7 +7,7 @@
     {
       "type": "idea",
       "title": "Skip a note, stack a note",
-      "body": "A chord is three or more notes played together. Here's the easy way to build one from your scale: start on any note, **skip one, take the next**, then skip one and take the next again.\n\nIn A minor, start on A: skip B, take C, skip D, take E. **A, C, E** is **Am**, the home chord.\n\nA three-note stack like that is a **triad**. Its bottom note is the **root**, and it names the chord.\n\nDo it from each of the seven notes and you get seven chords, every one of them in key.\n\nNext: the same root, three different chord sounds.",
+      "body": "A chord is three or more notes played together. Here's the easy way to build one from your scale: start on any note, **skip one, take the next**, then skip one and take the next again.\n\nIn A minor, start on A: skip B, take C, skip D, take E. **A, C, E** is **Am**, the home chord.\n\nA three-note stack like that is a **triad**. The note you start the stack on is the **root**, and it names the chord.\n\nDo it from each of the seven notes and you get seven chords, every one of them in key.\n\nNext: the same root, three different chord sounds.",
       "deeper": "Skipping one scale note jumps a **third**. Thirds come in two sizes: **minor** (3 half steps, like A to C) and **major** (4 half steps, like C to E). Which size you get depends on where you are in the scale.\n\nA triad is two thirds stacked:\n\n- **Minor**: minor third, then major third (A C E: 3 + 4 half steps).\n- **Major**: major third, then minor third (C E G: 4 + 3).\n- **Diminished**: two minor thirds (B D F: 3 + 3). Its top note is a half step lower than in the other two, which is what makes it tense.\n\nThe seven triads of A minor:\n\n- **Am** (A C E), minor\n- **Bdim** (B D F), diminished\n- **C** (C E G), major\n- **Dm** (D F A), minor\n- **Em** (E G B), minor\n- **F** (F A C), major\n- **G** (G B D), major\n\nThe chord pads build exactly these from your track's key."
     },
     {
@@ -158,7 +158,7 @@
     {
       "type": "task",
       "title": "One, four, five",
-      "prompt": "Build a progression from the chords on the 1st, 4th and 5th notes of your key: **i**, **iv** and **v** in a minor key (**I**, **IV**, **V** in a major one). Each pad shows its numeral under the chord name; tap any pad to hear it.\n\n1. Switch the slot strip to **2 / bar**, so you have four slots.\n2. Tap slot **1a**, then tap **i**, **iv**, **v** and **i**. Each pad you tap fills the next slot.\n3. Press play and listen to it loop.",
+      "prompt": "Build a progression from the chords on the 1st, 4th and 5th notes of your key: **i**, **iv** and **v** in a minor key (**I**, **IV**, **V** in a major one). Each pad shows its numeral under the chord name; tap any pad to hear it.\n\n1. Switch the slot strip to **2 / bar**, so you have four slots.\n2. Tap slot **1a**, then tap **i**, **iv**, **v** and **i** (**I**, **IV**, **V**, **I** in a major key). Each pad you tap fills the next slot.\n3. Press play and listen to it loop.",
       "tool": "chordPads",
       "targetRole": "chords",
       "uses": [],
@@ -174,7 +174,7 @@
         }
       ],
       "hints": [
-        "Lowercase numerals are minor chords. **i** is your home chord, **iv** is built on the 4th note of your key, and **v** on the 5th.",
+        "In a minor key these three are lowercase, because they're minor chords. **i** is your home chord, **iv** is built on the 4th note of your key, and **v** on the 5th.",
         "Three chords won't fit in two slots. Switch the strip to **2 / bar**, then tap slot **1a**. It lights up, and each pad you tap fills the next slot.",
         "In A minor that's Am, Dm, Em, then Am again. The **V ·borrowed** pad counts as the five too."
       ]
