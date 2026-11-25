@@ -149,6 +149,15 @@ public final class Renderer: @unchecked Sendable {
     }
 
     /// Playhead position within the loop (0..<loopTicks), as of the last rendered block.
+    /// The tempo range the renderer supports; the single source of truth for offline export too.
+    public static let tempoRange: ClosedRange<Double> = 20...999
+
+    /// Clamps to `tempoRange`; NaN, infinities and non-positive values map to the lower bound.
+    public static func clampedTempo(_ t: Double) -> Double {
+        guard t.isFinite, t > 0 else { return tempoRange.lowerBound }
+        return min(max(t, tempoRange.lowerBound), tempoRange.upperBound)
+    }
+
     public var playheadTick: Int { publishedTick.load(ordering: .relaxed) }
 
     public var isPlaying: Bool { publishedPlaying.load(ordering: .relaxed) }
@@ -196,7 +205,7 @@ public final class Renderer: @unchecked Sendable {
             params[ch] = ChannelParams(newPart?.sound ?? SoundSettings())
             cursors[ch] = 0  // re-found from the playhead at the next tick
         }
-        let newTempo = new.tempo.isFinite ? min(max(new.tempo, 20), 999) : 120
+        let newTempo = Self.clampedTempo(new.tempo)
         if playing && newTempo != tempo {
             // Keep the playhead's tick position; re-express it in samples at the new tempo.
             let tick = Double(clock) * tempo * Double(Ticks.perQuarter) / (sampleRate * 60)

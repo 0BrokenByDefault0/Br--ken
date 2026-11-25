@@ -96,19 +96,56 @@ private func manualRender(_ t: Track, frames count: Int) -> StereoBuffer {
 }
 
 @Test func soloPartRendersOnlyThatPart() {
-    // Solo mutes every other part but keeps channel indices, so the reference keeps drums at
-    // index 1 and swaps the melody for a muted placeholder: the output must be identical.
-    let melody = melodyPart()
-    let drums = drumsPart()
-    let full = exportTrack(bars: 1, [melody, drums])
-    let reference = exportTrack(bars: 1, [melodyPart(muted: true), drums])
+    // Melody plays only in bar 1, drums only in bar 2 (dry). Solo drums must be silent in bar 1.
+    let dryS = SoundSettings(volume: 0.8, reverb: 0, delay: 0)
+    let melody = Part(role: .melody, instrument: .bell,
+                      content: .notes(NoteSequence(notes: [NoteEvent(start: 0, length: 48, pitch: 72, velocity: 1)])),
+                      sound: dryS)
+    let drums = Part(role: .drums, instrument: .trapKit, content: .drums(DrumPattern(lanes: [
+        .kick: [DrumHit(tick: 384, velocity: 1), DrumHit(tick: 480, velocity: 1)],
+        .snare: [DrumHit(tick: 432, velocity: 1)],
+    ])), sound: dryS)
+    let full = exportTrack(tempo: 120, bars: 2, [melody, drums])
+    let bar1 = OfflineRenderer.frameCount(bars: 1, tempo: 120, sampleRate: 48_000)
     let solo = OfflineRenderer.render(track: full, onlyPart: drums.id, loopReady: false)
-    let ref = OfflineRenderer.render(track: reference, loopReady: false)
-    #expect(solo.left == ref.left)
-    #expect(solo.right == ref.right)
-    #expect(solo.left.contains { abs($0) > 1e-4 })
     let mix = OfflineRenderer.render(track: full, loopReady: false)
-    #expect(mix.left != solo.left)
+    func peak(_ a: [Float], _ r: Range<Int>) -> Float { a[r].map { abs($0) }.max() ?? 0 }
+    #expect(peak(solo.left, 0..<bar1) < 1e-6)
+    #expect(peak(solo.right, 0..<bar1) < 1e-6)
+    #expect(peak(mix.left, 0..<bar1) > 1e-3)
+    #expect(peak(solo.left, bar1..<solo.frameCount) > 1e-3)
+    // Same index kept: solo equals the track with the melody swapped for a muted placeholder.
+    let ref = OfflineRenderer.render(track: exportTrack(tempo: 120, bars: 2, [melodyPart(muted: true), drums]),
+                                     loopReady: false)
+    #expect(solo.left == ref.left)
+}
+
+@Test func tempoIsClamped() {
+    let sr = 48_000.0
+    let lo = Int((4.0 * 60 / 20 * sr).rounded())
+    let hi = Int((4.0 * 60 / 999 * sr).rounded())
+    for t in [0.0, -5, .nan, .infinity, 10] {
+        #expect(OfflineRenderer.frameCount(bars: 1, tempo: t, sampleRate: sr) == lo)
+        let b = OfflineRenderer.render(track: exportTrack(tempo: t, bars: 1, []), loopReady: false)
+        #expect(b.frameCount == lo)
+        #expect(b.left.count == lo)
+    }
+    #expect(OfflineRenderer.frameCount(bars: 1, tempo: 5000, sampleRate: sr) == hi)
+    #expect(OfflineRenderer.render(track: exportTrack(tempo: 5000, bars: 1, []), loopReady: false).frameCount == hi)
+    #expect(Renderer.tempoRange == 20...999)
+}
+
+@Test func loopReadyWrapsTail() {
+    // A pad held to the loop end: the second pass starts with the wrapped tail, the first does not.
+    let pad = Part(role: .chords, instrument: .pad,
+                   content: .notes(NoteSequence(notes: [NoteEvent(start: 192, length: 192, pitch: 60, velocity: 1)])),
+                   sound: SoundSettings(volume: 0.8, reverb: 0))
+    let t = exportTrack(tempo: 120, bars: 1, [pad])
+    let plain = OfflineRenderer.render(track: t, loopReady: false)
+    let loop = OfflineRenderer.render(track: t, loopReady: true)
+    #expect(plain.left != loop.left)
+    #expect(plain.left[0..<1000].allSatisfy { abs($0) < 1e-6 })
+    #expect(loop.left[0..<1000].contains { abs($0) > 1e-6 })
 }
 
 @Test func fileNameSanitized() throws {
@@ -117,6 +154,11 @@ private func manualRender(_ t: Track, frames count: Int) -> StereoBuffer {
     #expect(ExportNaming.fileName(track: t, part: part) == "My-Beat-140bpm-Aminor-chords.wav")
     #expect(ExportNaming.fileName(track: t, part: nil) == "My-Beat-140bpm-Aminor.wav")
     #expect(ExportNaming.fileName(track: exportTrack(name: "!!!", [part]), part: nil) == "track-140bpm-Aminor.wav")
+    #expect(ExportNaming.sanitize("My - Beat") == "My-Beat")
+    #expect(ExportNaming.sanitize("a__b--c") == "a__b-c")
+    let sharp = Track(name: "k", createdAt: Date(timeIntervalSince1970: 0), tempo: 90,
+                      key: try Key(parsing: "F# minor"), bars: 1, parts: [])
+    #expect(ExportNaming.fileName(track: sharp, part: nil) == "k-90bpm-Fsharpminor.wav")
     let long = exportTrack(name: String(repeating: "a", count: 60), [part])
     #expect(ExportNaming.fileName(track: long, part: nil).hasPrefix(String(repeating: "a", count: 40) + "-140bpm"))
 }

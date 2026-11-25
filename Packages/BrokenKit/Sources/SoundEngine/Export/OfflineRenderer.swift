@@ -16,9 +16,10 @@ public struct StereoBuffer: Sendable {
 public enum OfflineRenderer {
     private static let block = 1024
 
-    /// `round(bars x 4 x 60 / tempo x sampleRate)`.
+    /// `round(bars x 4 x 60 / tempo x sampleRate)`, with the tempo clamped like `Renderer` does.
     public static func frameCount(bars: Int, tempo: Double, sampleRate: Double) -> Int {
-        Int((Double(bars) * 4 * 60 / tempo * sampleRate).rounded())
+        let t = Renderer.clampedTempo(tempo)
+        return max(0, Int((Double(max(bars, 0)) * 4 * 60 / t * sampleRate).rounded()))
     }
 
     /// Renders the track from tick 0 with a fresh `Renderer`. `onlyPart` mutes every other part
