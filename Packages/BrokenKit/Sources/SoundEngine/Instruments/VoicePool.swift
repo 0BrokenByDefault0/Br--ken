@@ -45,7 +45,9 @@ public final class VoicePool {
         return n
     }
 
-    public func noteOn(channel: Int, instrument: InstrumentID, pitch: Int, velocity: Float, glide: Bool) {
+    /// Pitches outside MIDI 0...127 are clamped into range.
+    public func noteOn(channel: Int, instrument: InstrumentID, pitch rawPitch: Int, velocity: Float, glide: Bool) {
+        let pitch = Self.clampPitch(rawPitch)
         if instrument == .trapKit {
             guard let lane = drums.laneIndex(midiNote: pitch) else { return }
             if lane == drums.closedHatIndex {
@@ -74,7 +76,8 @@ public final class VoicePool {
         voices[slot].start(preset: preset, channel: channel, pitch: pitch, velocity: velocity, age: nextAge)
     }
 
-    public func noteOff(channel: Int, pitch: Int) {
+    public func noteOff(channel: Int, pitch rawPitch: Int) {
+        let pitch = Self.clampPitch(rawPitch)
         for i in 0..<maxVoices where !voices[i].isFinished && !voices[i].isReleased
             && voices[i].channel == channel && voices[i].pitch == pitch && voices[i].instrument != .trapKit {
             voices[i].release()
@@ -97,6 +100,8 @@ public final class VoicePool {
             }
         }
     }
+
+    private static func clampPitch(_ p: Int) -> Int { min(max(p, 0), 127) }
 
     // MARK: Allocation
 

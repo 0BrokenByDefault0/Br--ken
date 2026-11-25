@@ -59,11 +59,13 @@ struct Voice {
     private var drumPos = 0
     private var chokeLeft = 0
 
-    private static let chokeSamples = 240
+    /// Drum choke / stop fade: 5 ms.
+    private let chokeSamples: Int
 
     init(sampleRate: Double, ksBuffer: UnsafeMutablePointer<Float>?, ksCapacity: Int) {
         self.sampleRate = sampleRate
         invSampleRate = 1 / sampleRate
+        chokeSamples = max(1, Int((0.005 * sampleRate).rounded()))
         self.ksBuffer = ksBuffer
         self.ksCapacity = ksCapacity
         env = ADSR(attack: 0.001, decay: 0, sustain: 1, release: 0.1, sampleRate: sampleRate)
@@ -161,7 +163,7 @@ struct Voice {
         guard !isFinished, !isReleased else { return }
         isReleased = true
         if drumData != nil {
-            if chokeLeft == 0 { chokeLeft = Self.chokeSamples }
+            if chokeLeft == 0 { chokeLeft = chokeSamples }
         } else {
             env.gate(on: false)
         }
@@ -171,7 +173,7 @@ struct Voice {
     mutating func choke() {
         guard !isFinished, drumData != nil else { return }
         isReleased = true
-        if chokeLeft == 0 { chokeLeft = Self.chokeSamples }
+        if chokeLeft == 0 { chokeLeft = chokeSamples }
     }
 
     /// 808 glide: slide the current pitch to `newPitch` over the glide time.
@@ -189,7 +191,7 @@ struct Voice {
         if let data = drumData {
             var g = gain
             if chokeLeft > 0 {
-                g *= Float(chokeLeft) / Float(Self.chokeSamples)
+                g *= Float(chokeLeft) / Float(chokeSamples)
                 chokeLeft -= 1
                 if chokeLeft == 0 { isFinished = true }
             }
@@ -232,11 +234,12 @@ struct Voice {
 
     private mutating func nextBell() -> Float {
         let tau = 2 * Double.pi
-        let out = sin(tau * phaseC + Double(index1) * sin(tau * phaseM1))
+        // Advance before reading so the onset sample is not sin(0) = 0: the note sounds on its exact sample.
         phaseC += freq * invSampleRate
         phaseM1 += freq * 3.5 * invSampleRate
         phaseC -= phaseC.rounded(.down)
         phaseM1 -= phaseM1.rounded(.down)
+        let out = sin(tau * phaseC + Double(index1) * sin(tau * phaseM1))
         index1 = max(0, index1 - index1Step)
         return Float(out)
     }
