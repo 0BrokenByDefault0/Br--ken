@@ -42,7 +42,7 @@ struct BrokenApp: App {
         WindowGroup {
             Group {
                 if let model {
-                    MelodyLabView(audio: player)  // temporary root until the real navigation (Task 17)
+                    LabRootView(audio: player)  // temporary root until the real navigation (Task 17)
                         .environment(model)
                         .environment(audioHost)
                 } else {

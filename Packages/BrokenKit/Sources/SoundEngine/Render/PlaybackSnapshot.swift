@@ -39,7 +39,8 @@ public struct PartPlayback: Hashable, Sendable {
         case .drums(let pattern):
             for (lane, hits) in pattern.lanes {
                 for hit in hits {
-                    events.append(ScheduledNote(start: hit.tick, end: hit.tick + 1, pitch: lane.midiNote,
+                    let start = pattern.swungTick(hit.tick)
+                    events.append(ScheduledNote(start: start, end: start + 1, pitch: lane.midiNote,
                                                 velocity: hit.velocity, glide: false))
                 }
             }

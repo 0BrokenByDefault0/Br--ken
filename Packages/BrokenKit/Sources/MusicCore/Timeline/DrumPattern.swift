@@ -37,16 +37,25 @@ public enum RollRate: Int, Codable, CaseIterable, Sendable {
 public struct DrumPattern: Hashable, Codable, Sendable {
     /// Each lane's hits are kept sorted by tick.
     public var lanes: [DrumLane: [DrumHit]]
+    /// 0...0.6. Applied only when a snapshot is built (`swungTick`); stored ticks stay on the grid.
+    public var swing: Double = 0
 
     public init(lanes: [DrumLane: [DrumHit]]) {
         self.lanes = lanes.mapValues { $0.sorted { $0.tick < $1.tick } }
     }
 
-    private enum CodingKeys: String, CodingKey { case lanes }
+    private enum CodingKeys: String, CodingKey { case lanes, swing }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.init(lanes: try container.decode([DrumLane: [DrumHit]].self, forKey: .lanes))
+        swing = try container.decodeIfPresent(Double.self, forKey: .swing) ?? 0
+    }
+
+    /// Off-beat 16ths (`tick % 48 == 24`) move later by `round(swing * 12)` ticks; other ticks are unchanged.
+    public func swungTick(_ tick: Int) -> Int {
+        guard tick % 48 == 24 else { return tick }
+        return tick + Int((swing * 12).rounded())
     }
 
     /// Toggles a 0.8-velocity hit on the 16th grid.

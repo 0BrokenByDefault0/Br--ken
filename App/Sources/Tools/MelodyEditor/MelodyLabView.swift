@@ -105,8 +105,12 @@ struct MelodyLabView: View {
     @State private var scaleLock = false
     @State private var octave = 4
 
-    init(audio: any AudioPlaying) {
+    /// False while another screen is shown: playback then stops.
+    private let isActive: Bool
+
+    init(audio: any AudioPlaying, isActive: Bool = true) {
         _model = State(initialValue: MelodyLabModel(audio: audio))
+        self.isActive = isActive
     }
 
     var body: some View {
@@ -145,5 +149,8 @@ struct MelodyLabView: View {
                 .background(Color.night)
         }
         .background(Color.night.ignoresSafeArea())
+        .onChange(of: isActive) { _, active in
+            if !active, model.isPlaying { model.stop() }
+        }
     }
 }
