@@ -7,7 +7,7 @@
     {
       "type": "idea",
       "title": "A key is seven notes",
-      "body": "A **key** is a home note plus seven notes that sound right together. **A minor** is A B C D E F G: every white key on the piano, with A as home.\n\nStay inside those seven notes and your melody, chords and 808 agree with each other. Step outside and you hear a rub. Sometimes that's spice; usually it's a mistake.\n\nMinor keys sound dark and tense. Major keys sound bright. That's why most trap, cloud rap and UG beats sit in minor: the mood is the music.",
+      "body": "A **key** is a set of seven notes that sound right together, with one of them as home. **A minor** is A B C D E F G: every white key on the piano, with A as home.\n\nStay inside those seven notes and your melody, chords and 808 agree with each other. Step outside and you hear a rub. Sometimes that's spice; usually it's a mistake.\n\nMinor keys sound dark and tense. Major keys sound bright. That's why most trap, cloud rap and UG beats sit in minor: the mood is the music.",
       "deeper": "A scale is a pattern of **whole steps** (W, 2 half steps) and **half steps** (H, 1 half step).\n\n**Natural minor** is W H W W H W W: A→B (W), B→C (H), C→D (W), D→E (W), E→F (H), F→G (W), G→A (W).\n\n**Major** is W W H W W W H. In A: A B C# D E F# G#.\n\nNumber the notes 1 to 7 up from home. These are **scale degrees**, and the in-app keyboard shows them on each key.\n\nC major uses the same seven notes as A minor. What changes is which note feels like home. Keys that share notes like this are called **relative** major and minor."
     },
     {
