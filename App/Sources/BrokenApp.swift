@@ -7,9 +7,11 @@ struct BrokenApp: App {
     @State private var audioHost: AudioHost
     @State private var model: AppModel?
     private let loadError: String?
+    private let player: AudioPlayer
 
     init() {
         let player = AudioPlayer()
+        self.player = player
         let host = AudioHost(session: SystemAudioSession(), makeEngine: {
             let engine = AVAudioEngineController()
             player.attach(engine.renderer)
@@ -38,13 +40,16 @@ struct BrokenApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if let model {
-                JourneyPlaceholderView()
-                    .environment(model)
-                    .environment(audioHost)
-            } else {
-                LaunchErrorView(message: loadError ?? "Unknown error")
+            Group {
+                if let model {
+                    MelodyLabView(audio: player)  // temporary root until the real navigation (Task 17)
+                        .environment(model)
+                        .environment(audioHost)
+                } else {
+                    LaunchErrorView(message: loadError ?? "Unknown error")
+                }
             }
+            .preferredColorScheme(.dark)
         }
     }
 }
