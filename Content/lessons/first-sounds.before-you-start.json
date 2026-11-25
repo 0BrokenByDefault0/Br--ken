@@ -13,7 +13,7 @@
     {
       "type": "listen",
       "title": "Same beat, two tempos",
-      "caption": "A is 150 BPM in half-time. B is 75 BPM with the snare on beats 2 and 4. Play both and listen for when the snare hits.",
+      "caption": "A is 150 BPM in half-time. B is 75 BPM with the snare on beats 2 and 4. They should sound the same. Play both, listen for when the snare hits, then read why.",
       "examples": [
         {
           "label": "150 BPM, half-time",
@@ -175,7 +175,7 @@
       ],
       "hints": [
         "Start from the vibe. Hard and bouncy points to 140–160 BPM. Slow and floaty points to 60–80.",
-        "For the key, set the switch to **Minor** first, then pick a home note. A minor uses only the white keys, so it's the easiest to see on a keyboard.",
+        "For the key, tap **Minor** first, then pick a home note. A minor uses only the white keys, so it's the easiest to see on a keyboard.",
         "Still stuck? Set 140 BPM and A minor, then tap **Check my setup**. You can redo this lesson any time to change them."
       ]
     },

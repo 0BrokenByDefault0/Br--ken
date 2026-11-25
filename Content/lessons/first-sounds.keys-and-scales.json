@@ -7,7 +7,7 @@
     {
       "type": "idea",
       "title": "A key is seven notes",
-      "body": "A **key** is a set of seven notes that sound right together, with one of them as home. **A minor** is A B C D E F G: every white key on the piano, with A as home.\n\nStay inside those seven notes and your melody, chords and 808 agree with each other. Step outside and you hear a rub. Sometimes that's spice; usually it's a mistake.\n\nMinor keys sound dark and tense. Major keys sound bright. That's why most trap, cloud rap and UG beats sit in minor: the mood is the music.",
+      "body": "A **key** is a set of seven notes that sound right together, with one of them as home. **A minor** is A B C D E F G: every white key on the piano, with A as home.\n\nStay inside those seven notes and your melody, chords and 808 agree with each other. Step outside and you hear a rub. Sometimes that's spice; usually it's a mistake.\n\nMinor keys sound dark and tense. Major keys sound bright. That's why most trap, cloud rap and underground beats sit in minor: the mood is the music.",
       "deeper": "A scale is a pattern of **whole steps** (W, 2 half steps) and **half steps** (H, 1 half step).\n\n**Natural minor** is W H W W H W W: A→B (W), B→C (H), C→D (W), D→E (W), E→F (H), F→G (W), G→A (W).\n\n**Major** is W W H W W W H. In A: A B C# D E F# G#.\n\nNumber the notes 1 to 7 up from home. These are **scale degrees**, and the in-app keyboard shows them on each key.\n\nC major uses the same seven notes as A minor. What changes is which note feels like home. Keys that share notes like this are called **relative** major and minor."
     },
     {
@@ -81,7 +81,7 @@
       "type": "idea",
       "title": "Flavors of minor",
       "body": "Minor comes in flavors. Two you'll hear all the time in beats:\n\n**Harmonic minor** raises the 7th note: in A minor, G becomes G#. That one note adds a dramatic, eerie pull back to home.\n\n**Minor pentatonic** keeps just five notes: A C D E G. No two of them are a half step apart, so nothing rubs. That's why noodling in it sounds good fast.\n\nIn the app, **scale lock** fades out every key outside your track's key so you can't hit a wrong note. Treat it as training wheels: use it until your ear knows the way.",
-      "deeper": "**Harmonic minor**: 1 2 b3 4 5 b6 7. In A: A B C D E F G#. The jump from F to G# is 3 half steps (an **augmented second**), which gives it that exotic, dark sound. G# sits a half step below A, so it pulls hard toward home. It also turns the minor v chord (Em) into a major V chord (E), which pulls strongly back to Am.\n\n**Minor pentatonic**: 1 b3 4 5 b7. In A: A C D E G. It drops the 2nd and 6th (B and F) from natural minor.\n\nScale lock and this lesson's check both use natural minor (or major, in a major key). A G# counts as outside A minor here, but every pentatonic note is inside it."
+      "deeper": "**Harmonic minor**: 1 2 b3 4 5 b6 7. In A: A B C D E F G#. The jump from F to G# is 3 half steps (an **augmented second**), which gives it that tense, dramatic sound. G# sits a half step below A, so it pulls hard toward home. It also turns the minor v chord (Em) into a major V chord (E), which pulls strongly back to Am.\n\n**Minor pentatonic**: 1 b3 4 5 b7. In A: A C D E G. It drops the 2nd and 6th (B and F) from natural minor.\n\nScale lock and this lesson's check both use natural minor (or major, in a major key). A G# counts as outside A minor here, but every pentatonic note is inside it."
     },
     {
       "type": "listen",
