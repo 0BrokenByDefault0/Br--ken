@@ -26,7 +26,8 @@ struct SystemAudioSession: AudioSessionControlling {
 }
 
 /// Owns the audio engine and keeps it running: after an interruption (a call, Siri), a route change,
-/// a media-services reset, or returning to the foreground, audio comes back without a relaunch.
+/// an engine configuration change (e.g. Bluetooth headphones switching the hardware rate), a
+/// media-services reset, or returning to the foreground, audio comes back without a relaunch.
 /// Failures never crash; the latest one is shown through `lastError`.
 @Observable @MainActor
 final class AudioHost {
@@ -57,6 +58,9 @@ final class AudioHost {
             return .interruptionEnded
         }
         observe(AVAudioSession.routeChangeNotification) { _ in .shouldBeRunning }
+        // AVAudioEngine stops itself when the hardware rate or channel count changes. Observed for any
+        // object: the app has a single engine, and fakes can post it on the injected center.
+        observe(.AVAudioEngineConfigurationChange) { _ in .shouldBeRunning }
         observe(UIApplication.willEnterForegroundNotification) { _ in .shouldBeRunning }
         observe(AVAudioSession.mediaServicesWereResetNotification) { _ in .mediaServicesReset }
     }
@@ -80,12 +84,10 @@ final class AudioHost {
             // Restart even without `.shouldResume`: the owner wants sound back.
             try? start()
         case .shouldBeRunning:
-            guard let engine else {
-                try? start()  // the first start failed before an engine was built: try it all again
-                return
-            }
-            guard !engine.isRunning else { return }
-            try? record { try engine.start() }
+            // The full path (configure is idempotent), so a missed interruption-ended can't leave the
+            // session inactive. Also covers a first start that failed before an engine was built.
+            if let engine, engine.isRunning { return }
+            try? start()
         case .mediaServicesReset:
             // Every audio object is invalid after a reset: build a fresh engine (and renderer).
             engine?.stop()

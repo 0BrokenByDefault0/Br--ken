@@ -38,13 +38,22 @@ final class AVAudioEngineController: AudioEngineControlling {
     /// Built outside any actor: the block runs on the real-time audio thread and must not allocate,
     /// lock, or hop actors.
     private static func makeSourceNode(format: AVAudioFormat, renderer: Renderer) -> AVAudioSourceNode {
-        AVAudioSourceNode(format: format) { _, _, frameCount, bufferList -> OSStatus in
+        AVAudioSourceNode(format: format) { isSilence, _, frameCount, bufferList -> OSStatus in
             let buffers = UnsafeMutableAudioBufferListPointer(bufferList)
             guard buffers.count >= 2,
                   let left = buffers[0].mData?.assumingMemoryBound(to: Float.self),
                   let right = buffers[1].mData?.assumingMemoryBound(to: Float.self)
-            else { return noErr }
-            renderer.render(frames: Int(frameCount), left: left, right: right)
+            else {
+                // Unexpected layout: output silence rather than whatever the buffers held.
+                for buffer in buffers {
+                    if let data = buffer.mData { memset(data, 0, Int(buffer.mDataByteSize)) }
+                }
+                isSilence.pointee = true
+                return noErr
+            }
+            // Never write past the buffers, whatever frameCount says.
+            let capacity = Int(min(buffers[0].mDataByteSize, buffers[1].mDataByteSize)) / MemoryLayout<Float>.size
+            renderer.render(frames: min(Int(frameCount), capacity), left: left, right: right)
             return noErr
         }
     }
