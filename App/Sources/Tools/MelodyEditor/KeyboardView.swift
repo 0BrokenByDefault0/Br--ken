@@ -64,26 +64,30 @@ struct KeyboardView: View {
         for pitch in tracker.releaseAll() { onNote(pitch, false) }
     }
 
+    /// Two rows so nothing clips at 320 pt: octave and range on top, scale lock below.
     private var controls: some View {
-        HStack(spacing: 12) {
-            Button { octave = max(1, octave - 1) } label: {
-                Image(systemName: "minus").frame(width: Theme.minTarget, height: Theme.minTarget)
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                Button { octave = max(1, octave - 1) } label: {
+                    Image(systemName: "minus").frame(width: Theme.minTarget, height: Theme.minTarget)
+                }
+                Text("C\(octave)–C\(octave + (twoOctaves ? 2 : 1))")
+                    .font(Theme.mono(15)).foregroundStyle(Color.ink)
+                    .lineLimit(1).minimumScaleFactor(0.8)
+                Button { octave = min(6, octave + 1) } label: {
+                    Image(systemName: "plus").frame(width: Theme.minTarget, height: Theme.minTarget)
+                }
+                Spacer(minLength: 8)
+                Picker("Range", selection: $twoOctaves) {
+                    Text("1 oct").tag(false)
+                    Text("2 oct").tag(true)
+                }
+                .pickerStyle(.segmented).frame(width: 110, height: Theme.minTarget)
             }
-            Text("C\(octave)–C\(octave + (twoOctaves ? 2 : 1))")
-                .font(Theme.mono(15)).foregroundStyle(Color.ink)
-            Button { octave = min(6, octave + 1) } label: {
-                Image(systemName: "plus").frame(width: Theme.minTarget, height: Theme.minTarget)
-            }
-            Picker("Range", selection: $twoOctaves) {
-                Text("1 oct").tag(false)
-                Text("2 oct").tag(true)
-            }
-            .pickerStyle(.segmented).frame(width: 110)
-            Spacer()
             Toggle("Scale lock", isOn: $scaleLock)
                 .toggleStyle(.switch).tint(Color.haze)
                 .font(Theme.body(15)).foregroundStyle(Color.ink)
-                .fixedSize()
+                .frame(minHeight: Theme.minTarget)
         }
         .buttonStyle(PressableButtonStyle())
         .foregroundStyle(Color.haze)
