@@ -158,14 +158,23 @@ final class AppModel {
         isPlaying = true
     }
 
-    /// Plays a temporary track (a Chord Finder audition). `stop()` restores the active track.
-    func audition(_ track: Track) {
+    /// Plays a temporary track (a Chord Finder audition, a lesson loop or example) from the start.
+    /// `stop()` restores the active track. With `atTrackTempo` (the default) it plays at the active
+    /// track's current tempo; lesson examples and working tracks keep their own.
+    func audition(_ track: Track, atTrackTempo: Bool = true) {
         auditioning = true
         var track = track
-        if let activeTrack { track.tempo = activeTrack.tempo }  // always at the track's current tempo
+        if atTrackTempo, let activeTrack { track.tempo = activeTrack.tempo }
         send(track)
         audio.play()
         isPlaying = true
+    }
+
+    /// Swaps what a playing audition plays without restarting it (an edit, or a mute toggle, while a
+    /// lesson loop plays). No-op unless an audition is playing.
+    func updateAudition(_ track: Track) {
+        guard auditioning, isPlaying else { return }
+        send(track)
     }
 
     func stop() {
@@ -224,7 +233,24 @@ final class AppModel {
         for role in roles {
             if let part = working.part(role) { track.setPart(part) }
         }
+        commitKept(track, lessonID: lessonID)
+    }
+
+    /// The keep after a track-setup task: applies the working track's name, tempo, and key to the active
+    /// track (its parts stay), or creates the active track from them. Completes the lesson and saves.
+    func keepSetup(from working: Track, lessonID: String) {
+        var track = activeTrack
+            ?? Track(name: working.name, createdAt: Date(), tempo: working.tempo, key: working.key,
+                     bars: working.bars, parts: [])
+        track.name = working.name
+        track.tempo = working.tempo
+        track.key = working.key
+        commitKept(track, lessonID: lessonID)
+    }
+
+    private func commitKept(_ track: Track, lessonID: String) {
         save(track)
+        hasUncommittedPreview = false  // the whole track, preview included, was just written
         progress.activeTrackID = track.id
         progress.completedLessons.insert(lessonID)
         saveProgress()

@@ -14,7 +14,7 @@ struct RootView: View {
         TabView(selection: $tab) {
             NavigationStack { JourneyMapView(onOpenLesson: { tab = .lesson }) }
                 .tabItem { Label("Journey", systemImage: "map") }.tag(AppTab.journey)
-            LessonPlaceholderView()
+            LessonTab(onBackToJourney: { tab = .journey })
                 .tabItem { Label("Lesson", systemImage: "book") }.tag(AppTab.lesson)
             MelodyScreen()
                 .tabItem { Label("Melody", systemImage: "pianokeys") }.tag(AppTab.melody)
@@ -39,22 +39,20 @@ struct RootView: View {
     }
 }
 
-/// Stand-in until the lesson player (Task 18): names the current lesson.
-struct LessonPlaceholderView: View {
+/// The current lesson's player, or a pointer to the Journey when no lesson is open.
+struct LessonTab: View {
     @Environment(AppModel.self) private var model
+    let onBackToJourney: () -> Void
 
     var body: some View {
-        VStack(spacing: 10) {
-            if let lesson = model.currentLesson {
-                Text(lesson.title).font(Theme.title(24)).foregroundStyle(Color.ink)
-                Text(lesson.summary).font(Theme.body(15)).foregroundStyle(Color.mute)
-            } else {
-                Text("Pick a lesson from the Journey").font(Theme.title(20)).foregroundStyle(Color.ink)
-            }
+        if let lesson = model.currentLesson {
+            LessonPlayerView(lesson: lesson, onBackToJourney: onBackToJourney).id(lesson.id)
+        } else {
+            Text("Pick a lesson from the Journey").font(Theme.title(20)).foregroundStyle(Color.ink)
+                .multilineTextAlignment(.center)
+                .padding(24)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.night.ignoresSafeArea())
         }
-        .multilineTextAlignment(.center)
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.night.ignoresSafeArea())
     }
 }

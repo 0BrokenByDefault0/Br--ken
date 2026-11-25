@@ -612,11 +612,17 @@ private func threeNotes() throws -> Part {
         melodyTask(), .keep(message: "k", roles: [.melody, .drums]),
     ])
     let player = LessonPlayerModel(lesson: lesson, app: model)
-    #expect(player.conflictingRoles(forKeepAt: 1) == [.drums])
+    #expect(player.conflictingRoles(forKeepAt: 1).isEmpty, "an unchanged part replaces nothing")
     let melody = try threeNotes()
-    player.taskModel(at: 0).edit { $0.setPart(melody) }
-    player.keep(at: 1, roles: [.melody])
+    let kick = DrumPattern(lanes: [.kick: [DrumHit(tick: 0, velocity: 1)]])
+    player.taskModel(at: 0).edit {
+        $0.setPart(melody)
+        $0.setPart(Part(role: .drums, instrument: .trapKit, content: .drums(kick)))
+    }
+    #expect(player.conflictingRoles(forKeepAt: 1) == [.drums], "only roles Your Track already has are asked about")
+    player.keep(at: 1, roles: [.melody])  // "Keep mine" for the drums
     #expect(model.activeTrack?.part(.melody)?.content == melody.content)
+    #expect(model.activeTrack?.part(.drums)?.content == .drums(DrumPattern(lanes: [:])))
     #expect(model.progress.completedLessons.contains("harmony.find"))
     #expect(player.kept.contains(1))
 }
