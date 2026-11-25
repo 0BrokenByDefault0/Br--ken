@@ -38,23 +38,23 @@ public enum CheckRunner {
             guard let prog = progression(role, track) else { return missing(role, "chords") }
             let n = prog.slots.filter { $0.chord.quality.isExtended }.count
             return n >= lo
-                ? (true, "\(n) extended chords add colour.")
-                : (false, "Only \(n) extended chord\(n == 1 ? "" : "s"); use at least \(lo) (like 7ths or 9ths).")
+                ? (true, "\(plural(n, "extended chord")) add\(n == 1 ? "s" : "") colour.")
+                : (false, "Only \(plural(n, "extended chord")); use at least \(lo) (like 7ths or 9ths).")
         case .drumHitOnBeats(let lane, let beats, let everyBar):
             return drumHitOnBeats(lane, beats, everyBar, track)
         case .laneHitCount(let lane, let lo):
             guard let hits = hits(lane, track) else { return missing(.drums, "drums") }
             return hits.count >= lo
-                ? (true, "\(hits.count) \(name(lane)) hits keep it moving.")
-                : (false, "\(hits.count) \(name(lane)) hit\(hits.count == 1 ? "" : "s"); add more to reach \(lo).")
+                ? (true, "\(plural(hits.count, "\(name(lane)) hit")) keep\(hits.count == 1 ? "s" : "") it moving.")
+                : (false, "\(plural(hits.count, "\(name(lane)) hit")); add more to reach \(lo).")
         case .hatRollPresent:
             return hatRollPresent(track)
         case .syncopatedKicks(let lo):
             guard let kicks = hits(.kick, track) else { return missing(.drums, "drums") }
             let n = kicks.filter { $0.tick % Ticks.perQuarter != 0 }.count
             return n >= lo
-                ? (true, "\(n) off-beat kicks give it bounce.")
-                : (false, "\(n) off-beat kick\(n == 1 ? "" : "s"); move some kicks off the beat to reach \(lo).")
+                ? (true, "\(plural(n, "off-beat kick")) give\(n == 1 ? "s" : "") it bounce.")
+                : (false, "\(plural(n, "off-beat kick")); move some kicks off the beat to reach \(lo).")
         case .barsDiffer(let role):
             return barsDiffer(role, track)
         }
@@ -100,11 +100,14 @@ public enum CheckRunner {
 
     private static func bar(of tick: Int) -> Int { tick / Ticks.perBar }
 
+    private static func plural(_ n: Int, _ noun: String) -> String {
+        "\(n) \(noun)\(n == 1 ? "" : "s")"
+    }
+
     private static func count(_ n: Int, _ lo: Int, _ hi: Int?, noun: String) -> (Bool, String) {
-        let plural = { (k: Int) in k == 1 ? noun : noun + "s" }
-        if n < lo { return (false, "\(n) \(plural(n)); use at least \(lo).") }
-        if let hi, n > hi { return (false, "\(n) \(plural(n)) is a lot; keep it to \(hi) or fewer.") }
-        return (true, "\(n) \(plural(n)), a good amount.")
+        if n < lo { return (false, "\(plural(n, noun)); use at least \(lo).") }
+        if let hi, n > hi { return (false, "\(plural(n, noun)) is a lot; keep it to \(hi) or fewer.") }
+        return (true, "\(plural(n, noun)), a good amount.")
     }
 
     // MARK: - Melody checks
@@ -202,12 +205,17 @@ public enum CheckRunner {
             guard let best = fits.first else { continue }
             let score = fits.first { $0.chord == chord }?.score
                 ?? ChordFinder.score(of: chord, melody: melody, window: window)
-            let ok = best.score <= 0 ? score == best.score : score >= ratio * best.score
+            let ok = scorePasses(score, best: best.score, ratio: ratio)
             if !ok {
                 return (false, "Bar \(b + 1): \(chord.symbol(in: key)) clashes with the melody; try \(best.chord.symbol(in: key)).")
             }
         }
         return (true, "The chords support the melody in every bar.")
+    }
+
+    /// When the best score is not positive, only a chord matching the best passes.
+    static func scorePasses(_ score: Double, best: Double, ratio: Double) -> Bool {
+        best <= 0 ? score == best : score >= ratio * best
     }
 
     // MARK: - Drum checks
@@ -217,21 +225,22 @@ public enum CheckRunner {
         guard let laneHits = hits(lane, track) else { return missing(.drums, "drums") }
         let ticks = Set(laneHits.map(\.tick))
         let bars = max(track.bars, 1)
-        let beatText = beats.map(String.init).joined(separator: " and ")
-        var barsWithAll: [Int] = []
-        for b in 0..<bars {
-            let all = beats.allSatisfy { ticks.contains(b * Ticks.perBar + ($0 - 1) * Ticks.perQuarter) }
-            if all { barsWithAll.append(b + 1) }
+        let sortedBeats = beats.sorted()
+        let missingPerBar: [[Int]] = (0..<bars).map { b in
+            sortedBeats.filter { !ticks.contains(b * Ticks.perBar + ($0 - 1) * Ticks.perQuarter) }
         }
+        let beatsText = { (bs: [Int]) in "beat" + (bs.count == 1 ? " " : "s ") + bs.map(String.init).joined(separator: " and ") }
         if everyBar {
-            if let bad = (1...bars).first(where: { !barsWithAll.contains($0) }) {
-                return (false, "Bar \(bad): the \(name(lane)) is missing on beat \(beatText).")
+            if let bad = missingPerBar.firstIndex(where: { !$0.isEmpty }) {
+                return (false, "Bar \(bad + 1): the \(name(lane)) is missing on \(beatsText(missingPerBar[bad])).")
             }
-            return (true, "The \(name(lane)) lands on beat \(beatText) in every bar.")
+            return (true, "The \(name(lane)) lands on \(beatsText(sortedBeats)) in every bar.")
         }
-        return barsWithAll.isEmpty
-            ? (false, "No bar has the \(name(lane)) on beat \(beatText).")
-            : (true, "The \(name(lane)) lands on beat \(beatText).")
+        if missingPerBar.contains(where: \.isEmpty) {
+            return (true, "The \(name(lane)) lands on \(beatsText(sortedBeats)).")
+        }
+        let closest = missingPerBar.enumerated().min { $0.element.count < $1.element.count }!
+        return (false, "Bar \(closest.offset + 1): the \(name(lane)) is missing on \(beatsText(closest.element)).")
     }
 
     private static func hatRollPresent(_ track: Track) -> (Bool, String) {
