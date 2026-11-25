@@ -126,3 +126,39 @@ private func window(_ x: [Float], from a: Double, to b: Double) -> [Float] {
     #expect(peak(render(pool, channel: 0, count: 2400)) == 0)
     #expect(peak(render(pool, channel: 2, count: 2400)) > 0.05)
 }
+
+@Test func extremePitchDoesNotCrash() {
+    let pool = VoicePool(sampleRate: sr)
+    for inst in InstrumentID.allCases {
+        for pitch in [Int.min, -10_000, -1, 128, 10_000, Int.max] {
+            pool.noteOn(channel: 0, instrument: inst, pitch: pitch, velocity: 1, glide: false)
+            pool.noteOn(channel: 1, instrument: inst, pitch: pitch, velocity: 1, glide: true)
+        }
+    }
+    var out = render(pool, channel: 0, count: 4800)
+    out += render(pool, channel: 1, count: 4800)
+    #expect(allFinite(out))
+    #expect(pool.activeCount <= 32)
+}
+
+@Test func outOfRangeNoteOffReleasesClampedNote() {
+    let pool = VoicePool(sampleRate: sr)
+    pool.noteOn(channel: 0, instrument: .pad, pitch: 500, velocity: 1, glide: false)
+    _ = render(pool, count: 4800)
+    pool.noteOff(channel: 0, pitch: 500)
+    _ = render(pool, count: frames(1.5))
+    #expect(pool.activeCount == 0)
+}
+
+@Test func chokeFadeScalesWithSampleRate() {
+    // 5 ms is 480 samples at 96 kHz.
+    let pool = VoicePool(sampleRate: 96_000)
+    pool.noteOn(channel: 0, instrument: .trapKit, pitch: DrumLane.openHat.midiNote, velocity: 1, glide: false)
+    _ = render(pool, count: 960)
+    pool.noteOn(channel: 0, instrument: .trapKit, pitch: DrumLane.closedHat.midiNote, velocity: 1, glide: false)
+    #expect(pool.activeCount == 2)
+    _ = render(pool, count: 400)
+    #expect(pool.activeCount == 2)
+    _ = render(pool, count: 160)
+    #expect(pool.activeCount == 1)
+}
