@@ -81,7 +81,10 @@ public final class Renderer: @unchecked Sendable {
     private let dryBus: UnsafeMutablePointer<Float>
     private let sendBus: UnsafeMutablePointer<Float>
 
-    public init(sampleRate: Double) {
+    /// A `sampleRate` that is not positive and finite falls back to 48 000 Hz, so timing stays well-defined
+    /// (the dispatch loop could otherwise never reach the end of a block).
+    public init(sampleRate requested: Double) {
+        let sampleRate = requested.isFinite && requested > 0 ? requested : 48_000
         self.sampleRate = sampleRate
         pool = VoicePool(maxVoices: 32, sampleRate: sampleRate)
         let channels = Self.channelCount
@@ -139,8 +142,9 @@ public final class Renderer: @unchecked Sendable {
         _ = replaced  // released here, outside the lock, on this thread
     }
 
-    /// Queues a command for the next render block. Dropped if 256 commands are already waiting.
-    public func send(_ c: EngineCommand) {
+    /// Queues a command for the next render block. Returns false (command dropped) if 256 are already waiting.
+    @discardableResult
+    public func send(_ c: EngineCommand) -> Bool {
         commands.push(c)
     }
 
@@ -199,7 +203,21 @@ public final class Renderer: @unchecked Sendable {
             clock = Int((tick * sampleRate * 60 / (newTempo * Double(Ticks.perQuarter))).rounded())
         }
         tempo = newTempo
-        loopTicks = max(1, new.loopTicks)
+        let newLoop = max(1, new.loopTicks)
+        if playing {
+            // Rebase onto the new loop so the playhead keeps its loop position (or restarts at 0 if that
+            // position is past the new loop end), keeping the sub-tick offset to the next tick.
+            let p = nextTick % loopTicks
+            let rebased = p < newLoop ? p : 0
+            let offset = clock - onsetSample(nextTick)
+            let shift = rebased - nextTick
+            for ch in 0..<Self.partChannels {
+                for j in 0..<heldCount[ch] { heldEnd[ch * Self.maxHeld + j] += shift }
+            }
+            nextTick = rebased
+            clock = onsetSample(rebased) + offset
+        }
+        loopTicks = newLoop
         delaySamples = dottedEighthSamples()
         snapshot = new
     }

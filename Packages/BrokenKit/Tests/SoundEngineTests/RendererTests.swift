@@ -235,3 +235,99 @@ private func peak(_ s: Stereo) -> Float { max(peak(s.left), peak(s.right)) }
     #expect(out.left.firstIndex { abs($0) > 1e-6 } == 24_000)
     #expect(r.playheadTick > 96 && r.playheadTick < 384)
 }
+
+// At 120 BPM and 48 kHz one tick is exactly 250 samples.
+
+@Test func loopLengthChangeKeepsPlayhead() {
+    let r = Renderer(sampleRate: sr)
+    let melody = notes(.bell, [NoteEvent(start: 200, length: 48, pitch: 72)])
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 1, [melody])))
+    r.send(.play(fromTick: 0))
+    _ = render(r, frames: (3 * 384 + 100) * 250)  // three loops + 100 ticks
+    #expect(r.playheadTick == 100)
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 2, [melody])))
+    let out = render(r, frames: 30_000)
+    // Position 100 carries over (not 1252 % 768 = 484), so the note at tick 200 sounds 100 ticks later.
+    #expect(out.left.firstIndex { abs($0) > 1e-6 } == 25_000)
+    #expect(r.playheadTick == 220)
+}
+
+@Test func loopShrinkPastPlayheadRestartsAtZero() {
+    let r = Renderer(sampleRate: sr)
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 2, [notes(.pad, [NoteEvent(start: 384, length: 384, pitch: 60)])])))
+    r.send(.play(fromTick: 0))
+    _ = render(r, frames: 500 * 250)  // tick 500, in bar 2: the pad is sounding
+    #expect(r.activeVoiceCount == 1)
+    // Shrinking to 1 bar puts position 500 past the loop end: restart at 0 and release what was sounding.
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 1, [notes(.bell, [NoteEvent(start: 96, length: 48, pitch: 72)])])))
+    _ = render(r, frames: 4 * 250)
+    #expect(r.playheadTick == 4)
+}
+
+@Test func snapshotSwapKeepsPlayhead() {
+    let r = Renderer(sampleRate: sr)
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 1, [notes(.bell, [NoteEvent(start: 300, length: 48, pitch: 72)])])))
+    r.send(.play(fromTick: 0))
+    _ = render(r, frames: 100 * 250)
+    #expect(r.playheadTick == 100)
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 1, [notes(.bell, [NoteEvent(start: 150, length: 48, pitch: 72)])])))
+    let out = render(r, frames: 100 * 250)
+    #expect(out.left.firstIndex { abs($0) > 1e-6 } == 50 * 250)
+    #expect(r.playheadTick == 200)
+}
+
+@Test func tempoChangeMidPlay() {
+    let r = Renderer(sampleRate: sr)
+    let melody = notes(.bell, [NoteEvent(start: 200, length: 48, pitch: 72)])
+    r.setSnapshot(PlaybackSnapshot(track: track(tempo: 120, bars: 1, [melody])))
+    r.send(.play(fromTick: 0))
+    _ = render(r, frames: 100 * 250)
+    #expect(r.playheadTick == 100)
+    // At 60 BPM a tick is 500 samples: the note at tick 200 is 100 ticks = 50 000 samples away.
+    r.setSnapshot(PlaybackSnapshot(track: track(tempo: 60, bars: 1, [melody])))
+    let out = render(r, frames: 60_000)
+    #expect(out.left.firstIndex { abs($0) > 1e-6 } == 50_000)
+    #expect(r.playheadTick == 220)
+}
+
+@Test func mutedPartIsSilentAndReleased() {
+    // A muted part schedules nothing.
+    let quiet = Renderer(sampleRate: sr)
+    var bell = notes(.bell, [NoteEvent(start: 0, length: 96, pitch: 72)])
+    bell.muted = true
+    quiet.setSnapshot(PlaybackSnapshot(track: track(bars: 1, [bell])))
+    quiet.send(.play(fromTick: 0))
+    #expect(peak(render(quiet, frames: frames(0.5))) == 0)
+    #expect(quiet.activeVoiceCount == 0)
+
+    // Muting a sounding part through a swap releases it, and it stays silent past the loop wrap.
+    let r = Renderer(sampleRate: sr)
+    var pad = notes(.pad, [NoteEvent(start: 0, length: 768, pitch: 60)])
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 2, [pad])))
+    r.send(.play(fromTick: 0))
+    #expect(peak(render(r, frames: frames(1))) > 0.05)
+    pad.muted = true
+    r.setSnapshot(PlaybackSnapshot(track: track(bars: 2, [pad])))
+    _ = render(r, frames: frames(3.5))  // to 4.5 s, past the wrap at 4 s
+    #expect(r.activeVoiceCount == 0)
+    #expect(peak(render(r, frames: 4800)) < 1e-4)
+}
+
+@Test func invalidSampleRateFallsBack() {
+    for rate in [0.0, -44_100, .nan, .infinity] {
+        let r = Renderer(sampleRate: rate)
+        #expect(r.sampleRate == 48_000)
+        r.setSnapshot(PlaybackSnapshot(track: track([notes(.bell, [NoteEvent(start: 96, length: 96, pitch: 72)])])))
+        r.send(.play(fromTick: 0))
+        let out = render(r, frames: 30_000)
+        #expect(out.left.firstIndex { abs($0) > 1e-6 } == 24_000)
+    }
+}
+
+@Test func sendReportsFullQueue() {
+    let r = Renderer(sampleRate: sr)
+    for _ in 0..<256 { #expect(r.send(.noteOff(.keys, 60))) }
+    #expect(!r.send(.noteOff(.keys, 60)))
+    _ = render(r, frames: 64)  // drains the queue
+    #expect(r.send(.noteOff(.keys, 60)))
+}
