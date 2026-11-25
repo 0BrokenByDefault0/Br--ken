@@ -5,7 +5,8 @@ import Foundation
 private let fixtureURL = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
     .appendingPathComponent("Fixtures/sample-lesson.json")
 private let repoContent = URL(fileURLWithPath: #filePath)
-    .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    .deletingLastPathComponent().deletingLastPathComponent()
     .appendingPathComponent("Content")
 
 private func stepType(_ s: LessonStep) -> String {
