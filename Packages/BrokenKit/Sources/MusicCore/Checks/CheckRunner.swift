@@ -20,7 +20,7 @@ public enum CheckRunner {
             return inKey(role, track)
         case .noteCount(let role, let lo, let hi):
             guard let notes = notes(role, track) else { return missing(role, "notes") }
-            return count(notes.count, lo, hi, noun: "note")
+            return count(notes.notes.count, lo, hi, noun: "note")
         case .barRhythmRepeats(let role):
             return barRhythmRepeats(role, track)
         case .endsOnDegree(let role, let degrees):
