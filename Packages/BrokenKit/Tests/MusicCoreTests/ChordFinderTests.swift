@@ -24,7 +24,8 @@ import Foundation
 @Test func perBarSplitsWindows() throws {
     let m = try Notation.melody("A4:16 F4:8 C5:8")
     let bars = ChordFinder.fitsPerBar(melody: m, bars: 2, key: try Key(parsing: "A minor"))
-    #expect(bars.count == 2 && bars[1].first!.chord == (try Chord(parsing: "F")))
+    let f = try Chord(parsing: "F")
+    #expect(bars.count == 2 && bars[1].first!.chord == f)
 }
 
 @Test func emptyWindowReturnsCandidatesWithoutCrash() throws {
