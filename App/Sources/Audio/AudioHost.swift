@@ -34,7 +34,9 @@ final class AudioHost {
 
     private let session: AudioSessionControlling
     private let makeEngine: @MainActor () -> AudioEngineControlling
-    @ObservationIgnored private var engine: AudioEngineControlling
+    /// Built on the first `start()`, after the session is configured, so the engine reads the
+    /// configured hardware sample rate.
+    @ObservationIgnored private var engine: AudioEngineControlling?
     private let observers: NotificationObservers
 
     private enum Event: Sendable {
@@ -47,7 +49,6 @@ final class AudioHost {
          center: NotificationCenter = .default) {
         self.session = session
         self.makeEngine = makeEngine
-        engine = makeEngine()
         observers = NotificationObservers(center: center)
 
         observe(AVAudioSession.interruptionNotification) { note in
@@ -67,6 +68,8 @@ final class AudioHost {
     func start() throws {
         try record {
             try session.configure()
+            let engine = self.engine ?? makeEngine()
+            self.engine = engine
             try engine.start()
         }
     }
@@ -77,12 +80,16 @@ final class AudioHost {
             // Restart even without `.shouldResume`: the owner wants sound back.
             try? start()
         case .shouldBeRunning:
+            guard let engine else {
+                try? start()  // the first start failed before an engine was built: try it all again
+                return
+            }
             guard !engine.isRunning else { return }
             try? record { try engine.start() }
         case .mediaServicesReset:
             // Every audio object is invalid after a reset: build a fresh engine (and renderer).
-            engine.stop()
-            engine = makeEngine()
+            engine?.stop()
+            engine = nil
             try? start()
         }
     }

@@ -103,6 +103,19 @@ private func interruption(_ type: AVAudioSession.InterruptionType) -> [AnyHashab
 }
 
 @MainActor
+@Test func engineIsBuiltAfterSessionIsConfigured() throws {
+    let session = FakeSession()
+    var configuresBeforeBuild: [Int] = []
+    let host = AudioHost(session: session, makeEngine: {
+        configuresBeforeBuild.append(session.configureCount)
+        return FakeEngine()
+    }, center: NotificationCenter())
+    #expect(configuresBeforeBuild.isEmpty, "no engine before start: it reads the configured sample rate")
+    try host.start()
+    #expect(configuresBeforeBuild == [1])
+}
+
+@MainActor
 @Test func startErrorIsRecordedNotThrownFromNotifications() throws {
     let center = NotificationCenter()
     let host = AudioHost(session: FakeSession(), makeEngine: { FailingEngine() }, center: center)
