@@ -12,7 +12,7 @@ private func key(_ s: String) -> Key { try! Key(parsing: s) }
 
 @Test func semitonesAcrossModes() {
     #expect(key("A minor").semitones(toMatch: key("C major")) == 0)
-    #expect(key("A minor").semitones(toMatch: key("G major")) == -2)
+    #expect(key("A minor").semitones(toMatch: key("G major")) == -5)  // relative E minor; the brief's -2 contradicts its own rule
     #expect(key("C major").semitones(toMatch: key("A minor")) == 0)
 }
 
