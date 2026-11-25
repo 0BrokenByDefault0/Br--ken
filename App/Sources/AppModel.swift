@@ -26,7 +26,8 @@ final class AppModel {
     let audio: any AudioPlaying
     /// True while the loop is playing (the active track, or a Chord Finder audition).
     private(set) var isPlaying = false
-    /// While on, a rim click on every beat is mixed into what is played (the saved track is unchanged).
+    /// While on, a rim click on every beat is mixed into the active track as it plays (the saved track is
+    /// unchanged). Auditions (lesson loops, examples, the Chord Finder) play without it.
     var metronome = false { didSet { if let activeTrack, !auditioning { send(activeTrack) } } }
     private var auditioning = false
     /// True while the active track has slider changes that are heard but not yet saved.
@@ -165,7 +166,7 @@ final class AppModel {
         auditioning = true
         var track = track
         if atTrackTempo, let activeTrack { track.tempo = activeTrack.tempo }
-        send(track)
+        audio.setTrack(track)
         audio.play()
         isPlaying = true
     }
@@ -174,7 +175,7 @@ final class AppModel {
     /// lesson loop plays). No-op unless an audition is playing.
     func updateAudition(_ track: Track) {
         guard auditioning, isPlaying else { return }
-        send(track)
+        audio.setTrack(track)
     }
 
     func stop() {
@@ -244,12 +245,17 @@ final class AppModel {
     }
 
     /// The keep after a track-setup task: applies the working track's tempo and key to the active track
-    /// (its name and parts stay), or creates the active track from the working track's name, tempo, and
-    /// key. Completes the lesson and saves.
+    /// (its name stays; on a key change its note and chord parts move into the new key, drums untouched),
+    /// or creates the active track from the working track's name, tempo, and key. Completes the lesson
+    /// and saves.
     func keepSetup(from working: Track, lessonID: String) {
         var track = activeTrack
             ?? Track(name: working.name, createdAt: Date(), tempo: working.tempo, key: working.key,
                      bars: working.bars, parts: [])
+        if track.key != working.key {
+            let shift = track.key.semitones(toMatch: working.key)
+            track.parts = track.parts.map { $0.transposed(by: shift) }
+        }
         track.tempo = working.tempo
         track.key = working.key
         commitKept(track, lessonID: lessonID)
@@ -269,6 +275,7 @@ final class AppModel {
         saveProgress()
     }
 
+    /// Sends the active track to audio, with the metronome click while it is on.
     private func send(_ track: Track) {
         audio.setTrack(metronome ? withMetronome(track) : track)
     }

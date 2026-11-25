@@ -22,6 +22,10 @@ final class TaskStepModel {
     private(set) var results: [CheckResult] = []
     /// How many hints have been shown.
     private(set) var hintIndex = 0
+    /// The target role's part this task's work grew from: the part as the task started (so a copy of Your
+    /// Track's part, when it has one), moved on to what a keep saved from this task. When Your Track still
+    /// holds it, the working part is the owner's own edit of their saved part.
+    private(set) var basePart: Part? = nil
 
     private let app: AppModel
     // Tool models, built once for this task the first time the tool view asks for them.
@@ -49,6 +53,12 @@ final class TaskStepModel {
         self.checks = checks
         self.hints = hints
         self.working = working
+        basePart = targetRole.flatMap { working.part($0) }
+    }
+
+    /// A keep saved this task's target part to Your Track as `saved`: later edits grow from it.
+    func rebase(onto saved: Part?) {
+        basePart = saved
     }
 
     /// The default instrument and empty content for a role edited with `tool`.

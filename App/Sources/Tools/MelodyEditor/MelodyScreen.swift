@@ -12,6 +12,8 @@ final class MelodyToolModel {
     let roll: PianoRollModel
     private(set) var isRecording = false
     let instrument: InstrumentID
+    /// Glide is an 808 slide, so the piano roll offers Glide mode only on the 808.
+    var showsGlide: Bool { instrument == .eight08 }
     private let audio: any AudioPlaying
     private let isPlaying: () -> Bool
     private let startPlayback: () -> Void
@@ -62,11 +64,17 @@ final class MelodyToolModel {
     func keyEvent(pitch: Int, on: Bool) {
         if on {
             audio.noteOn(instrument, pitch, 0.8)
-            if isRecording { recorder.noteOn(pitch: pitch, atTick: audio.playheadTick) }
+            if isRecording { recorder.noteOn(pitch: pitch, atTick: heardTick) }
         } else {
             audio.noteOff(instrument, pitch)
-            if isRecording { recorder.noteOff(pitch: pitch, atTick: audio.playheadTick) }
+            if isRecording { recorder.noteOff(pitch: pitch, atTick: heardTick) }
         }
+    }
+
+    /// Where in the loop the owner is hearing now (the playhead minus the output latency).
+    private var heardTick: Int {
+        LatencyCompensation.heardTick(playhead: audio.playheadTick, latency: audio.latencyTicks,
+                                      loopTicks: roll.loopTicks)
     }
 
     func audition(_ pitch: Int) {
@@ -85,7 +93,7 @@ struct MelodyScreen: View {
 
     var body: some View {
         if let track = model.activeTrack {
-            MelodyEditorBody(app: model, track: track).id(track.id)
+            MelodyEditorBody(app: model, track: track).id(track.toolIdentity)
         } else {
             NoTrackView(tool: "The melody editor")
         }
@@ -127,7 +135,7 @@ private struct MelodyEditorBody: View {
                 }
                 .buttonStyle(PressableButtonStyle())
                 PianoRollView(model: tool.roll, playheadTick: { app.audio.playheadTick }, isPlaying: app.isPlaying,
-                              onAudition: { tool.audition($0) })
+                              showsGlide: tool.showsGlide, onAudition: { tool.audition($0) })
                 SoundControlsView(settings: Binding(
                     get: { app.activeTrack?.part(.melody)?.sound ?? SoundSettings() },
                     set: { value in

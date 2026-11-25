@@ -52,7 +52,7 @@ private struct Sandbox {
         AppModel(content: try ContentLibrary(directory: contentDir),
                  trackStore: TrackStore(directory: tracksDir),
                  progressStore: ProgressStore(fileURL: progressURL),
-                 audio: audio ?? FakeAudio())
+                 audio: audio ?? FakeAudio() as any AudioPlaying)
     }
 }
 

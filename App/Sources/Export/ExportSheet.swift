@@ -24,7 +24,7 @@ struct ExportSheet: View {
                         Text("Full mix").tag(ExportScope.fullMix)
                         Text("Stems").tag(ExportScope.stems)
                         ForEach(exportableParts) { part in
-                            Text(part.role.rawValue.capitalized).tag(ExportScope.part(part.id))
+                            Text(part.role.displayName).tag(ExportScope.part(part.id))
                         }
                     }
                     .pickerStyle(.menu)
@@ -71,7 +71,7 @@ struct ExportSheet: View {
                             }
                             Text("In Koala: tap ＋ → Import → Files")
                                 .font(Theme.body(14)).foregroundStyle(Color.mute)
-                            Text("Files are also saved in the Files app under Broken > Exports.")
+                            Text("Files are also saved in Files app › Br--ken › Exports.")
                                 .font(Theme.body(12)).foregroundStyle(Color.mute)
                         }
                     }

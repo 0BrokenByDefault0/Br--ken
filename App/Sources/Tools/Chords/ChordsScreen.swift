@@ -8,10 +8,21 @@ struct ChordsScreen: View {
 
     var body: some View {
         if let track = model.activeTrack {
-            ChordsBody(app: model, track: track).id(track.id)
+            ChordsBody(app: model, track: track).id(track.toolIdentity)
         } else {
             NoTrackView(tool: "The chord finder")
         }
+    }
+}
+
+extension ChordFinderModel {
+    /// The Chord Finder over `track`'s melody, in its key and tempo, starting from its chords part.
+    convenience init(track: Track) {
+        var melody = NoteSequence(notes: [])
+        if case .notes(let s)? = track.part(.melody)?.content { melody = s }
+        self.init(melody: melody, bars: track.bars, key: track.key)
+        tempo = track.tempo
+        if case .chords(let p)? = track.part(.chords)?.content { progression = p }
     }
 }
 
@@ -24,12 +35,7 @@ private struct ChordsBody: View {
     init(app: AppModel, track: Track) {
         self.app = app
         key = track.key
-        var melody = NoteSequence(notes: [])
-        if case .notes(let s)? = track.part(.melody)?.content { melody = s }
-        let finder = ChordFinderModel(melody: melody, bars: track.bars, key: track.key)
-        finder.tempo = track.tempo
-        if case .chords(let p)? = track.part(.chords)?.content { finder.progression = p }
-        _finder = State(initialValue: finder)
+        _finder = State(initialValue: ChordFinderModel(track: track))
     }
 
     private var melody: NoteSequence {

@@ -85,7 +85,7 @@ struct YourTrackBar: View {
     @ViewBuilder
     private func chip(_ role: PartRole, track: Track) -> some View {
         let part = track.part(role)
-        let name = Self.name(role)
+        let name = role.displayName
         if let part {
             Button { model.setMuted(role: role, !part.muted) } label: {
                 Text(name).font(Theme.body(14).weight(.medium))
@@ -105,15 +105,6 @@ struct YourTrackBar: View {
                 .frame(minHeight: Theme.minTarget)
                 .overlay(Capsule().strokeBorder(Color.mute.opacity(0.6), style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
                 .accessibilityLabel("\(name) part, not built yet")
-        }
-    }
-
-    static func name(_ role: PartRole) -> String {
-        switch role {
-        case .melody: "Melody"
-        case .chords: "Chords"
-        case .drums: "Drums"
-        default: role.rawValue.capitalized
         }
     }
 

@@ -16,6 +16,8 @@ jobs:
       - run: swift test --package-path Packages/BrokenKit
 
   app:
+    # Never build or release an IPA when the Linux core tests fail.
+    needs: core-tests
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ipa]') || startsWith(github.ref, 'refs/tags/v')
     runs-on: macos-15
     timeout-minutes: 30
@@ -61,6 +63,9 @@ jobs:
           case "$(plutil -extract UIFileSharingEnabled raw "$PLIST")" in true|1) ;; *) echo "UIFileSharingEnabled not true"; exit 1;; esac
           case "$(plutil -extract LSSupportsOpeningDocumentsInPlace raw "$PLIST")" in true|1) ;; *) echo "LSSupportsOpeningDocumentsInPlace not true"; exit 1;; esac
           test "$(plutil -extract MinimumOSVersion raw "$PLIST")" = "18.0"
+          ORIENTATIONS="$(plutil -extract UISupportedInterfaceOrientations json -o - "$PLIST" | tr -d ' \n')"
+          test "$ORIENTATIONS" = '["UIInterfaceOrientationPortrait"]' || { echo "Orientations not portrait-only: $ORIENTATIONS"; exit 1; }
+          test "$(plutil -extract CFBundleShortVersionString raw "$PLIST")" = "0.1.0"
           echo "IPA verification passed"
       - uses: actions/upload-artifact@v4
         with:

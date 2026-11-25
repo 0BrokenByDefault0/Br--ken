@@ -11,8 +11,9 @@ final class LessonPlayerModel {
     private(set) var finished = false
     /// What each keep step (by index) saved to Your Track.
     private(set) var saved: [Int: [PartRole]] = [:]
-    /// Per keep step, the roles Your Track already has that the owner chose to replace (default: keep mine).
-    private(set) var replaceChoices: [Int: Set<PartRole>] = [:]
+    /// Per keep step, the Replace (true) / Keep mine (false) choices the owner made for roles Your Track
+    /// already has. A role without a choice uses `defaultReplaces`.
+    private(set) var replaceChoices: [Int: [PartRole: Bool]] = [:]
     // Built lazily from view bodies, so not observed.
     @ObservationIgnored private var taskModels: [Int: TaskStepModel] = [:]
     private let app: AppModel
@@ -133,13 +134,19 @@ final class LessonPlayerModel {
     }
 
     func replaces(_ role: PartRole, atKeep i: Int) -> Bool {
-        replaceChoices[i]?.contains(role) ?? false
+        replaceChoices[i]?[role] ?? defaultReplaces(role, atKeep: i)
+    }
+
+    /// Replace when Your Track's part is still the part the source task's work grew from (the owner edited
+    /// their own saved part in this lesson); otherwise Keep mine, so nothing of theirs is lost by default.
+    func defaultReplaces(_ role: PartRole, atKeep i: Int) -> Bool {
+        guard let source = keepSource(forKeepAt: i), source.targetRole == role,
+              let base = source.basePart, let saved = app.activeTrack?.part(role) else { return false }
+        return Self.samePart(base, saved)
     }
 
     func setReplace(_ replace: Bool, role: PartRole, atKeep i: Int) {
-        var choices = replaceChoices[i] ?? []
-        if replace { choices.insert(role) } else { choices.remove(role) }
-        replaceChoices[i] = choices
+        replaceChoices[i, default: [:]][role] = replace
     }
 
     /// What "Save to Your Track" saves: the roles with content, minus conflicts the owner keeps.
@@ -164,7 +171,11 @@ final class LessonPlayerModel {
         } else {
             let working = keepWorking(at: i)
             app.keep(roles: roles, from: working, lessonID: lesson.id)
-            saved[i] = roles.filter { working.part($0)?.hasContent ?? false }
+            let savedRoles = roles.filter { working.part($0)?.hasContent ?? false }
+            saved[i] = savedRoles
+            if let source, let target = source.targetRole, savedRoles.contains(target) {
+                source.rebase(onto: app.activeTrack?.part(target))
+            }
         }
     }
 

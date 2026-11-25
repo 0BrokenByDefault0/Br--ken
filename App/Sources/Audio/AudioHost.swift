@@ -65,6 +65,9 @@ final class AudioHost {
         observe(AVAudioSession.mediaServicesWereResetNotification) { _ in .mediaServicesReset }
     }
 
+    /// Hides the current error (the owner dismissed its banner); the next failure sets it again.
+    func dismissError() { lastError = nil }
+
     /// The audio session's current category (for tests and diagnostics).
     var category: String { AVAudioSession.sharedInstance().category.rawValue }
 

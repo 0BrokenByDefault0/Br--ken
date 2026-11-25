@@ -2,13 +2,16 @@ import SwiftUI
 import MusicCore
 
 /// Piano roll: tap a cell to add or remove a note; touch-and-hold a note, then drag sideways to resize it.
-/// Glide mode turns taps into glide toggles. Rows run high pitch at the top.
+/// Glide mode (shown only for the 808, the one instrument that glides) turns taps into glide toggles.
+/// Rows run high pitch at the top.
 struct PianoRollView: View {
     let model: PianoRollModel
     /// Current loop position in ticks, read ~30 times a second by a small overlay while `isPlaying`; the
     /// notes and grid are not redrawn for it.
     let playheadTick: () -> Int
     let isPlaying: Bool
+    /// Whether to offer Glide mode (the part plays on the 808).
+    var showsGlide = false
     /// Called with the pitch when a note is added, so the caller can let the owner hear it.
     var onAudition: ((Int) -> Void)?
 
@@ -22,12 +25,14 @@ struct PianoRollView: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Picker("Tap does", selection: $glideMode) {
-                    Text("Notes").tag(false)
-                    Text("Glide").tag(true)
+                if showsGlide {
+                    Picker("Tap does", selection: $glideMode) {
+                        Text("Notes").tag(false)
+                        Text("Glide").tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(maxWidth: 180)
                 }
-                .pickerStyle(.segmented)
-                .frame(maxWidth: 180)
                 Spacer()
                 Text("Tap: add / remove · Hold + drag: length")
                     .font(Theme.body(11)).foregroundStyle(Color.mute)
@@ -136,7 +141,7 @@ struct PianoRollView: View {
     private func handleTap(at point: CGPoint) {
         guard let (step, pitch) = cell(at: point) else { return }
         Theme.lightHaptic()
-        if glideMode {
+        if glideMode && showsGlide {
             model.toggleGlide(step: step, pitch: pitch)
         } else {
             let existed = model.noteIndex(step: step, pitch: pitch) != nil

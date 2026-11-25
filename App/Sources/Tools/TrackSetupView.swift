@@ -144,6 +144,12 @@ struct NewTrackSheet: View {
     }
 }
 
+extension Track {
+    /// The Chords and Melody tabs rebuild their models when this changes: another track, or a new key
+    /// (their pads, scale rows, and Chord Finder fits are built for one key).
+    var toolIdentity: String { "\(id)-\(key.name)" }
+}
+
 /// Shown on a tool screen when there is no active track.
 struct NoTrackView: View {
     let tool: String

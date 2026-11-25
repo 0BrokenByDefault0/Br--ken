@@ -54,10 +54,30 @@ struct IdeaStepView: View {
 
 /// The track an example card plays: every part audible except the ones the owner muted on the card.
 enum ListenPlayback {
-    static func track(for clip: Clip, muted: Set<PartRole>) throws -> Track {
+    /// The example's track, every part audible. Parse it once per card: each parse makes new part ids.
+    static func track(for clip: Clip) throws -> Track {
         var track = try clip.makeTrack(name: "Example")
-        for i in track.parts.indices { track.parts[i].muted = muted.contains(track.parts[i].role) }
+        for i in track.parts.indices { track.parts[i].muted = false }
         return track
+    }
+
+    /// `base` with the parts at `mutedParts` (indexes into `parts`) muted, so same-role parts mute apart.
+    static func track(_ base: Track, mutedParts: Set<Int>) -> Track {
+        var track = base
+        for i in track.parts.indices { track.parts[i].muted = mutedParts.contains(i) }
+        return track
+    }
+
+    /// One label per part: the role's name, numbered when the example has more than one of that role
+    /// ("Chords 1", "Chords 2").
+    static func partLabels(_ track: Track) -> [String] {
+        let roles = track.parts.map(\.role)
+        var seen: [PartRole: Int] = [:]
+        return roles.map { role in
+            seen[role, default: 0] += 1
+            let count = roles.filter { $0 == role }.count
+            return count > 1 ? "\(role.displayName) \(seen[role]!)" : role.displayName
+        }
     }
 
     /// The example's chords as symbols ("Dm – B♭"), if it has a chords part.
@@ -77,7 +97,18 @@ struct ListenStepView: View {
     let caption: String
     let examples: [Example]
     @State private var playing: Int?
-    @State private var muted: [Int: Set<PartRole>] = [:]
+    /// Per card, the indexes of the parts the owner muted.
+    @State private var muted: [Int: Set<Int>] = [:]
+    /// Each example parsed once (nil if it can't be played), so redraws keep the same tracks.
+    @State private var baseTracks: [Track?]
+
+    init(app: AppModel, title: String, caption: String, examples: [Example]) {
+        self.app = app
+        self.title = title
+        self.caption = caption
+        self.examples = examples
+        _baseTracks = State(initialValue: examples.map { try? ListenPlayback.track(for: $0.clip) })
+    }
 
     var body: some View {
         ScrollView {
@@ -94,7 +125,8 @@ struct ListenStepView: View {
     }
 
     private func exampleTrack(_ i: Int) -> Track? {
-        try? ListenPlayback.track(for: examples[i].clip, muted: muted[i] ?? [])
+        guard baseTracks.indices.contains(i), let base = baseTracks[i] else { return nil }
+        return ListenPlayback.track(base, mutedParts: muted[i] ?? [])
     }
 
     private func toggle(_ i: Int) {
@@ -107,9 +139,9 @@ struct ListenStepView: View {
         }
     }
 
-    private func toggleMute(_ role: PartRole, in i: Int) {
+    private func toggleMute(part index: Int, in i: Int) {
         var set = muted[i] ?? []
-        if set.contains(role) { set.remove(role) } else { set.insert(role) }
+        if set.contains(index) { set.remove(index) } else { set.insert(index) }
         muted[i] = set
         if playing == i, let track = exampleTrack(i) { app.updateAudition(track) }
     }
@@ -144,12 +176,13 @@ struct ListenStepView: View {
             Text(LessonText.markdown(example.explanation)).font(Theme.body(15)).foregroundStyle(Color.ink)
             if let track {
                 if track.parts.count > 1 {
+                    let labels = ListenPlayback.partLabels(track)
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            ForEach(track.parts) { part in
-                                let on = !part.muted
-                                Button { toggleMute(part.role, in: i) } label: {
-                                    Label(LessonText.roleName(part.role), systemImage: on ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                            ForEach(track.parts.indices, id: \.self) { p in
+                                let on = !track.parts[p].muted
+                                Button { toggleMute(part: p, in: i) } label: {
+                                    Label(labels[p], systemImage: on ? "speaker.wave.2.fill" : "speaker.slash.fill")
                                         .font(Theme.body(14)).foregroundStyle(on ? Color.ink : Color.mute)
                                         .padding(.horizontal, 12)
                                         .frame(minHeight: Theme.minTarget)
@@ -267,7 +300,7 @@ struct TaskStepView: View {
             }
             .buttonStyle(PressableButtonStyle())
             PianoRollView(model: melody.roll, playheadTick: { app.audio.playheadTick }, isPlaying: app.isPlaying,
-                          onAudition: { melody.audition($0) })
+                          showsGlide: melody.showsGlide, onAudition: { melody.audition($0) })
         case .chordPads:
             let instrument = task.targetPart?.instrument ?? .pad
             ChordPadsView(key: task.working.key,
@@ -368,7 +401,9 @@ struct TaskStepView: View {
 
 /// Shows the message and saves the lesson's result to Your Track. Roles the owner hasn't built are named
 /// and skipped; for each role Your Track already has (with a different part) the owner picks Replace or
-/// Keep mine (the default) before one "Save to Your Track" tap.
+/// Keep mine before one "Save to Your Track" tap. The default is Replace when the saved part is the one
+/// this lesson's task started from (the owner's own edit), else Keep mine. The choices stay after saving,
+/// so "Save again" applies a changed one.
 struct KeepStepView: View {
     let player: LessonPlayerModel
     let app: AppModel
@@ -399,6 +434,21 @@ struct KeepStepView: View {
         ForEach(player.emptyRoles(forKeepAt: index), id: \.self) { role in
             notBuilt(role)
         }
+        replaceChoices(background: Color.panel)
+        Text(isSetup ? "Saves the tempo and key to Your Track."
+             : toSave.isEmpty ? "Nothing new to save; this marks the lesson done."
+             : "Saves your \(LessonText.list(toSave)) to Your Track.")
+            .font(Theme.body(15)).foregroundStyle(Color.mute)
+        Button { player.saveKeep(at: index) } label: {
+            Text("Save to Your Track").font(Theme.title(17)).foregroundStyle(Color.night)
+                .frame(maxWidth: .infinity, minHeight: Theme.minTarget + 6)
+                .background(Color.amber, in: RoundedRectangle(cornerRadius: 14))
+        }
+        .buttonStyle(PressableButtonStyle())
+    }
+
+    /// A Replace / Keep mine picker for each role Your Track already has with a different part.
+    private func replaceChoices(background: Color) -> some View {
         ForEach(player.conflictingRoles(forKeepAt: index), id: \.self) { role in
             VStack(alignment: .leading, spacing: 8) {
                 Text("Your Track already has \(LessonText.roleName(role))")
@@ -413,18 +463,8 @@ struct KeepStepView: View {
                 .frame(minHeight: Theme.minTarget)
             }
             .padding(12)
-            .background(Color.panel, in: RoundedRectangle(cornerRadius: 12))
+            .background(background, in: RoundedRectangle(cornerRadius: 12))
         }
-        Text(isSetup ? "Saves the tempo and key to Your Track."
-             : toSave.isEmpty ? "Nothing new to save; this marks the lesson done."
-             : "Saves your \(LessonText.list(toSave)) to Your Track.")
-            .font(Theme.body(15)).foregroundStyle(Color.mute)
-        Button { player.saveKeep(at: index) } label: {
-            Text("Save to Your Track").font(Theme.title(17)).foregroundStyle(Color.night)
-                .frame(maxWidth: .infinity, minHeight: Theme.minTarget + 6)
-                .background(Color.amber, in: RoundedRectangle(cornerRadius: 14))
-        }
-        .buttonStyle(PressableButtonStyle())
     }
 
     private func notBuilt(_ role: PartRole) -> some View {
@@ -472,6 +512,7 @@ struct KeepStepView: View {
                 .padding(12)
                 .background(Color.night, in: RoundedRectangle(cornerRadius: 12))
             }
+            replaceChoices(background: Color.night)
             Button("Save again") { player.saveKeep(at: index) }
                 .font(Theme.body(15)).foregroundStyle(Color.haze)
                 .frame(minHeight: Theme.minTarget)
