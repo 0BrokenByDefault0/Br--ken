@@ -1,0 +1,170 @@
+{
+  "id": "first-sounds.the-grid",
+  "stage": "first-sounds",
+  "title": "Bars, beats, and the grid",
+  "summary": "4/4, bars, beats and 16th steps, and why moving the snare to beat 3 makes the trap bounce.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Count it: bars, beats, steps",
+      "body": "Nearly every hip hop beat is in **4/4**: four beats per bar. Count it out loud: 1, 2, 3, 4, 1, 2, 3, 4. Each group of four is one **bar**.\n\nThe drum grid splits every beat into four **16th steps**, so one bar is 16 steps. Count them \"1 e & a, 2 e & a, 3 e & a, 4 e & a\".\n\nThe beats sit on steps **1, 5, 9 and 13**. Those are your landmarks.\n\nWhere the snare goes decides the feel. Snare on beats 2 and 4 is the normal backbeat. Snare only on beat 3 is **half-time**, the slow, heavy trap bounce.",
+      "deeper": "**4/4** means four beats per bar, with a quarter note as the beat. An **8th note** is half a beat (8 per bar) and a **16th note** is a quarter of a beat (16 per bar). Beat n starts on step 4 × (n − 1) + 1.\n\nIn normal time the snare hits beats 2 and 4. That's the **backbeat**.\n\nIn **half-time** the snare moves to beat 3 only. It hits half as often, so the groove feels half as fast even though the BPM hasn't changed: 140 BPM in half-time nods like 70. The long gap between snares leaves room for a rapper to ride, while fast hats on top keep the energy up."
+    },
+    {
+      "type": "listen",
+      "title": "Normal time vs half-time",
+      "caption": "Both are 140 BPM with the same kick and hats. Only the snare moves.",
+      "examples": [
+        {
+          "label": "Snare on 2 and 4",
+          "explanation": "The normal backbeat. Two snares per bar, so it feels quick: your head nods at 140.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "....X.......X.......X.......X...",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "Snare on 3 (half-time)",
+          "explanation": "One snare per bar. Same BPM, but your head nods half as fast, like 70. This is the trap bounce.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Slow snare, fast hats",
+      "body": "Half-time slows the snare down. The hats are how trap puts the speed back.\n\nOver a half-time snare, hats on each beat feel heavy and empty. Hats in fast **16ths** feel urgent, even though the snare hasn't moved. Add quick rolls and you've got the signature trap sound: a slow nod with a fast top.\n\nThat contrast is the point. The snare sets the speed your head nods at. The hats set the energy.",
+      "deeper": "At 140 BPM one 16th step lasts about 0.11 seconds (60 ÷ 140 ÷ 4).\n\nIn half-time the felt beat is 70 BPM, and against that slow beat, 16th hats at 140 move as fast as 32nd notes would at 70. That's where the \"double-time hats\" feeling comes from.\n\nA **roll** splits one step into smaller hits: 2 per step (32nd notes), 3 per step (a triplet), or 4 per step. Right before a snare, or at the end of a bar, a roll pushes the groove forward into what comes next."
+    },
+    {
+      "type": "listen",
+      "title": "Half-time vs double-time hats",
+      "caption": "The same 140 BPM half-time kick and snare in all three. Only the hats change.",
+      "examples": [
+        {
+          "label": "Hats on the beat",
+          "explanation": "One hat per beat. It sits with the slow half-time feel: heavy, spacious, almost sleepy.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x...x...x...x...x...x...x...x..."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "16th-note hats",
+          "explanation": "Four hats per beat: double-time on top of a half-time snare. Same groove underneath, much more urgency.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "label": "16ths with rolls",
+          "explanation": "The same 16ths, plus a triplet roll into the snare in bar 1 and a fast roll at the end of bar 2. This is the trap top end.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "xxxxxxTTxxxxxxxxxxxxxxxxxxxx2244"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Build a half-time skeleton",
+      "prompt": "Put a **kick on beat 1** (step 1) and a **snare on beat 3** (step 9) in every bar. Your track has more than one bar, so fill each one: switch bars with the bar picker, or use **Copy to next**.\n\nHats are up to you. Try 8ths, then 16ths, and hear the energy change. Press play while you work.",
+      "tool": "drumGrid",
+      "targetRole": "drums",
+      "uses": [],
+      "checks": [
+        {
+          "kind": "drumHitOnBeats",
+          "lane": "kick",
+          "beats": [
+            1
+          ],
+          "everyBar": true
+        },
+        {
+          "kind": "drumHitOnBeats",
+          "lane": "snare",
+          "beats": [
+            3
+          ],
+          "everyBar": true
+        }
+      ],
+      "hints": [
+        "Beats land on steps 1, 5, 9 and 13. Beat 3 is step 9, the first step of the second half of the bar.",
+        "The check listens to the **snare** row, not the clap. Put the beat 3 hit in the snare row.",
+        "Every bar counts. Pick Bar 1, tap step 1 on the kick and step 9 on the snare, then tap **Copy to next**."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Nice. This one was practice, so nothing from the grid goes into Your Track. You'll build the real drums in Drums & groove.",
+      "roles": []
+    }
+  ]
+}

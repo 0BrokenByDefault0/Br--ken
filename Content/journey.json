@@ -1,7 +1,7 @@
 {
   "version": 1,
   "stages": [
-    { "id": "first-sounds", "title": "First sounds", "tagline": "tempo, key, picking a vibe", "order": 1, "lessons": [] },
+    { "id": "first-sounds", "title": "First sounds", "tagline": "tempo, key, picking a vibe", "order": 1, "lessons": ["first-sounds.before-you-start", "first-sounds.the-grid", "first-sounds.keys-and-scales"] },
     { "id": "the-idea", "title": "The idea", "tagline": "melody or loop as your seed", "order": 2, "lessons": [] },
     { "id": "harmony", "title": "Harmony", "tagline": "chords that fit your melody", "order": 3, "lessons": [] },
     { "id": "drums-groove", "title": "Drums & groove", "tagline": "patterns that lock with it", "order": 4, "lessons": [] },

@@ -1,0 +1,188 @@
+{
+  "id": "first-sounds.before-you-start",
+  "stage": "first-sounds",
+  "title": "Before you touch a key",
+  "summary": "Vibe, tempo, key: the three calls producers make before the first note, and why in that order.",
+  "steps": [
+    {
+      "type": "idea",
+      "title": "Three calls before the first note",
+      "body": "Before you load a single sound, make three calls, in this order.\n\n**1. Vibe.** Pick a reference: a beat you love, a mood, a scene. Dark and floaty? Hard and bouncy? Everything else follows from this.\n\n**2. Tempo.** The vibe sets the speed. Trap is usually built around 130–170 BPM. Cloud rap often floats at 60–80, or at 130–160 felt in half-time. Tempo decides how the drums bounce and how a rapper can flow.\n\n**3. Key.** Now pick which notes you're allowed to use.\n\nEach call narrows the next, so you stop guessing and start steering.",
+      "deeper": "**BPM** means beats per minute. At 140 BPM one beat lasts 60 ÷ 140 ≈ 0.43 seconds.\n\n**Half-time** means the snare lands once per bar, on beat 3, instead of twice, on beats 2 and 4. The snare is what your head nods to, so the groove feels half as fast: 140 BPM in half-time nods like 70. That's why the same beat can be described as \"140 or 70\".\n\nA **reference** isn't something to copy. It's a target for mood, tempo range and sound choice.\n\nWhy lock tempo before writing anything? Drums, 808 slides and hat rolls are all written to the grid, and changing the tempo later changes how every one of them feels."
+    },
+    {
+      "type": "listen",
+      "title": "Same beat, two tempos",
+      "caption": "A is 150 BPM in half-time. B is 75 BPM with the snare on beats 2 and 4. Play both and listen for when the snare hits.",
+      "examples": [
+        {
+          "label": "150 BPM, half-time",
+          "explanation": "Snare on beat 3 of every bar, hats in 8th notes. At 150 BPM a bar lasts 1.6 seconds, so the snare comes every 1.6 seconds.",
+          "clip": {
+            "tempo": 150,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.....x.........X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "bass808",
+                "instrument": "eight08",
+                "melody": "A1:12 r:4 F1:10 G1:6"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "A4:6 C5:6 E5:4 D5:8 C5:4 B4:4"
+              }
+            ]
+          }
+        },
+        {
+          "label": "75 BPM, snare on 2 and 4",
+          "explanation": "Half the tempo, two snares per bar. A bar now lasts 3.2 seconds, and the snare still comes every 1.6 seconds. The 16th-note hats line up with A's 8th-note hats. Same groove, which is why 150 half-time and 75 feel related: the snare, the hit your head nods to, lands at the same speed.",
+          "clip": {
+            "tempo": 75,
+            "key": "A minor",
+            "bars": 1,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X..x....X....x..",
+                  "snare": "....X.......X...",
+                  "closedHat": "xxxxxxxxxxxxxxxx"
+                }
+              },
+              {
+                "role": "bass808",
+                "instrument": "eight08",
+                "melody": "A1:6 r:2 F1:5 G1:3"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "A4:3 C5:3 E5:2 D5:4 C5:2 B4:2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "idea",
+      "title": "Major or minor sets the mood",
+      "body": "The key is the set of notes your melody, chords and 808 all pull from. The first big choice is **major or minor**.\n\nMajor sounds bright and open. Minor sounds darker, sadder, more tense. Most trap, cloud rap and underground beats live in minor keys, because that mood is the whole point.\n\nNext you'll hear the exact same loop twice: once in A minor, once in A major. Only three notes change. Listen to how far the mood flips.",
+      "deeper": "A **key** names a home note (the **tonic**) and a scale built on it. **A minor** uses A B C D E F G. **A major** uses A B C# D E F# G#.\n\nMeasured from the same home note, minor has a lower 3rd, 6th and 7th than major, each by one half step.\n\nThe 3rd is the note that makes a chord major or minor. A up to C is a **minor third** (3 half steps). A up to C# is a **major third** (4 half steps).\n\nPicking the key early means every part you add later (chords, 808, counter-melody) comes from the same seven notes, so the parts fit together without guesswork."
+    },
+    {
+      "type": "listen",
+      "title": "Same loop, major vs minor",
+      "caption": "Same drums, same 808, same chord roots, same rhythm. The only change: C, F and G become C#, F# and G#.",
+      "examples": [
+        {
+          "label": "A minor",
+          "explanation": "Chords Am, Dm, Em. Heavy, moody, a little sad. Classic trap territory.",
+          "clip": {
+            "tempo": 140,
+            "key": "A minor",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "bass808",
+                "instrument": "eight08",
+                "melody": "A1:16 D2:8 E2:8"
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "Am:16 Dm:8 Em:8"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:4 C5:4 A4:4 C5:4 D5:4 F5:4 E5:4 G5:4"
+              }
+            ]
+          }
+        },
+        {
+          "label": "A major",
+          "explanation": "Chords A, D, E. Same roots and rhythm, but now it sounds bright and hopeful. Same beat, opposite mood.",
+          "clip": {
+            "tempo": 140,
+            "key": "A major",
+            "bars": 2,
+            "parts": [
+              {
+                "role": "drums",
+                "instrument": "trapKit",
+                "drums": {
+                  "kick": "X.........x.....X.........x.....",
+                  "snare": "........X...............X.......",
+                  "closedHat": "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."
+                }
+              },
+              {
+                "role": "bass808",
+                "instrument": "eight08",
+                "melody": "A1:16 D2:8 E2:8"
+              },
+              {
+                "role": "chords",
+                "instrument": "pad",
+                "chords": "A:16 D:8 E:8"
+              },
+              {
+                "role": "melody",
+                "instrument": "bell",
+                "melody": "E5:4 C#5:4 A4:4 C#5:4 D5:4 F#5:4 E5:4 G#5:4"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "task",
+      "title": "Set up Your Track",
+      "prompt": "Make your three calls. Think of the vibe first. Then set the **tempo** (130–160 for a half-time trap feel, or 60–80 for slow and floaty) and pick a **key**.\n\nNot sure? **A minor at 140 BPM** is a solid home base. This becomes Your Track, the beat you'll build on through the journey.",
+      "tool": "trackSetup",
+      "uses": [],
+      "checks": [
+        {
+          "kind": "tempoInRange",
+          "min": 60,
+          "max": 180
+        }
+      ],
+      "hints": [
+        "Start from the vibe. Hard and bouncy points to 140–160 BPM. Slow and floaty points to 60–80.",
+        "For the key, set the switch to **Minor** first, then pick a home note. A minor uses only the white keys, so it's the easiest to see on a keyboard.",
+        "Still stuck? Set 140 BPM and A minor, then tap **Check my setup**. You can redo this lesson any time to change them."
+      ]
+    },
+    {
+      "type": "keep",
+      "message": "Keep this setup. It creates Your Track, or updates its tempo and key if you already have one. Everything you write from here lands in this tempo and key.",
+      "roles": []
+    }
+  ]
+}
