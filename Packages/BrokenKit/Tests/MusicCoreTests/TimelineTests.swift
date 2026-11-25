@@ -68,3 +68,23 @@ import Foundation
     let p = try Notation.chords("Am:16 F:8")
     #expect(try JSONDecoder().decode(ChordProgression.self, from: JSONEncoder().encode(p)) == p)
 }
+@Test func rollFillReplacesOnlyInsideRange() {
+    var d = DrumPattern(lanes: [.closedHat: [DrumHit(tick: 0, velocity: 0.8), DrumHit(tick: 287, velocity: 0.8),
+                                             DrumHit(tick: 290, velocity: 0.8), DrumHit(tick: 384, velocity: 0.8)]])
+    d.fillRoll(lane: .closedHat, from: 288, to: 384, rate: .thirtySecond, velocities: 0.5...1.0)
+    let ticks = d.lanes[.closedHat]!.map(\.tick)
+    #expect(!ticks.contains(290))
+    #expect(ticks.contains(0) && ticks.contains(287) && ticks.contains(384))
+    #expect(ticks == ticks.sorted())
+    #expect(ticks.count == 3 + 8)
+}
+@Test func decodingSortsUnsortedInput() throws {
+    var s = NoteSequence(notes: [])
+    s.notes = [NoteEvent(start: 96, length: 24, pitch: 62), NoteEvent(start: 0, length: 24, pitch: 60)]
+    let ds = try JSONDecoder().decode(NoteSequence.self, from: JSONEncoder().encode(s))
+    #expect(ds.notes.map(\.start) == [0, 96])
+    var d = DrumPattern(lanes: [:])
+    d.lanes[.kick] = [DrumHit(tick: 96, velocity: 0.8), DrumHit(tick: 0, velocity: 0.8)]
+    let dd = try JSONDecoder().decode(DrumPattern.self, from: JSONEncoder().encode(d))
+    #expect(dd.lanes[.kick]!.map(\.tick) == [0, 96])
+}

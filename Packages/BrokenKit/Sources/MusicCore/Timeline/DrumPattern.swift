@@ -42,6 +42,13 @@ public struct DrumPattern: Hashable, Codable, Sendable {
         self.lanes = lanes.mapValues { $0.sorted { $0.tick < $1.tick } }
     }
 
+    private enum CodingKeys: String, CodingKey { case lanes }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(lanes: try container.decode([DrumLane: [DrumHit]].self, forKey: .lanes))
+    }
+
     /// Toggles a 0.8-velocity hit on the 16th grid.
     public mutating func toggle(lane: DrumLane, step: Int) {
         let tick = step * Ticks.perSixteenth

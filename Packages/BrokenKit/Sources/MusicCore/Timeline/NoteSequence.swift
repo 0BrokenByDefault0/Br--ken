@@ -22,6 +22,13 @@ public struct NoteSequence: Hashable, Codable, Sendable {
         self.notes = notes.sorted { $0.start < $1.start }
     }
 
+    private enum CodingKeys: String, CodingKey { case notes }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(notes: try container.decode([NoteEvent].self, forKey: .notes))
+    }
+
     /// Notes whose `[start, start + length)` intersects `range`.
     public func notes(overlapping range: Range<Int>) -> [NoteEvent] {
         notes.filter { $0.start < range.upperBound && $0.start + $0.length > range.lowerBound }
