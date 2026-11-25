@@ -425,3 +425,39 @@ private let journeyStages: [(String, [String])] = [
     let names = Set(model.tracks.map(\.name))
     #expect(!names.contains(model.defaultTrackName))
 }
+
+@MainActor
+@Test func switchingTracksSavesPendingPreview() throws {
+    let sandbox = try Sandbox()
+    let model = try sandbox.makeModel()
+    let a = model.startTrack(name: "A", tempo: 140, key: try Key(parsing: "A minor"))
+    let b = model.newTrack(name: "B", tempo: 120, key: try Key(parsing: "A minor"))
+    model.previewActiveTrack { $0.tempo = 99 }
+    #expect(model.hasUncommittedPreview)
+    model.setActive(b.id)
+    #expect(!model.hasUncommittedPreview)
+    #expect(TrackStore(directory: sandbox.tracksDir).loadAll().tracks.first { $0.id == a.id }?.tempo == 99)
+    #expect(model.activeTrack?.id == b.id)
+}
+
+@MainActor
+@Test func flushPendingPreviewPersistsOnceAndIsNoOpOtherwise() throws {
+    let sandbox = try Sandbox()
+    let model = try sandbox.makeModel()
+    let t = model.startTrack(name: "A", tempo: 140, key: try Key(parsing: "A minor"))
+    model.flushPendingPreview()  // nothing pending
+    model.previewActiveTrack { $0.tempo = 101 }
+    #expect(TrackStore(directory: sandbox.tracksDir).loadAll().tracks.first?.tempo == 140)
+    model.flushPendingPreview()  // what a tab change or leaving the foreground does
+    #expect(!model.hasUncommittedPreview)
+    #expect(TrackStore(directory: sandbox.tracksDir).loadAll().tracks.first { $0.id == t.id }?.tempo == 101)
+}
+
+@MainActor
+@Test func normalEditClearsPendingPreviewFlag() throws {
+    let model = try Sandbox().makeModel()
+    model.startTrack(name: "A", tempo: 140, key: try Key(parsing: "A minor"))
+    model.previewActiveTrack { $0.tempo = 101 }
+    model.editActivePart(.drums, instrument: .trapKit, empty: .drums(DrumPattern(lanes: [:]))) { _ in }
+    #expect(!model.hasUncommittedPreview, "a saving edit writes the whole track, preview included")
+}

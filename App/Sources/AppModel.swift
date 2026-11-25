@@ -29,6 +29,8 @@ final class AppModel {
     /// While on, a rim click on every beat is mixed into what is played (the saved track is unchanged).
     var metronome = false { didSet { if let activeTrack, !auditioning { send(activeTrack) } } }
     private var auditioning = false
+    /// True while the active track has slider changes that are heard but not yet saved.
+    private(set) var hasUncommittedPreview = false
 
     init(content: ContentLibrary, trackStore: TrackStore, progressStore: ProgressStore, audio: any AudioPlaying) {
         self.content = content
@@ -64,6 +66,7 @@ final class AppModel {
     }
 
     func setActive(_ id: UUID) {
+        flushPendingPreview()  // the track being left keeps its edits
         progress.activeTrackID = id
         saveProgress()
         if let activeTrack { send(activeTrack) }
@@ -76,6 +79,7 @@ final class AppModel {
         guard var track = activeTrack else { return }
         mutate(&track)
         save(track, persist: persist)
+        hasUncommittedPreview = !persist
         send(track)
     }
 
@@ -88,6 +92,13 @@ final class AppModel {
     func commitActiveTrack() {
         guard let track = activeTrack else { return }
         save(track)
+        hasUncommittedPreview = false
+    }
+
+    /// Saves previewed changes that were never committed (an interrupted drag, a tab change, the app
+    /// going to the background, switching tracks). No-op when there are none.
+    func flushPendingPreview() {
+        if hasUncommittedPreview { commitActiveTrack() }
     }
 
     /// Edits the active track's part for `role`, creating an empty one (`instrument`, `empty`) on the
@@ -131,6 +142,7 @@ final class AppModel {
         }
         tracks.removeAll { $0.id == id }
         if wasActive {
+            hasUncommittedPreview = false
             stop()
             progress.activeTrackID = nil
             saveProgress()

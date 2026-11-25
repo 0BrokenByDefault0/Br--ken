@@ -29,8 +29,8 @@ private struct DrumsBody: View {
         let drag = SwingDrag()
         _drag = State(initialValue: drag)
         grid.onChange = { [weak app, drag] pattern in
-            // A swing drag is heard live and saved once, when it ends.
-            app?.editActivePart(.drums, instrument: .trapKit, empty: .drums(DrumPattern(lanes: [:])), persist: !drag.active) {
+            // Pad edits always save; only a swing slider change (flagged for the duration of that call) previews.
+            app?.editActivePart(.drums, instrument: .trapKit, empty: .drums(DrumPattern(lanes: [:])), persist: !drag.swinging) {
                 $0.content = .drums(pattern)
             }
         }
@@ -50,9 +50,14 @@ private struct DrumsBody: View {
                 TrackTransport()
                 HStack(spacing: 12) {
                     Text("Swing").font(Theme.body(14)).foregroundStyle(Color.ink)
-                    Slider(value: Binding(get: { grid.swing }, set: { grid.swing = $0 }), in: DrumGridModel.swingRange,
+                    Slider(value: Binding(get: { grid.swing }, set: { value in
+                               drag.swinging = true
+                               grid.swing = value
+                               drag.swinging = false
+                               if !drag.editing { app.commitActiveTrack() }  // VoiceOver / keyboard adjustments
+                           }), in: DrumGridModel.swingRange,
                            onEditingChanged: { editing in
-                               drag.active = editing
+                               drag.editing = editing
                                if !editing { app.commitActiveTrack() }
                            })
                         .tint(Color.haze)
@@ -69,13 +74,19 @@ private struct DrumsBody: View {
             .padding(16)
         }
         .background(Color.night.ignoresSafeArea())
+        .onDisappear {
+            drag.editing = false
+            app.flushPendingPreview()
+        }
         .onChange(of: drumsContent) { _, content in
             if case .drums(let p)? = content, p != grid.pattern { grid.pattern = p }
         }
     }
 }
 
-/// Whether the swing slider is being dragged (read by the grid's change callback).
+/// Swing slider state. `swinging` is true only while a slider value is being applied to the grid (so the
+/// grid's change callback previews instead of saving); `editing` is whether a drag is in progress.
 private final class SwingDrag {
-    var active = false
+    var swinging = false
+    var editing = false
 }

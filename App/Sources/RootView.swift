@@ -7,6 +7,7 @@ enum AppTab: Hashable {
 /// The app's home: Journey · Lesson · Melody · Chords · Drums.
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.scenePhase) private var scenePhase
     @State private var tab = AppTab.journey
 
     var body: some View {
@@ -28,7 +29,13 @@ struct RootView: View {
         .toolbarColorScheme(.dark, for: .tabBar)
         .preferredColorScheme(.dark)
         // Playback belongs to the screen it was started on.
-        .onChange(of: tab) { _, _ in if model.isPlaying { model.stop() } }
+        .onChange(of: tab) { _, _ in
+            model.flushPendingPreview()
+            if model.isPlaying { model.stop() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active { model.flushPendingPreview() }
+        }
     }
 }
 

@@ -6,6 +6,7 @@ struct SoundControlsView: View {
     @Binding var settings: SoundSettings
     /// Called when a slider drag ends.
     var onCommit: (() -> Void)? = nil
+    @State private var editing = false
 
     var body: some View {
         VStack(spacing: 2) {
@@ -23,7 +24,8 @@ struct SoundControlsView: View {
         HStack {
             Text(label).font(Theme.body(15)).foregroundStyle(Color.ink)
                 .frame(width: 64, alignment: .leading)
-            Slider(value: value, in: 0...1, onEditingChanged: { if !$0 { onCommit?() } }).tint(Color.haze)
+            Slider(value: Binding(get: { value.wrappedValue }, set: { value.wrappedValue = $0; if !editing { onCommit?() } }),
+                   in: 0...1, onEditingChanged: { editing = $0; if !$0 { onCommit?() } }).tint(Color.haze)
             Text("\(Int((value.wrappedValue * 100).rounded()))")
                 .font(Theme.mono(13)).foregroundStyle(Color.mute)
                 .frame(width: 30, alignment: .trailing)
