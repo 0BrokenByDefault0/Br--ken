@@ -120,26 +120,35 @@ struct MetronomeTests {
 struct KeyPressTrackerTests {
     @Test func pressReportsOnlyTheFirstTouch() {
         var tracker = KeyPressTracker()
-        #expect(tracker.press(60))
-        #expect(!tracker.press(60))
+        let first = tracker.press(60)
+        let second = tracker.press(60)
+        #expect(first)
+        #expect(!second)
     }
 
     @Test func releaseOfAnUnheldPitchIsIgnored() {
         var tracker = KeyPressTracker()
-        #expect(!tracker.release(60))
+        let early = tracker.release(60)
         _ = tracker.press(60)
-        #expect(tracker.release(60))
-        #expect(!tracker.release(60))
+        let real = tracker.release(60)
+        let again = tracker.release(60)
+        #expect(!early)
+        #expect(real)
+        #expect(!again)
     }
 
     @Test func octaveChangeReleasesEveryHeldPitchOnce() {
         var tracker = KeyPressTracker()
         _ = tracker.press(64)
         _ = tracker.press(60)
-        #expect(tracker.releaseAll() == [60, 64])
-        #expect(tracker.releaseAll().isEmpty)
+        let released = tracker.releaseAll()
+        let secondRelease = tracker.releaseAll()
         // The late lift of the old finger must not send a second note-off, and new keys work.
-        #expect(!tracker.release(60))
-        #expect(tracker.press(72))
+        let lateLift = tracker.release(60)
+        let newPress = tracker.press(72)
+        #expect(released == [60, 64])
+        #expect(secondRelease.isEmpty)
+        #expect(!lateLift)
+        #expect(newPress)
     }
 }
