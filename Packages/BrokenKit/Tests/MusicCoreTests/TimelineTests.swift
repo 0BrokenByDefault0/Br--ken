@@ -88,3 +88,22 @@ import Foundation
     let dd = try JSONDecoder().decode(DrumPattern.self, from: JSONEncoder().encode(d))
     #expect(dd.lanes[.kick]!.map(\.tick) == [0, 96])
 }
+
+@Test func swingShiftsOffbeats() throws {
+    var d = DrumPattern(lanes: [:])
+    #expect(d.swing == 0)
+    #expect(d.swungTick(24) == 24)
+    d.swing = 0.5
+    #expect(d.swungTick(24) == 30)        // off-beat 16th: + round(0.5 * 12)
+    #expect(d.swungTick(72) == 78)
+    #expect(d.swungTick(0) == 0)          // on-beat 16ths and 8ths stay
+    #expect(d.swungTick(48) == 48)
+    #expect(d.swungTick(12) == 12)        // roll ticks stay
+    d.swing = 0.6
+    #expect(d.swungTick(24) == 31)        // 7.2 rounds to 7
+    let back = try JSONDecoder().decode(DrumPattern.self, from: JSONEncoder().encode(d))
+    #expect(back.swing == 0.6)
+    let old = try JSONDecoder().decode(DrumPattern.self, from: Data(#"{"lanes":{"kick":[{"tick":96,"velocity":0.8,"pitchOffset":0},{"tick":0,"velocity":0.8,"pitchOffset":0}]}}"#.utf8))
+    #expect(old.swing == 0)
+    #expect(old.lanes[.kick]!.map(\.tick) == [0, 96])
+}

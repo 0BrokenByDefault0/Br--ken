@@ -331,3 +331,16 @@ private func peak(_ s: Stereo) -> Float { max(peak(s.left), peak(s.right)) }
     _ = render(r, frames: 64)  // drains the queue
     #expect(r.send(.noteOff(.keys, 60)))
 }
+
+@Test func swingAppliedInSnapshot() {
+    var pattern = DrumPattern(lanes: [
+        .closedHat: [DrumHit(tick: 0, velocity: 1), DrumHit(tick: 24, velocity: 1), DrumHit(tick: 48, velocity: 1),
+                     DrumHit(tick: 72, velocity: 1), DrumHit(tick: 84, velocity: 1)],
+    ])
+    pattern.swing = 0.5
+    let drums = Part(role: .drums, instrument: .trapKit, content: .drums(pattern))
+    let s = PlaybackSnapshot(track: track(bars: 1, [drums]))
+    #expect(s.parts[0].events.map(\.start) == [0, 30, 48, 78, 84])
+    #expect(s.parts[0].events.allSatisfy { $0.end == $0.start + 1 })
+    #expect(pattern.lanes[.closedHat]!.map(\.tick) == [0, 24, 48, 72, 84])  // stored ticks stay unswung
+}

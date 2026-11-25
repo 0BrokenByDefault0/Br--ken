@@ -152,3 +152,80 @@ struct KeyPressTrackerTests {
         #expect(newPress)
     }
 }
+
+// MARK: - Drum grid
+
+@MainActor
+struct DrumGridModelTests {
+    private func model() -> DrumGridModel { DrumGridModel(pattern: DrumPattern(lanes: [:]), bars: 2) }
+
+    @Test func gridToggle() {
+        let m = model()
+        m.toggle(lane: .kick, step: 4)
+        #expect(m.pattern.lanes[.kick]?.map(\.tick) == [96])
+        m.selectedBar = 1
+        m.toggle(lane: .kick, step: 4)  // bar 2, step 4 = tick 384 + 96
+        #expect(m.pattern.lanes[.kick]?.map(\.tick) == [96, 480])
+        m.toggle(lane: .kick, step: 4)
+        m.selectedBar = 0
+        m.toggle(lane: .kick, step: 4)
+        #expect(m.pattern.lanes[.kick]?.isEmpty == true)
+    }
+
+    @Test func velocityTargetsTheHitOnTheStep() {
+        let m = model()
+        m.toggle(lane: .snare, step: 2)
+        m.setVelocity(lane: .snare, step: 2, 0.4)
+        #expect(m.pattern.lanes[.snare]?.first?.velocity == 0.4)
+        m.setVelocity(lane: .snare, step: 3, 0.1)  // no hit there: no-op
+        #expect(m.pattern.lanes[.snare]?.count == 1)
+    }
+
+    @Test func rollCreatesSubdividedHits() {
+        let m = model()
+        m.roll(lane: .closedHat, fromStep: 0, toStep: 1, rate: .thirtySecond, ramp: 0.35...1.0)
+        let hits = m.pattern.lanes[.closedHat] ?? []
+        #expect(hits.map(\.tick) == [0, 12, 24, 36])
+        #expect(hits.first?.velocity == 0.35)
+        #expect(hits.last?.velocity == 1.0)
+    }
+
+    @Test func clearRollsEmptiesTheStep() {
+        let m = model()
+        m.roll(lane: .closedHat, fromStep: 0, toStep: 1, rate: .thirtySecond, ramp: 0.75...0.75)
+        m.clearRolls(lane: .closedHat, step: 0)
+        #expect(m.pattern.lanes[.closedHat]?.map(\.tick) == [24, 36])
+    }
+
+    @Test func copyBar() {
+        let m = model()
+        m.toggle(lane: .kick, step: 0)
+        m.toggle(lane: .snare, step: 4)
+        m.selectedBar = 1
+        m.toggle(lane: .closedHat, step: 3)  // replaced by the copy
+        m.copyBar(0, to: 1)
+        #expect(m.pattern.lanes[.kick]?.map(\.tick) == [0, 384])
+        #expect(m.pattern.lanes[.snare]?.map(\.tick) == [96, 480])
+        #expect(m.pattern.lanes[.closedHat]?.isEmpty ?? true)
+    }
+
+    @Test func swingIsClamped() {
+        let m = model()
+        m.swing = 0.9
+        #expect(m.swing == 0.6)
+        m.swing = -1
+        #expect(m.swing == 0)
+        m.swing = 0.3
+        #expect(m.pattern.swing == 0.3)
+    }
+
+    @Test func editsNotifyTheOwner() {
+        let m = model()
+        var seen: [DrumPattern] = []
+        m.onChange = { seen.append($0) }
+        m.toggle(lane: .kick, step: 0)
+        m.swing = 0.2
+        #expect(seen.count == 2)
+        #expect(seen.last?.swing == 0.2)
+    }
+}
