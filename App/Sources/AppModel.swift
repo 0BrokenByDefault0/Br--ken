@@ -1,5 +1,7 @@
 import Foundation
 import MusicCore
+// Foundation also has a `Progress` (NSProgress); this scoped import makes MusicCore's win in this file.
+import struct MusicCore.Progress
 import Observation
 
 /// App-wide state: lesson content, the owner's tracks, and lesson progress. Every change is saved
