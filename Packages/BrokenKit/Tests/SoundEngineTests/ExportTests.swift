@@ -170,3 +170,10 @@ private func manualRender(_ t: Track, frames count: Int) -> StereoBuffer {
     #expect(b.left.allSatisfy { $0 == 0 })
     #expect(b.right.allSatisfy { $0 == 0 })
 }
+
+@Test func fileNameClampsTempo() {
+    let part = Part(role: .chords, instrument: .pad, content: .drums(DrumPattern(lanes: [:])))
+    #expect(ExportNaming.fileName(track: exportTrack(tempo: .nan, [part]), part: nil) == "t-20bpm-Aminor.wav")
+    #expect(ExportNaming.fileName(track: exportTrack(tempo: 0, [part]), part: nil) == "t-20bpm-Aminor.wav")
+    #expect(ExportNaming.fileName(track: exportTrack(tempo: .infinity, [part]), part: nil).hasSuffix("-Aminor.wav"))
+}
